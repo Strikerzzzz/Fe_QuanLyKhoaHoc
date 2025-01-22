@@ -2,22 +2,46 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 50px;
-  background: #001529;
-  color: white;
+  padding: 35px 40px; /* Khoảng cách hai bên */
+  background-color: #fff; /* Màu nền */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Hiệu ứng đổ bóng */
+  height: 60px; /* Chiều cao navbar */
+  width: 100%; /* Đảm bảo navbar chiếm toàn bộ chiều ngang */
+  font-size: large;
+}
 
-  .logo img {
-    height: 50px;
-  }
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
 
-  .menu a {
-    margin: 0 20px;
-    color: white;
-    text-decoration: none;
-    font-size: 16px;
-  }
+.logo img {
+  height: 40px; /* Kích thước logo */
+}
 
-  .auth-buttons button {
-    margin-left: 10px;
-  }
+.menu {
+  display: flex;
+  gap: 15px; /* Khoảng cách giữa các mục menu */
+  margin-left: 20px; /* Khoảng cách giữa logo và menu */
+}
+
+.menu a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+}
+
+.menu a:hover {
+  color: #1890ff; /* Màu khi hover */
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Khoảng cách giữa các nút */
+  margin-left: auto; /* Đẩy toàn bộ phần này sát lề phải */
+}
+
+button {
+  cursor: pointer;
 }

@@ -1,16 +1,53 @@
 <div class="navbar">
-  <div class="logo">
-    <a routerLink="/">
-      <img src="assets/images/logo.png" alt="Logo">
-    </a>
+  <div class="navbar-left">
+    <div class="logo">
+      <a routerLink="/">
+        <img src="assets/images/logo.png" alt="Logo">
+      </a>
+    </div>
+    <div class="menu">
+      <a routerLink="/courses">Khóa học</a>
+      <a routerLink="/blog">Blog</a>
+      <a routerLink="/contact">Liên hệ</a>
+    </div>
   </div>
-  <div class="menu">
-    <a routerLink="/courses">Khóa học</a>
-    <a routerLink="/blog">Blog</a>
-    <a routerLink="/contact">Liên hệ</a>
+  <div class="navbar-right">
+    <button nz-button nzType="default" (click)="openAuthPopup(false)">Đăng nhập</button>
+    <button nz-button nzType="primary" (click)="openAuthPopup(true)">Đăng ký</button>
   </div>
-  <div class="auth-buttons">
-    <button nz-button nzType="default" (click)="openAuthPopup()">Đăng nhập</button>
-    <button nz-button nzType="primary" (click)="openAuthPopup()">Đăng ký</button>
-  </div>
+
+  <!-- Popup Đăng nhập/Đăng ký -->
+  <nz-modal [(nzVisible)]="isAuthPopupVisible" [nzTitle]="isRegisterMode ? 'Đăng ký tài khoản' : 'Đăng nhập tài khoản'"
+    (nzOnCancel)="closeAuthPopup()">
+    <div *nzModalContent>
+      <form nz-form [formGroup]="authForm" (ngSubmit)="handleSubmit()">
+        <!-- Trường Username (Chỉ hiển thị khi Đăng ký) -->
+        <nz-form-item *ngIf="isRegisterMode">
+          <nz-form-control [nzErrorTip]="'Vui lòng nhập tên tài khoản'">
+            <input nz-input formControlName="username" id="username" placeholder=" Tên tài khoản" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <!-- Trường Email -->
+        <nz-form-item>
+          <nz-form-control [nzErrorTip]="'Vui lòng nhập email hợp lệ'">
+            <input nz-input formControlName="email" id="email" placeholder="Email" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <!-- Trường Password -->
+        <nz-form-item>
+          <nz-form-control [nzErrorTip]="'Vui lòng nhập mật khẩu'">
+            <input nz-input type="password" formControlName="password" id="password" placeholder="Mật khẩu" />
+          </nz-form-control>
+        </nz-form-item>
+        <button nz-button nzType="primary" nzBlock [disabled]="authForm.invalid">
+          {{ isRegisterMode ? 'Đăng ký' : 'Đăng nhập' }}
+        </button>
+      </form>
+    </div>
+    <div *nzModalFooter>
+
+    </div>
+  </nz-modal>
 </div>
