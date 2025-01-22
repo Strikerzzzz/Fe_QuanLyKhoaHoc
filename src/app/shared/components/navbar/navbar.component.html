@@ -1,0 +1,16 @@
+<div class="navbar">
+  <div class="logo">
+    <a routerLink="/">
+      <img src="assets/images/logo.png" alt="Logo">
+    </a>
+  </div>
+  <div class="menu">
+    <a routerLink="/courses">Khóa học</a>
+    <a routerLink="/blog">Blog</a>
+    <a routerLink="/contact">Liên hệ</a>
+  </div>
+  <div class="auth-buttons">
+    <button nz-button nzType="default" (click)="openAuthPopup()">Đăng nhập</button>
+    <button nz-button nzType="primary" (click)="openAuthPopup()">Đăng ký</button>
+  </div>
+</div>

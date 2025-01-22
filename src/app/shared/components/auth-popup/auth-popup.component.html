@@ -1,0 +1,19 @@
+<nz-modal [(nzVisible)]="isVisible" nzTitle="Đăng nhập" (nzOnCancel)="handleCancel()" [nzFooter]="null">
+    <form nz-form [formGroup]="loginForm" (ngSubmit)="submitForm()">
+        <nz-form-item>
+            <nz-form-control nzErrorTip="Vui lòng nhập email!">
+                <nz-input-group nzPrefixIcon="mail">
+                    <input nz-input formControlName="email" placeholder="Email" />
+                </nz-input-group>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-control nzErrorTip="Vui lòng nhập mật khẩu!">
+                <nz-input-group nzPrefixIcon="lock">
+                    <input nz-input type="password" formControlName="password" placeholder="Mật khẩu" />
+                </nz-input-group>
+            </nz-form-control>
+        </nz-form-item>
+        <button nz-button nzType="primary" [disabled]="!loginForm.valid">Đăng nhập</button>
+    </form>
+</nz-modal>

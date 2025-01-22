@@ -1,0 +1,23 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 50px;
+  background: #001529;
+  color: white;
+
+  .logo img {
+    height: 50px;
+  }
+
+  .menu a {
+    margin: 0 20px;
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+  }
+
+  .auth-buttons button {
+    margin-left: 10px;
+  }
+}
