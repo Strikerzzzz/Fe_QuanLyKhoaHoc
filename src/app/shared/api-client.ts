@@ -20,16 +20,16 @@ export interface IClient {
      * @param body (optional) 
      * @return OK
      */
-    register(body: RegisterRequest | undefined): Observable<void>;
+    register(body: RegisterRequest | undefined): Observable<StringResult>;
     /**
      * @param body (optional) 
      * @return OK
      */
-    login(body: LoginRequest | undefined): Observable<void>;
+    login(body: LoginRequest | undefined): Observable<StringResult>;
     /**
      * @return OK
      */
-    users(): Observable<void>;
+    users(): Observable<UserIEnumerableResult>;
 }
 
 @Injectable({
@@ -49,7 +49,7 @@ export class Client implements IClient {
      * @param body (optional) 
      * @return OK
      */
-    register(body: RegisterRequest | undefined): Observable<void> {
+    register(body: RegisterRequest | undefined): Observable<StringResult> {
         let url_ = this.baseUrl + "/api/Users/register";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -61,6 +61,7 @@ export class Client implements IClient {
             responseType: "blob",
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "text/plain"
             })
         };
 
@@ -71,14 +72,14 @@ export class Client implements IClient {
                 try {
                     return this.processRegister(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<StringResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<StringResult>;
         }));
     }
 
-    protected processRegister(response: HttpResponseBase): Observable<void> {
+    protected processRegister(response: HttpResponseBase): Observable<StringResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -87,7 +88,17 @@ export class Client implements IClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = StringResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ObjectResult.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -101,7 +112,7 @@ export class Client implements IClient {
      * @param body (optional) 
      * @return OK
      */
-    login(body: LoginRequest | undefined): Observable<void> {
+    login(body: LoginRequest | undefined): Observable<StringResult> {
         let url_ = this.baseUrl + "/api/Users/login";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -113,6 +124,7 @@ export class Client implements IClient {
             responseType: "blob",
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "text/plain"
             })
         };
 
@@ -123,14 +135,14 @@ export class Client implements IClient {
                 try {
                     return this.processLogin(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<StringResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<StringResult>;
         }));
     }
 
-    protected processLogin(response: HttpResponseBase): Observable<void> {
+    protected processLogin(response: HttpResponseBase): Observable<StringResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -139,7 +151,18 @@ export class Client implements IClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = StringResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result401 = resultData401 !== undefined ? resultData401 : <any>null;
+    
+            return throwException("Unauthorized", status, _responseText, _headers, result401);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -152,7 +175,7 @@ export class Client implements IClient {
     /**
      * @return OK
      */
-    users(): Observable<void> {
+    users(): Observable<UserIEnumerableResult> {
         let url_ = this.baseUrl + "/api/Users";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -160,6 +183,7 @@ export class Client implements IClient {
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
+                "Accept": "text/plain"
             })
         };
 
@@ -170,14 +194,14 @@ export class Client implements IClient {
                 try {
                     return this.processUsers(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<UserIEnumerableResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<UserIEnumerableResult>;
         }));
     }
 
-    protected processUsers(response: HttpResponseBase): Observable<void> {
+    protected processUsers(response: HttpResponseBase): Observable<UserIEnumerableResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -186,7 +210,18 @@ export class Client implements IClient {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return _observableOf(null as any);
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UserIEnumerableResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result401 = resultData401 !== undefined ? resultData401 : <any>null;
+    
+            return throwException("Unauthorized", status, _responseText, _headers, result401);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -237,6 +272,58 @@ export interface ILoginRequest {
     password?: string | undefined;
 }
 
+export class ObjectResult implements IObjectResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: any | undefined;
+
+    constructor(data?: IObjectResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            this.data = _data["data"];
+        }
+    }
+
+    static fromJS(data: any): ObjectResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new ObjectResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        data["data"] = this.data;
+        return data;
+    }
+}
+
+export interface IObjectResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: any | undefined;
+}
+
 export class RegisterRequest implements IRegisterRequest {
     username?: string | undefined;
     email?: string | undefined;
@@ -279,6 +366,222 @@ export interface IRegisterRequest {
     username?: string | undefined;
     email?: string | undefined;
     password?: string | undefined;
+}
+
+export class StringResult implements IStringResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: string | undefined;
+
+    constructor(data?: IStringResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            this.data = _data["data"];
+        }
+    }
+
+    static fromJS(data: any): StringResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new StringResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        data["data"] = this.data;
+        return data;
+    }
+}
+
+export interface IStringResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: string | undefined;
+}
+
+export class User implements IUser {
+    id?: string | undefined;
+    userName?: string | undefined;
+    normalizedUserName?: string | undefined;
+    email?: string | undefined;
+    normalizedEmail?: string | undefined;
+    emailConfirmed?: boolean;
+    passwordHash?: string | undefined;
+    securityStamp?: string | undefined;
+    concurrencyStamp?: string | undefined;
+    phoneNumber?: string | undefined;
+    phoneNumberConfirmed?: boolean;
+    twoFactorEnabled?: boolean;
+    lockoutEnd?: Date | undefined;
+    lockoutEnabled?: boolean;
+    accessFailedCount?: number;
+    fullName?: string | undefined;
+    createdAt?: Date;
+    updatedAt?: Date;
+
+    constructor(data?: IUser) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.userName = _data["userName"];
+            this.normalizedUserName = _data["normalizedUserName"];
+            this.email = _data["email"];
+            this.normalizedEmail = _data["normalizedEmail"];
+            this.emailConfirmed = _data["emailConfirmed"];
+            this.passwordHash = _data["passwordHash"];
+            this.securityStamp = _data["securityStamp"];
+            this.concurrencyStamp = _data["concurrencyStamp"];
+            this.phoneNumber = _data["phoneNumber"];
+            this.phoneNumberConfirmed = _data["phoneNumberConfirmed"];
+            this.twoFactorEnabled = _data["twoFactorEnabled"];
+            this.lockoutEnd = _data["lockoutEnd"] ? new Date(_data["lockoutEnd"].toString()) : <any>undefined;
+            this.lockoutEnabled = _data["lockoutEnabled"];
+            this.accessFailedCount = _data["accessFailedCount"];
+            this.fullName = _data["fullName"];
+            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : <any>undefined;
+            this.updatedAt = _data["updatedAt"] ? new Date(_data["updatedAt"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): User {
+        data = typeof data === 'object' ? data : {};
+        let result = new User();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["userName"] = this.userName;
+        data["normalizedUserName"] = this.normalizedUserName;
+        data["email"] = this.email;
+        data["normalizedEmail"] = this.normalizedEmail;
+        data["emailConfirmed"] = this.emailConfirmed;
+        data["passwordHash"] = this.passwordHash;
+        data["securityStamp"] = this.securityStamp;
+        data["concurrencyStamp"] = this.concurrencyStamp;
+        data["phoneNumber"] = this.phoneNumber;
+        data["phoneNumberConfirmed"] = this.phoneNumberConfirmed;
+        data["twoFactorEnabled"] = this.twoFactorEnabled;
+        data["lockoutEnd"] = this.lockoutEnd ? this.lockoutEnd.toISOString() : <any>undefined;
+        data["lockoutEnabled"] = this.lockoutEnabled;
+        data["accessFailedCount"] = this.accessFailedCount;
+        data["fullName"] = this.fullName;
+        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
+        data["updatedAt"] = this.updatedAt ? this.updatedAt.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IUser {
+    id?: string | undefined;
+    userName?: string | undefined;
+    normalizedUserName?: string | undefined;
+    email?: string | undefined;
+    normalizedEmail?: string | undefined;
+    emailConfirmed?: boolean;
+    passwordHash?: string | undefined;
+    securityStamp?: string | undefined;
+    concurrencyStamp?: string | undefined;
+    phoneNumber?: string | undefined;
+    phoneNumberConfirmed?: boolean;
+    twoFactorEnabled?: boolean;
+    lockoutEnd?: Date | undefined;
+    lockoutEnabled?: boolean;
+    accessFailedCount?: number;
+    fullName?: string | undefined;
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
+export class UserIEnumerableResult implements IUserIEnumerableResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: User[] | undefined;
+
+    constructor(data?: IUserIEnumerableResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            if (Array.isArray(_data["data"])) {
+                this.data = [] as any;
+                for (let item of _data["data"])
+                    this.data!.push(User.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): UserIEnumerableResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserIEnumerableResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        if (Array.isArray(this.data)) {
+            data["data"] = [];
+            for (let item of this.data)
+                data["data"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IUserIEnumerableResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: User[] | undefined;
 }
 
 export class SwaggerException extends Error {
