@@ -1,7 +1,7 @@
 <div class="confirmation-container">
   <h2>Email Confirmation</h2>
   <p>{{ message }}</p>
-  <a *ngIf="message.includes('successfully')" routerLink="/login" class="btn btn-primary">Go to Login</a>
+  <a *NgIf="message.includes('successfully')" routerLink="/login" class="btn btn-primary">Go to Login</a>
 </div>
 <nz-alert *ngIf="message" [nzType]="'error'" [nzMessage]="message" nzShowIcon></nz-alert>
 

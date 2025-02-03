@@ -1,0 +1,35 @@
+<nz-layout>
+    <!-- Sidebar -->
+    <nz-sider class="menu-sidebar" nzCollapsible nzWidth="256px" nzBreakpoint="md" [(nzCollapsed)]="isCollapsed"
+        [nzTrigger]="null" nzTheme="light">
+        <ul nz-menu nzTheme="light" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+            <li nz-submenu nzOpen nzTitle="Hệ thống" nzIcon="dashboard">
+                <ul>
+                    <li nz-menu-item nzMatchRouter>
+                        <a routerLink="/admin/user-management" routerLinkActive="active">Quản lý người dùng</a>
+                    </li>
+                    <li nz-menu-item nzMatchRouter>
+                        <a routerLink="/admin/system-stats" routerLinkActive="active">Thống kê hệ thống</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </nz-sider>
+
+    <nz-layout>
+        <nz-header class="app-header">
+            <span class="header-trigger" (click)="isCollapsed = !isCollapsed">
+                <nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" class="trigger"
+                    nzTheme="outline"></nz-icon>
+            </span>
+            <h2 class="header-title">Trang Quản Lý</h2>
+        </nz-header>
+
+        <!-- Content -->
+        <nz-content class="app-content">
+            <div class="content-wrapper">
+                <router-outlet></router-outlet> <!-- Các trang con sẽ được hiển thị ở đây -->
+            </div>
+        </nz-content>
+    </nz-layout>
+</nz-layout>
