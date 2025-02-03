@@ -2,12 +2,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 35px 40px; /* Khoảng cách hai bên */
-  background-color: #fff; /* Màu nền */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Hiệu ứng đổ bóng */
-  height: 60px; /* Chiều cao navbar */
-  width: 100%; /* Đảm bảo navbar chiếm toàn bộ chiều ngang */
+  padding: 15px 40px; 
+  background: #fff;
+  height: 60px; 
+  width: 100%;
   font-size: large;
+  position: fixed; 
+  top: 0; 
+  left: 0;
+  z-index: 1000; 
 }
 
 .navbar-left {
@@ -16,13 +19,13 @@
 }
 
 .logo img {
-  height: 40px; /* Kích thước logo */
+  height: 40px; 
 }
 
 .menu {
   display: flex;
-  gap: 15px; /* Khoảng cách giữa các mục menu */
-  margin-left: 20px; /* Khoảng cách giữa logo và menu */
+  gap: 15px; 
+  margin-left: 20px; 
 }
 
 .menu a {
@@ -32,16 +35,20 @@
 }
 
 .menu a:hover {
-  color: #1890ff; /* Màu khi hover */
+  color: #1890ff; 
 }
 
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 10px; /* Khoảng cách giữa các nút */
-  margin-left: auto; /* Đẩy toàn bộ phần này sát lề phải */
+  gap: 10px;
+  margin-left: auto; 
 }
 
 button {
   cursor: pointer;
+}
+
+.inner-content {
+  margin-top: 75px; 
 }
