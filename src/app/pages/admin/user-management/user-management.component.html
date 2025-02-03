@@ -1,1 +1,27 @@
-<p>user-management works!</p>
+<nz-card nzTitle="Quản lý người dùng" [nzBordered]="false">
+    <nz-table #basicTable [nzData]="users" [nzBordered]="true" [nzSize]="'middle'" [nzLoading]="loading"
+        [nzShowPagination]="false">
+        <thead>
+            <tr>
+                <th nzWidth="10%">ID</th>
+                <th nzWidth="25%">Họ và tên</th>
+                <th nzWidth="25%">Email</th>
+                <th nzWidth="20%">Số điện thoại</th>
+                <th nzWidth="20%">Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let user of users">
+                <td>{{ user.id }}</td>
+                <td>{{ user.fullName }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.phoneNumber }}</td>
+                <td>
+                    <button nz-button nzType="primary" nzDanger (click)="deleteUser(user.id!)">
+                        Xóa
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </nz-table>
+</nz-card>
