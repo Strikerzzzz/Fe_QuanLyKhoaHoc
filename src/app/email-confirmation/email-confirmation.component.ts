@@ -21,7 +21,7 @@ export class EmailConfirmationComponent implements OnInit {
       const token = decodeURIComponent(params['token']);
 
       if (!email || !token) {
-        this.message = 'Invalid or expired confirmation link.';
+        this.message = 'Liên kết xác nhận không hợp lệ hoặc đã hết hạn.';
         return;
       }
 
@@ -34,14 +34,14 @@ export class EmailConfirmationComponent implements OnInit {
       this.apiClient.confirmEmail(request).subscribe({
         next: (response) => {
           if (response.succeeded) {
-            this.message = 'Email confirmed successfully!';
-            setTimeout(() => this.router.navigate(['/login']), 3000);
+            this.message = 'Email đã được xác nhận thành công!';
+            setTimeout(() => this.router.navigate(['/']), 5000);
           } else {
-            this.message = 'Error confirming email: ' + response.errors?.join(', ');
+            this.message = 'Lỗi xác nhận email: ' + response.errors?.join(', ');
           }
         },
         error: (err) => {
-          this.message = 'Failed to confirm email. ' + err.errors?.join(', ');
+          this.message = 'Không thể xác nhận email. ' + err.errors?.join(', ');
           console.error(err.errors);
         }
       });

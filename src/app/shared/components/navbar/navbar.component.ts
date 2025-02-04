@@ -68,7 +68,7 @@ export class NavbarComponent {
         // Gửi yêu cầu đăng ký
         this.apiClient.register(formData).subscribe(
           (response: any) => {
-            this.message.info('Đăng ký thành công');
+            this.message.info(response.data);
             this.isAuthPopupVisible = false;
           },
           (error) => {

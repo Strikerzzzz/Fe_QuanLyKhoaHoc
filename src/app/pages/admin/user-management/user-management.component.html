@@ -3,25 +3,63 @@
         [nzShowPagination]="false">
         <thead>
             <tr>
-                <th nzWidth="10%">ID</th>
-                <th nzWidth="25%">Họ và tên</th>
-                <th nzWidth="25%">Email</th>
-                <th nzWidth="20%">Số điện thoại</th>
-                <th nzWidth="20%">Hành động</th>
+                <th nzWidth="15%">ID</th>
+                <th nzWidth="15%">Tên</th>
+                <th nzWidth="20%">Email</th>
+                <th nzWidth="10%">Vai trò</th>
+                <th nzWidth="15%">Khóa tài khoản</th>
+                <th nzWidth="7%">Hành động</th>
             </tr>
         </thead>
         <tbody>
             <tr *ngFor="let user of users">
                 <td>{{ user.id }}</td>
-                <td>{{ user.fullName }}</td>
+                <td>{{ user.userName }}</td>
                 <td>{{ user.email }}</td>
-                <td>{{ user.phoneNumber }}</td>
                 <td>
-                    <button nz-button nzType="primary" nzDanger (click)="deleteUser(user.id!)">
-                        Xóa
+                    <button nz-button nzType="link" (click)="editRoles(user)">Chỉnh sửa vai trò</button>
+                </td>
+                <td>
+                    <span *ngIf="isLocked(user.lockoutEnd)">
+                        Khóa đến {{ user.lockoutEnd | date: 'short' }}
+                        (Còn {{ getRemainingLockTimeFormatted(user.lockoutEnd) }})
+                        <button nz-button nzType="link" (click)="unlockUser(user.id!)">Mở khóa</button>
+                    </span>
+                    <button *ngIf="!isLocked(user.lockoutEnd)" nz-button nzType="default"
+                        (click)="openLockUserModal(user.id!)">
+                        Khóa
                     </button>
+                </td>
+                <td>
+                    <button nz-button nzType="primary" nzDanger nz-popconfirm nzPopconfirmTitle="Bạn có chắc chắn xóa?"
+                        nzPopconfirmPlacement="bottom" (nzOnConfirm)="deleteUser(user.id!)">Xóa</button>
                 </td>
             </tr>
         </tbody>
     </nz-table>
+    <nz-modal [(nzVisible)]="showRolePopup" nzTitle="Chỉnh sửa vai trò" (nzOnCancel)="showRolePopup = false"
+        (nzOnOk)="saveRoles()">
+
+        <div *nzModalContent>
+            <nz-list [nzBordered]="true">
+                <nz-list-item *ngFor="let role of allRoles">
+                    <label nz-checkbox [nzChecked]="currentRoles.includes(role)"
+                        (nzCheckedChange)="onRoleChange(role, $event)">
+                        {{ role }}
+                    </label>
+                </nz-list-item>
+            </nz-list>
+        </div>
+    </nz-modal>
+    <nz-modal [(nzVisible)]="lockPopupVisible" nzTitle="Khóa tài khoản" (nzOnCancel)="lockPopupVisible = false"
+        (nzOnOk)="saveLock()">
+        <div *nzModalContent>
+            <label>Chọn thời gian khóa:</label>
+            <div class="time-picker-inputs">
+                <nz-input-number [(ngModel)]="lockDays" [nzMin]="0" [nzMax]="365" [nzStep]="1"></nz-input-number> ngày
+                <nz-input-number [(ngModel)]="lockHours" [nzMin]="0" [nzMax]="23" [nzStep]="1"></nz-input-number> giờ
+                <nz-input-number [(ngModel)]="lockMinutes" [nzMin]="0" [nzMax]="59" [nzStep]="1"></nz-input-number> phút
+            </div>
+        </div>
+    </nz-modal>
 </nz-card>
