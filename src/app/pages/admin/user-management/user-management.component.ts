@@ -8,7 +8,6 @@ import { CommonModule } from '@angular/common';
 import { NzModalService, NzModalModule } from 'ng-zorro-antd/modal';
 import { NzListModule } from 'ng-zorro-antd/list';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
-import { NzTimePickerModule } from 'ng-zorro-antd/time-picker';
 import { FormsModule } from '@angular/forms';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';

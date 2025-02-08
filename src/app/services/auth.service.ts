@@ -38,4 +38,12 @@ export class AuthService {
         }
         return false;
     }
+    isLecturer(): boolean {
+        const decodedToken = this.getDecodedToken();
+        if (decodedToken) {
+            const roles = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+            return Array.isArray(roles) && roles.includes('Lecturer');
+        }
+        return false;
+    }
 }

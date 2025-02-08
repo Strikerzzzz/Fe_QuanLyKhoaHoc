@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { FooterComponent } from "./shared/components/footer/footer.component";
 import { NavbarComponent } from "./shared/components/navbar/navbar.component";
@@ -9,14 +9,14 @@ import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterLink, RouterOutlet, NzLayoutModule, NzIconModule, NzMenuModule, FooterComponent, NavbarComponent,
-    CommonModule // Thêm CommonModule vào đây
+  imports: [RouterOutlet, NzLayoutModule, NzIconModule, NzMenuModule, FooterComponent, NavbarComponent,
+    CommonModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  showFooter = true; //mặc định hiển thị footer
+  showFooter = true;
   constructor() {
     const currentRoute = window.location.pathname;
     //this.showFooter = !['/login', '/register'].includes(currentRoute); // Ẩn footer trên trang đăng nhập/đăng ký

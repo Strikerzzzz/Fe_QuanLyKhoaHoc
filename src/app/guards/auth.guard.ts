@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
 @Injectable({
@@ -8,12 +8,17 @@ import { AuthService } from '../services/auth.service';
 export class AuthGuard implements CanActivate {
     constructor(private authService: AuthService, private router: Router) { }
 
-    canActivate(): boolean {
-        if (this.authService.isAuthenticated() && this.authService.isAdmin()) {
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+        if (!this.authService.isAuthenticated()) {
+            this.router.navigate(['/home']);
+            return false;
+        }
+        const requiredRole = route.data['role'];
+        const isAdmin = this.authService.isAdmin();
+        const isLecturer = this.authService.isLecturer();
+        if (!requiredRole || (requiredRole === 'Admin' && isAdmin) || (requiredRole === 'Lecturer' && isLecturer)) {
             return true;
         }
-
-        // Nếu không có quyền, điều hướng về trang chủ
         this.router.navigate(['/home']);
         return false;
     }
