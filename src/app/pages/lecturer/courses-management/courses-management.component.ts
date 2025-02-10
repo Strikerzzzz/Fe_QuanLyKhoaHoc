@@ -50,7 +50,10 @@ export class CoursesManagementComponent {
     this.client.coursesGET().subscribe(
       res => {
         this.courses = res.data || [];
-        this.currentPage = 1; // reset trang khi load lại dữ liệu
+        const totalPages = Math.ceil(this.courses.length / this.pageSize);
+        if (this.currentPage > totalPages && totalPages > 0) {
+          this.currentPage = totalPages;
+        }
         this.updateDisplayedCourses();
       },
       err => {
