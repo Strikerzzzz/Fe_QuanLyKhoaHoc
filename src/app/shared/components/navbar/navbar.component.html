@@ -6,12 +6,12 @@
       </a>
     </div>
     <div class="menu">
-      <a routerLink="/home">Home</a>
+      <a routerLink="/home">Trang chủ</a>
 
       <!-- Hiển thị menu theo role -->
-      <a *ngIf="hasRole('Admin')" [routerLink]="['/admin']">Quản lý</a>
+      <a *ngIf="hasRole('Admin')" [routerLink]="['/admin']">Quản lý</a> 
       <a *ngIf="hasRole('Lecturer')" [routerLink]="['/lecturer']">Giảng viên</a>
-      <a *ngIf="hasRole('User')" routerLink="/student">Học viên</a>
+      <a *ngIf="hasRole('User')" routerLink="/student">Học tập</a>
     </div>
   </div>
 

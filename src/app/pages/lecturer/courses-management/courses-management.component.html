@@ -1,0 +1,122 @@
+<nz-table #basicTable [nzData]="displayedCourses" [nzBordered]="true" [nzSize]="'middle'" [nzShowPagination]="false">
+  <thead>
+    <tr>
+      <th nzWidth="8%">Avatar</th>
+      <th nzWidth="15%">Tên khóa học</th>
+      <th nzWidth="20%">Mô tả</th>
+      <th nzWidth="10%">Giá</th>
+      <th nzWidth="10%">Độ khó</th>
+      <th nzWidth="10%">Từ khóa</th>
+      <th nzWidth="10%">Quản lý</th>
+      <th nzWidth="10%">Thao tác</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let course of displayedCourses">
+      <td>
+        <ng-container *ngIf="course.avatarUrl; else noAvatar">
+          <img [src]="course.avatarUrl" alt="Avatar" class="avatar" />
+        </ng-container>
+        <ng-template #noAvatar>
+          <div class="avatar placeholder">
+            <i nz-icon nzType="user" nzTheme="outline"></i>
+          </div>
+        </ng-template>
+      </td>
+      <!-- Các cột thông tin -->
+      <td>{{ course.title }}</td>
+      <td>{{ course.description }}</td>
+      <td>{{ course.price | currency:'VND':'symbol':'1.0-0':'vi-VN' }}</td>
+      <td>{{ course.difficulty }}</td>
+      <td>{{ course.keywords }}</td>
+      <td>
+        <button nz-button nzType="default" nzSize="small" (click)="goToLesson(course.courseId)">
+          <i nz-icon nzType="book" nzTheme="outline"></i> Lesson
+        </button>
+        <button nz-button nzType="default" nzSize="small" (click)="goToExam(course.courseId)">
+          <i nz-icon nzType="file-text" nzTheme="outline"></i> Exam
+        </button>
+      </td>
+      <td>
+        <button nz-button nzType="default" (click)="showModal(true, course)">
+          <i nz-icon nzType="edit" nzTheme="outline"></i> Sửa
+        </button>
+        <button nz-button nzType="primary" nzDanger nz-popconfirm nzPopconfirmTitle="Bạn có chắc chắn xóa?"
+          nzPopconfirmPlacement="bottom" (nzOnConfirm)="deleteCourse(course.courseId)">
+          <i nz-icon nzType="delete" nzTheme="outline"></i> Xóa
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</nz-table>
+
+<!-- Hộp chứa Nút Thêm và Phân trang nằm cùng 1 dòng -->
+<div class="action-row">
+  <!-- Nút Thêm khóa học bên trái -->
+  <div class="action-add">
+    <button nz-button nzType="primary" nzSize="large" (click)="showModal(false)">
+      <i nz-icon nzType="plus" nzTheme="outline"></i> Thêm khóa học
+    </button>
+  </div>
+
+  <!-- Pagination bên phải -->
+  <div class="action-pagination">
+    <nz-pagination [(nzPageIndex)]="currentPage" [nzPageSize]="pageSize" [nzTotal]="courses.length"
+      (nzPageIndexChange)="onPageChange($event)">
+    </nz-pagination>
+  </div>
+</div>
+
+<nz-modal [(nzVisible)]="isVisible" [nzTitle]="isEditMode ? 'Sửa khóa học' : 'Thêm khóa học'" (nzOnOk)="handleOk()"
+  (nzOnCancel)="handleCancel()">
+  <!-- Sử dụng nzLayout="horizontal" để tạo layout 2 cột -->
+  <form nz-form nzLayout="horizontal" *nzModalContent>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="title" nzRequired>
+        Tên khóa học
+      </nz-form-label>
+      <nz-form-control [nzSpan]="14">
+        <input nz-input id="title" [(ngModel)]="courseData.title" name="title" required />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="description">
+        Mô tả
+      </nz-form-label>
+      <nz-form-control [nzSpan]="14">
+        <!-- Tăng số dòng tối thiểu và tối đa để trường mô tả rộng hơn -->
+        <textarea nz-input id="description" [(ngModel)]="courseData.description" name="description"
+          nzAutosize="{ minRows: 7, maxRows: 12 }">
+        </textarea>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="price">
+        Giá
+      </nz-form-label>
+      <nz-form-control [nzSpan]="14">
+        <input nz-input id="price" type="number" [(ngModel)]="courseData.price" name="price" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="difficulty">
+        Độ khó
+      </nz-form-label>
+      <nz-form-control [nzSpan]="14">
+        <input nz-input id="difficulty" [(ngModel)]="courseData.difficulty" name="difficulty" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="keywords">
+        Từ khóa
+      </nz-form-label>
+      <nz-form-control [nzSpan]="14">
+        <input nz-input id="keywords" [(ngModel)]="courseData.keywords" name="keywords" />
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>
