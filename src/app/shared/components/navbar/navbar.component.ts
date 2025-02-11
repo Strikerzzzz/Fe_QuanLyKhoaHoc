@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Client } from '../../api-client';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -10,21 +10,26 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { Router, RouterModule } from '@angular/router';
+import { NzIconModule } from 'ng-zorro-antd/icon'; // ADDED: Import cho icon
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [NzLayoutModule, NzButtonModule, NzModalModule, NzFormModule, ReactiveFormsModule, CommonModule, RouterModule],
+  imports: [NzLayoutModule, NzButtonModule, NzModalModule, NzFormModule, ReactiveFormsModule, CommonModule, RouterModule, NzIconModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
   isAuthPopupVisible: boolean = false;
   isRegisterMode: boolean = false;
   roles: string[] = [];
   isLoggedIn: boolean = false;
   authForm!: FormGroup;
   userName: string = '';
+
+  // ADDED: Các biến để điều khiển hiển thị mật khẩu (toggle giữa password và text)
+  passwordVisible: boolean = false;
+  confirmPasswordVisible: boolean = false;
 
   private jwtHelper = new JwtHelperService();
 
@@ -41,8 +46,19 @@ export class NavbarComponent {
       username: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: [''] // Thêm control này để xác nhận mật khẩu
     });
   }
+
+  // Validator cho confirmPassword: so sánh với trường password
+  confirmPasswordValidator(control: AbstractControl): { [key: string]: boolean } | null {
+    // Kiểm tra xem control đã được gắn với form group hay chưa
+    if (!control.parent) return null;
+    const password = control.parent.get('password');
+    if (!password) return null;
+    return control.value === password.value ? null : { mismatch: true };
+  }
+
   // Hiển thị popup với chế độ đăng nhập/đăng ký
   openAuthPopup(isRegister: boolean): void {
     this.isRegisterMode = isRegister;
@@ -51,10 +67,13 @@ export class NavbarComponent {
     // Reset form và bật/tắt validation cho trường "username"
     if (isRegister) {
       this.authForm.controls['username'].setValidators([Validators.required]);
+      this.authForm.controls['confirmPassword'].setValidators([Validators.required, this.confirmPasswordValidator.bind(this)]);
     } else {
       this.authForm.controls['username'].clearValidators();
+      this.authForm.controls['confirmPassword'].clearValidators();
     }
     this.authForm.controls['username'].updateValueAndValidity();
+    this.authForm.controls['confirmPassword'].updateValueAndValidity();
   }
   closeAuthPopup(): void {
     this.isAuthPopupVisible = false;
@@ -64,7 +83,12 @@ export class NavbarComponent {
     if (this.authForm.valid) {
       const formData = this.authForm.value;
 
+      // Nếu đang ở chế độ đăng ký, kiểm tra lại confirmPassword
       if (this.isRegisterMode) {
+        if (formData.password !== formData.confirmPassword) {
+          this.message.error('Mật khẩu và xác nhận mật khẩu không khớp');
+          return; // Không gửi yêu cầu đăng ký nếu 2 trường không khớp
+        }
         // Gửi yêu cầu đăng ký
         this.apiClient.register(formData).subscribe(
           (response: any) => {
@@ -127,5 +151,13 @@ export class NavbarComponent {
     this.userName = '';
     this.isLoggedIn = false;
     this.router.navigate(['/home']);
+  }
+   // ADDED: Hàm chuyển đổi hiển thị mật khẩu cho trường "password" và "confirmPassword"
+   togglePasswordVisibility(field: string): void {
+    if (field === 'password') {
+      this.passwordVisible = !this.passwordVisible;
+    } else if (field === 'confirmPassword') {
+      this.confirmPasswordVisible = !this.confirmPasswordVisible;
+    }
   }
 }

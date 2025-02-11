@@ -47,7 +47,7 @@ export class CoursesManagementComponent {
 
   // Lấy danh sách khóa học từ API
   loadCourses(): void {
-    this.client.coursesGET().subscribe(
+    this.client.coursesGET2().subscribe(
       res => {
         this.courses = res.data || [];
         const totalPages = Math.ceil(this.courses.length / this.pageSize);
