@@ -106,7 +106,9 @@
         Độ khó
       </nz-form-label>
       <nz-form-control [nzSpan]="14">
-        <input nz-input id="difficulty" [(ngModel)]="courseData.difficulty" name="difficulty" />
+        <nz-select id="difficulty" [(ngModel)]="courseData.difficulty" name="difficulty" nzPlaceHolder="Chọn độ khó">
+          <nz-option *ngFor="let level of difficultyLevels" [nzValue]="level.value" [nzLabel]="level.label"></nz-option>
+        </nz-select>
       </nz-form-control>
     </nz-form-item>
 
@@ -115,8 +117,17 @@
         Từ khóa
       </nz-form-label>
       <nz-form-control [nzSpan]="14">
-        <input nz-input id="keywords" [(ngModel)]="courseData.keywords" name="keywords" />
-      </nz-form-control>
+        <nz-select
+        id="keywords"
+        [(ngModel)]="keywordString"
+        name="keywords"
+        nzMode="tags"
+        nzPlaceHolder="Nhập hoặc chọn từ khóa"
+        (nzOnSearch)="onSearchKeyword($event)"
+      (ngModelChange)="updateKeywordString()"
+      >
+        <nz-option *ngFor="let keyword of suggestedKeywords" [nzValue]="keyword" [nzLabel]="keyword"></nz-option>
+      </nz-select>      </nz-form-control>
     </nz-form-item>
   </form>
 </nz-modal>
