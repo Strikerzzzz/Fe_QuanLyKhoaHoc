@@ -49,11 +49,8 @@
          <!-- Trường Password với toggle hiển thị mật khẩu -->
          <nz-form-item>
           <nz-form-control [nzErrorTip]="'Vui lòng nhập mật khẩu'">
-            <!-- ADDED: Wrapper div để chứa input và icon -->
             <div class="password-wrapper" style="position: relative;">
-              <!-- ADDED: Binding thuộc tính [type] để chuyển đổi giữa 'text' và 'password' -->
               <input nz-input [type]="passwordVisible ? 'text' : 'password'" formControlName="password" id="password" placeholder="Mật khẩu" />
-              <!-- ADDED: Icon toggle hiển thị mật khẩu -->
               <i nz-icon 
                  [nzType]="passwordVisible ? 'eye-invisible' : 'eye'" 
                  (click)="togglePasswordVisibility('password')"
@@ -66,11 +63,8 @@
          <!-- Trường Xác nhận mật khẩu (chỉ hiển thị khi đăng ký) với toggle hiển thị -->
          <nz-form-item *ngIf="isRegisterMode">
           <nz-form-control [nzErrorTip]="confirmPasswordErrorTpl">
-            <!-- ADDED: Wrapper div để chứa input và icon -->
             <div class="password-wrapper" style="position: relative;">
-              <!-- ADDED: Binding thuộc tính [type] cho confirmPassword -->
               <input nz-input [type]="confirmPasswordVisible ? 'text' : 'password'" formControlName="confirmPassword" id="confirmPassword" placeholder="Xác nhận mật khẩu" />
-              <!-- ADDED: Icon toggle hiển thị xác nhận mật khẩu -->
               <i nz-icon 
                  [nzType]="confirmPasswordVisible ? 'eye-invisible' : 'eye'" 
                  (click)="togglePasswordVisibility('confirmPassword')"

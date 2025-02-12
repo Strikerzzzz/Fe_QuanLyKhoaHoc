@@ -1,1 +1,75 @@
-<p>exam works!</p>
+<!-- Header hiển thị thông tin bài kiểm tra và khóa học -->
+<div class="exam-header">
+    <p class="course-info">Khóa học: {{ courseTitle }}</p>
+    <h2 class="exam-title">{{ examTitle }}</h2>
+    <p class="exam-description">{{ examDescription }}</p>
+  </div>
+  
+  <!-- Tab phân loại câu hỏi -->
+  <nz-tabset>
+    <nz-tab nzTitle="Trắc nghiệm">
+      <nz-table #mcTable [nzData]="multipleChoiceQuestions" [nzBordered]="true" [nzSize]="'middle'" [nzShowPagination]="false">
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Nội dung câu hỏi</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let question of multipleChoiceQuestions; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ question.content }}</td>
+            <td>
+              <button nz-button nzType="default" (click)="editMCQuestion(question)">Sửa</button>
+              <button nz-button nzType="primary" nzDanger (click)="deleteMCQuestion(question)">Xóa</button>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+      <button nz-button nzType="primary" (click)="openMCQuestionModal()">Thêm câu hỏi trắc nghiệm</button>
+    </nz-tab>
+    <nz-tab nzTitle="Điền vào chỗ trống">
+      <nz-table #fibTable [nzData]="fillInBlankQuestions" [nzBordered]="true" [nzSize]="'middle'" [nzShowPagination]="false">
+        <thead>
+          <tr>
+            <th>STT</th>
+            <th>Nội dung câu hỏi</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let question of fillInBlankQuestions; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ question.content }}</td>
+            <td>
+              <button nz-button nzType="default" (click)="editFIBQuestion(question)">Sửa</button>
+              <button nz-button nzType="primary" nzDanger>Xóa</button>
+            </td>
+          </tr>
+        </tbody>
+      </nz-table>
+      <button nz-button nzType="primary" (click)="openFIBQuestionModal()">Thêm câu hỏi điền</button>
+    </nz-tab>
+  </nz-tabset>
+  
+  <!-- Phân trang nếu cần -->
+  <nz-pagination [(nzPageIndex)]="currentPage" [nzPageSize]="pageSize" [nzTotal]="totalQuestions" (nzPageIndexChange)="onPageChange($event)"></nz-pagination>
+  
+  <!-- Modal cho thêm/sửa câu hỏi (ví dụ cho câu hỏi trắc nghiệm, tương tự cho điền vào chỗ trống) -->
+  <nz-modal [(nzVisible)]="isQuestionModalVisible"
+            [nzTitle]="isEditingQuestion ? 'Sửa câu hỏi' : 'Thêm câu hỏi'"
+            >
+    <form nz-form nzLayout="horizontal" *nzModalContent>
+      <nz-form-item>
+        <nz-form-label [nzSpan]="6" nzFor="content" nzRequired>
+          Nội dung câu hỏi
+        </nz-form-label>
+        <nz-form-control [nzSpan]="14">
+          <input nz-input id="content" [(ngModel)]="questionData.content" name="content" required />
+        </nz-form-control>
+      </nz-form-item>
+      <!-- Các trường khác tùy loại câu hỏi -->
+    </form>
+  </nz-modal>
+  

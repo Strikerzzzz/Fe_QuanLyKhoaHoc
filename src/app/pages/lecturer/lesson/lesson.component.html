@@ -1,6 +1,7 @@
 <!-- Hiển thị tên khóa học -->
-<h2 class="course-title">Khóa học: {{ courseTitle }}</h2>
-
+<div class="course-header">
+  <h2 class="course-title">Khóa học: {{ courseTitle }}</h2>
+</div>
 <nz-table #basicTable [nzData]="displayedLessons" [nzBordered]="true" [nzSize]="'middle'" [nzShowPagination]="false">
     <thead>
       <tr>
@@ -33,7 +34,7 @@
     </tbody>
   </nz-table>
   
-  <!-- Hộp chứa Nút Thêm và Phân trang nằm cùng 1 dòng -->
+  <!-- Hộp chứa Nút Thêm và Phân trang nằm cùng 1 dòng  -->
 <div class="action-row">
   <!-- Nút Thêm bài học bên trái -->
   <div class="action-add">
