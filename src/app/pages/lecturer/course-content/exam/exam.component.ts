@@ -58,6 +58,18 @@ ngOnInit(): void {
   this.loadCourseInfo();
   this.loadQuestions();
 }
+handleCancel(): void {
+  this.isQuestionModalVisible = false;
+}
+
+handleOk(): void {
+  // Nếu cần kiểm tra dữ liệu trước khi đóng
+  if (!this.questionData.content) {
+    this.message.error("Nội dung câu hỏi không được để trống!");
+    return;
+  }
+  this.isQuestionModalVisible = false;
+}
 
 // Lấy thông tin bài kiểm tra
 loadExamInfo(): void {

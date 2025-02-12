@@ -58,7 +58,8 @@
   <!-- Modal cho thêm/sửa câu hỏi (ví dụ cho câu hỏi trắc nghiệm, tương tự cho điền vào chỗ trống) -->
   <nz-modal [(nzVisible)]="isQuestionModalVisible"
             [nzTitle]="isEditingQuestion ? 'Sửa câu hỏi' : 'Thêm câu hỏi'"
-            >
+            (nzOnCancel)="handleCancel()"
+  (nzOnOk)="handleOk()">
     <form nz-form nzLayout="horizontal" *nzModalContent>
       <nz-form-item>
         <nz-form-label [nzSpan]="6" nzFor="content" nzRequired>

@@ -11,11 +11,12 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 
 @Component({
   selector: 'app-courses-management',
   imports: [RouterModule, NzTableModule, NzModalModule, NzFormModule, FormsModule, CommonModule,
-    NzPopconfirmModule, NzPaginationModule, NzButtonModule, NzInputModule],
+    NzPopconfirmModule, NzPaginationModule, NzButtonModule, NzInputModule, NzSelectModule],
   templateUrl: './courses-management.component.html',
   styleUrl: './courses-management.component.scss'
 })
@@ -36,6 +37,28 @@ export class CoursesManagementComponent {
   currentPage = 1;
   pageSize = 5;
   displayedCourses: any[] = [];
+
+
+  //thêm danh sách combobox độ khó
+  difficultyLevels = [
+    { label: 'Dễ', value: 'Dễ' },
+    { label: 'Trung bình', value: 'Trung bình' },
+    { label: 'Khó', value: 'Khó' }
+  ];
+
+  // Danh sách từ khóa lọc theo tìm kiếm
+  filteredKeywords: string[] = [];
+
+  keywordString: string[] = []; // Chuyển thành mảng thay vì string
+
+
+  // Danh sách từ khóa tự động 
+  suggestedKeywords: string[] = [
+    'Lập trình', 'Web Development', 'JavaScript', 'Python', 'Java', 'SQL',
+    'React', 'Angular', 'Node.js', 'AI', 'Machine Learning', 'Data Science',
+    'Cybersecurity', 'Blockchain', 'DevOps', 'Docker', 'Kubernetes', 'Cloud Computing',
+    'UI/UX', 'Figma', 'Photoshop', 'SEO', 'Digital Marketing'
+  ];
 
   constructor(private client: Client,
     private message: NzMessageService,
@@ -91,11 +114,20 @@ export class CoursesManagementComponent {
         keywords: course.keywords,
         avatarUrl: course.avatarUrl
       };
+
+      // Nếu từ khóa là chuỗi, chuyển thành mảng để hiển thị trong select
+      this.keywordString = course.keywords
+        ? course.keywords.split(", ").map((k: string) => k.trim())
+        : [];
+
+
     } else {
       this.selectedCourseId = undefined;
       this.courseData = {};
+      this.keywordString = [];
     }
     this.isVisible = true;
+
   }
 
   // Xử lý nút OK của modal
@@ -159,5 +191,18 @@ export class CoursesManagementComponent {
   goToContent(courseId: number): void {
     this.router.navigate(['/lecturer/courses-content', courseId]);
   }
+  updateKeywordString(): void {
+    if (Array.isArray(this.keywordString)) {
+      this.courseData.keywords = this.keywordString.join(", ");
+    } else {
+      this.courseData.keywords = this.keywordString;
+    }
+  }
+  onSearchKeyword(searchValue: string): void {
+    this.filteredKeywords = this.suggestedKeywords
+      .filter((keyword: string) => keyword.toLowerCase().includes(searchValue.toLowerCase()));
+  }
+
+
 }
 
