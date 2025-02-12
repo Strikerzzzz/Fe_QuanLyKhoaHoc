@@ -1,0 +1,40 @@
+<nz-layout>
+    <!-- Sidebar -->
+    <nz-sider class="menu-sidebar" nzCollapsible nzWidth="256px" nzBreakpoint="md" [(nzCollapsed)]="isCollapsed"
+        [nzTrigger]="null" nzTheme="light">
+        <ul nz-menu nzTheme="light" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+            <li nz-submenu nzOpen nzTitle="Nội dung" nzIcon="setting">
+                <ul>
+                    <li nz-menu-item nzMatchRouter>
+                        <a [routerLink]="['lesson']" routerLinkActive="active">Bài học</a>
+                    </li>
+                    <li nz-menu-item nzMatchRouter>
+                        <a [routerLink]="['exam']" routerLinkActive="active">Kiểm tra</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <ul nz-menu nzTheme="light" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+            <li nz-submenu nzOpen nzTitle="Thống kê" nzIcon="dashboard">
+                <ul>
+
+                </ul>
+            </li>
+        </ul>
+    </nz-sider>
+
+    <nz-layout>
+        <nz-header class="app-header">
+            <span class="header-trigger" (click)="isCollapsed = !isCollapsed">
+                <nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" class="trigger"
+                    nzTheme="outline"></nz-icon>
+            </span>
+            <h2 class="header-title">Khóa Học: <i>{{ courseTitle }}</i></h2>
+        </nz-header>
+        <nz-content class="app-content">
+            <div class="content-wrapper">
+                <router-outlet></router-outlet>
+            </div>
+        </nz-content>
+    </nz-layout>
+</nz-layout>

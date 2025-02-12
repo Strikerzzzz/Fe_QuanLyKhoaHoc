@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Client, CreateLessonRequest, UpdateLessonRequest } from '../../../shared/api-client';
+import { Client, CreateLessonRequest, UpdateLessonRequest } from '../../../../shared/api-client';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -16,20 +16,19 @@ import { NzInputModule } from 'ng-zorro-antd/input';
   imports: [
     CommonModule,
     FormsModule,
-    NzTableModule,        
-    NzButtonModule,         
-    NzPopconfirmModule,   
+    NzTableModule,
+    NzButtonModule,
+    NzPopconfirmModule,
     NzModalModule,
     NzFormModule,
     NzPaginationModule,
-    NzInputModule, 
-    RouterModule 
+    NzInputModule,
+    RouterModule
   ],
   templateUrl: './lesson.component.html',
   styleUrl: './lesson.component.scss'
 })
 export class LessonComponent implements OnInit {
-  courseTitle: string = ''; // Tên khóa học
   lessons: any[] = [];
   displayedLessons: any[] = [];
   lessonData: Partial<CreateLessonRequest | UpdateLessonRequest> = {};
@@ -48,38 +47,18 @@ export class LessonComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute
   ) {
-    this.courseId = Number(this.route.snapshot.paramMap.get('courseId'));
   }
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
+    this.route.parent?.paramMap.subscribe(params => {
       this.courseId = Number(params.get('courseId'));
-      this.courseTitle = ''; 
-      this.loadCourseInfo();
       this.loadLessons();
     });
   }
 
-  // 📌 Lấy thông tin khóa học theo ID
-  loadCourseInfo(): void {
-    this.client.coursesGET(this.courseId).subscribe(
-      res => {
-        if (res.data && typeof res.data === 'string') {
-          this.courseTitle = res.data;
-        } else {
-          this.courseTitle = 'Không xác định';
-        }
-      },
-      err => {
-        console.error("Lỗi khi gọi API:", err);
-        this.message.error("Lỗi khi lấy thông tin khóa học!");
-        this.courseTitle = 'Không xác định';
-      }
-    );
-  }
-  
   // Lấy danh sách bài học của khóa học
   loadLessons(): void {
+    console.log(this.courseId);
     this.client.course2(this.courseId).subscribe(
       res => {
         this.lessons = res.data || [];
@@ -105,7 +84,7 @@ export class LessonComponent implements OnInit {
   showModal(isEdit: boolean, lesson?: any): void {
     this.isEditMode = isEdit;
     if (isEdit && lesson) {
-      this.selectedLessonId = lesson.lessonId; 
+      this.selectedLessonId = lesson.lessonId;
       this.lessonData = { ...lesson };
     } else {
       this.selectedLessonId = undefined;
@@ -113,7 +92,7 @@ export class LessonComponent implements OnInit {
     }
     this.isVisible = true;
   }
-  
+
 
   handleOk(): void {
     this.isEditMode ? this.updateLesson() : this.addLesson();
@@ -157,7 +136,7 @@ export class LessonComponent implements OnInit {
       }
     );
   }
-  
+
 
   // Xóa bài học
   deleteLesson(lesson: any): void {
@@ -174,7 +153,7 @@ export class LessonComponent implements OnInit {
       () => this.message.error("Lỗi khi xóa bài học!")
     );
   }
-  
+
 
 
   // Điều hướng

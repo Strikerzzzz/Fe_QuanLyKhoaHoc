@@ -9,7 +9,7 @@
       <a routerLink="/home">Trang chủ</a>
 
       <!-- Hiển thị menu theo role -->
-      <a *ngIf="hasRole('Admin')" [routerLink]="['/admin']">Quản lý</a> 
+      <a *ngIf="hasRole('Admin')" [routerLink]="['/admin']">Quản lý</a>
       <a *ngIf="hasRole('Lecturer')" [routerLink]="['/lecturer']">Giảng viên</a>
       <a *ngIf="hasRole('User')" routerLink="/student">Học tập</a>
     </div>
@@ -46,29 +46,29 @@
           </nz-form-control>
         </nz-form-item>
 
-         <!-- Trường Password với toggle hiển thị mật khẩu -->
-         <nz-form-item>
+        <!-- Trường Password với toggle hiển thị mật khẩu -->
+        <nz-form-item>
           <nz-form-control [nzErrorTip]="'Vui lòng nhập mật khẩu'">
-            <div class="password-wrapper" style="position: relative;">
-              <input nz-input [type]="passwordVisible ? 'text' : 'password'" formControlName="password" id="password" placeholder="Mật khẩu" />
-              <i nz-icon 
-                 [nzType]="passwordVisible ? 'eye-invisible' : 'eye'" 
-                 (click)="togglePasswordVisibility('password')"
-                 style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+            <div class="password-wrapper">
+              <input nz-input [type]="passwordVisible ? 'text' : 'password'" formControlName="password" id="password"
+                placeholder="Mật khẩu" />
+              <i nz-icon [nzType]="passwordVisible ? 'eye-invisible' : 'eye'"
+                (click)="togglePasswordVisibility('password')"
+                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
               </i>
             </div>
           </nz-form-control>
         </nz-form-item>
 
-         <!-- Trường Xác nhận mật khẩu (chỉ hiển thị khi đăng ký) với toggle hiển thị -->
-         <nz-form-item *ngIf="isRegisterMode">
+        <!-- Trường Xác nhận mật khẩu (chỉ hiển thị khi đăng ký) với toggle hiển thị -->
+        <nz-form-item *ngIf="isRegisterMode">
           <nz-form-control [nzErrorTip]="confirmPasswordErrorTpl">
-            <div class="password-wrapper" style="position: relative;">
-              <input nz-input [type]="confirmPasswordVisible ? 'text' : 'password'" formControlName="confirmPassword" id="confirmPassword" placeholder="Xác nhận mật khẩu" />
-              <i nz-icon 
-                 [nzType]="confirmPasswordVisible ? 'eye-invisible' : 'eye'" 
-                 (click)="togglePasswordVisibility('confirmPassword')"
-                 style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
+            <div class="password-wrapper">
+              <input nz-input [type]="confirmPasswordVisible ? 'text' : 'password'" formControlName="confirmPassword"
+                id="confirmPassword" placeholder="Xác nhận mật khẩu" />
+              <i nz-icon [nzType]="confirmPasswordVisible ? 'eye-invisible' : 'eye'"
+                (click)="togglePasswordVisibility('confirmPassword')"
+                style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">
               </i>
             </div>
           </nz-form-control>

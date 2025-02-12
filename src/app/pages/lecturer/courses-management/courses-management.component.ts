@@ -156,11 +156,8 @@ export class CoursesManagementComponent {
       }
     );
   }
-  goToLesson(courseId: number): void {
-    this.router.navigate(['/lecturer/lesson', courseId]);
-  }
-  goToExam(courseId: number): void {
-    this.router.navigate(['/lecturer/exam', courseId]);
+  goToContent(courseId: number): void {
+    this.router.navigate(['/lecturer/courses-content', courseId]);
   }
 }
 

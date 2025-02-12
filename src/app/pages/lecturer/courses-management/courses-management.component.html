@@ -30,11 +30,8 @@
       <td>{{ course.difficulty }}</td>
       <td>{{ course.keywords }}</td>
       <td>
-        <button nz-button nzType="default" nzSize="small" (click)="goToLesson(course.courseId)">
-          <i nz-icon nzType="book" nzTheme="outline"></i> Lesson
-        </button>
-        <button nz-button nzType="default" nzSize="small" (click)="goToExam(course.courseId)">
-          <i nz-icon nzType="file-text" nzTheme="outline"></i> Exam
+        <button nz-button nzType="default" nzSize="small" (click)="goToContent(course.courseId)">
+          <i nz-icon nzType="book" nzTheme="outline"></i> Nội dung
         </button>
       </td>
       <td>

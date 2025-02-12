@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router, ActivatedRoute, } from '@angular/router';
-import { Client, CreateCourseRequest, UpdateCourseRequest } from '../../../shared/api-client';
+import { Client, CreateCourseRequest, UpdateCourseRequest } from '../../../../shared/api-client';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzModalModule } from 'ng-zorro-antd/modal';
@@ -53,9 +53,7 @@ constructor(
 ) {}
 
 ngOnInit(): void {
-  // Lấy examId và courseId từ URL (ví dụ: /lecturer/exam/:examId/:courseId)
-  this.examId = Number(this.route.snapshot.paramMap.get('examId'));
-  this.courseId = Number(this.route.snapshot.paramMap.get('courseId'));
+  this.courseId = Number(this.route.parent?.snapshot.paramMap.get('courseId'));
   this.loadExamInfo();
   this.loadCourseInfo();
   this.loadQuestions();

@@ -1,0 +1,62 @@
+<!-- Hiển thị tên khóa học -->
+
+<nz-table #basicTable [nzData]="displayedLessons" [nzBordered]="true" [nzSize]="'middle'" [nzShowPagination]="false">
+  <thead>
+    <tr>
+      <th nzWidth="40%">Tiêu đề</th>
+      <th nzWidth="30%">Quản lý</th>
+      <th nzWidth="30%">Thao tác</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let lesson of displayedLessons">
+      <td>{{ lesson.title }}</td>
+      <td>
+        <button nz-button nzType="default" nzSize="small" (click)="goToContent(lesson.lessonId)">
+          <i nz-icon nzType="file-text" nzTheme="outline"></i> Nội dung
+        </button>
+        <button nz-button nzType="default" nzSize="small" (click)="goToAssignment(lesson.lessonId)">
+          <i nz-icon nzType="book" nzTheme="outline"></i> Bài tập
+        </button>
+      </td>
+      <td>
+        <button nz-button nzType="default" (click)="showModal(true, lesson)">
+          <i nz-icon nzType="edit" nzTheme="outline"></i> Sửa
+        </button>
+        <button nz-button nzType="primary" nzDanger nz-popconfirm nzPopconfirmTitle="Bạn có chắc chắn xóa?"
+          (nzOnConfirm)="deleteLesson(lesson)">
+          <i nz-icon nzType="delete" nzTheme="outline"></i> Xóa
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</nz-table>
+
+<div class="action-row">
+  <div class="action-add">
+    <button nz-button nzType="primary" nzSize="large" (click)="showModal(false)">
+      <i nz-icon nzType="plus" nzTheme="outline"></i> Thêm bài học
+    </button>
+  </div>
+
+  <div class="action-pagination">
+    <nz-pagination [(nzPageIndex)]="currentPage" [nzPageSize]="pageSize" [nzTotal]="lessons.length"
+      (nzPageIndexChange)="onPageChange($event)">
+    </nz-pagination>
+  </div>
+</div>
+
+<nz-modal [(nzVisible)]="isVisible" [nzTitle]="isEditMode ? 'Sửa bài học' : 'Thêm bài học'" (nzOnOk)="handleOk()"
+  (nzOnCancel)="handleCancel()">
+  <!-- Sử dụng nzLayout="horizontal" để tạo layout 2 cột -->
+  <form nz-form nzLayout="horizontal" *nzModalContent>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="title" nzRequired>
+        Tiêu đề
+      </nz-form-label>
+      <nz-form-control [nzSpan]="14">
+        <input nz-input id="title" [(ngModel)]="lessonData.title" name="title" required />
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>

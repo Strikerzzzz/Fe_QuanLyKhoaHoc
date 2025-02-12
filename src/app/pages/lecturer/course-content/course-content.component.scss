@@ -1,0 +1,53 @@
+/* admin.component.scss */
+:host {
+    display: flex;
+    height: 100vh;
+}
+
+.menu-sidebar {
+    background: #ffffff;
+    color: rgb(0, 0, 0);
+}
+
+.logo {
+    color: white;
+    font-size: 1.5rem;
+    padding: 16px;
+    text-align: center;
+    background: #002140;
+}
+
+.app-header {
+    background: #fff;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #e8e8e8;
+    height: 64px;
+}
+
+.header-trigger {
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.header-title {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    flex-grow: 1;
+}
+
+.app-content {
+    padding: 24px;
+    background: #f0f2f5;
+    overflow-y: auto;
+}
+
+.content-wrapper {
+    padding: 16px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}

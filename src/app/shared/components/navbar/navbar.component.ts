@@ -10,12 +10,13 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { Router, RouterModule } from '@angular/router';
-import { NzIconModule } from 'ng-zorro-antd/icon'; // ADDED: Import cho icon
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzInputModule } from 'ng-zorro-antd/input';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [NzLayoutModule, NzButtonModule, NzModalModule, NzFormModule, ReactiveFormsModule, CommonModule, RouterModule, NzIconModule],
+  imports: [NzLayoutModule, NzButtonModule, NzInputModule, NzModalModule, NzFormModule, ReactiveFormsModule, CommonModule, RouterModule, NzIconModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
@@ -152,8 +153,8 @@ export class NavbarComponent implements OnInit {
     this.isLoggedIn = false;
     this.router.navigate(['/home']);
   }
-   // ADDED: Hàm chuyển đổi hiển thị mật khẩu cho trường "password" và "confirmPassword"
-   togglePasswordVisibility(field: string): void {
+  // ADDED: Hàm chuyển đổi hiển thị mật khẩu cho trường "password" và "confirmPassword"
+  togglePasswordVisibility(field: string): void {
     if (field === 'password') {
       this.passwordVisible = !this.passwordVisible;
     } else if (field === 'confirmPassword') {
