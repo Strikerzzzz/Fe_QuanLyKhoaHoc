@@ -29,6 +29,10 @@
                 <nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" class="trigger"
                     nzTheme="outline"></nz-icon>
             </span>
+            <a nz-button nzType="default" class="back-button" (click)="goBack()" style="margin: 0 24px;">
+                <nz-icon nzType="arrow-left" nzTheme="outline"></nz-icon>
+                Quay lại
+            </a>
             <h2 class="header-title">Khóa Học: <i>{{ courseTitle }}</i></h2>
         </nz-header>
         <nz-content class="app-content">

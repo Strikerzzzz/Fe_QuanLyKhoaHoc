@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
@@ -20,7 +20,8 @@ export class CourseContentComponent implements OnInit {
   constructor(
     private client: Client,
     private message: NzMessageService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) {
     this.courseId = Number(this.route.snapshot.paramMap.get('courseId'));
   }
@@ -45,5 +46,8 @@ export class CourseContentComponent implements OnInit {
         this.courseTitle = 'Không xác định';
       }
     );
+  }
+  goBack(): void {
+    this.router.navigate(['/lecturer/courses-management']);
   }
 }

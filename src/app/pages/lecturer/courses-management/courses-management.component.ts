@@ -23,36 +23,27 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 
 export class CoursesManagementComponent {
   courses: any[] = [];
-
-  // Dữ liệu form dùng để tạo mới hoặc cập nhật khóa học  
   courseData: Partial<CreateCourseRequest | UpdateCourseRequest> = {};
-
-  // Lưu tạm id của khóa học cần cập nhật
   selectedCourseId?: number;
 
-  isVisible = false;   // Điều khiển hiển thị modal
-  isEditMode = false;  // true: cập nhật, false: tạo mới
+  isVisible = false;
+  isEditMode = false;
 
-  // Các biến phân trang
   currentPage = 1;
   pageSize = 5;
   displayedCourses: any[] = [];
 
 
-  //thêm danh sách combobox độ khó
   difficultyLevels = [
     { label: 'Dễ', value: 'Dễ' },
     { label: 'Trung bình', value: 'Trung bình' },
     { label: 'Khó', value: 'Khó' }
   ];
 
-  // Danh sách từ khóa lọc theo tìm kiếm
   filteredKeywords: string[] = [];
 
-  keywordString: string[] = []; // Chuyển thành mảng thay vì string
+  keywordString: string[] = [];
 
-
-  // Danh sách từ khóa tự động 
   suggestedKeywords: string[] = [
     'Lập trình', 'Web Development', 'JavaScript', 'Python', 'Java', 'SQL',
     'React', 'Angular', 'Node.js', 'AI', 'Machine Learning', 'Data Science',

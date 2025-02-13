@@ -12,10 +12,10 @@
     <tr *ngFor="let lesson of displayedLessons">
       <td>{{ lesson.title }}</td>
       <td>
-        <button nz-button nzType="default" nzSize="small" (click)="goToContent(lesson.lessonId)">
+        <button nz-button nzType="default" (click)="goToContent(lesson.lessonId)">
           <i nz-icon nzType="file-text" nzTheme="outline"></i> Nội dung
         </button>
-        <button nz-button nzType="default" nzSize="small" (click)="goToAssignment(lesson.lessonId)">
+        <button nz-button nzType="default" (click)="goToAssignment(lesson.lessonId)">
           <i nz-icon nzType="book" nzTheme="outline"></i> Bài tập
         </button>
       </td>

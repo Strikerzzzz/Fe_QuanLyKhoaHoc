@@ -30,7 +30,7 @@
       <td>{{ course.difficulty }}</td>
       <td>{{ course.keywords }}</td>
       <td>
-        <button nz-button nzType="default" nzSize="small" (click)="goToContent(course.courseId)">
+        <button nz-button nzType="default" (click)="goToContent(course.courseId)">
           <i nz-icon nzType="book" nzTheme="outline"></i> Nội dung
         </button>
       </td>
@@ -114,17 +114,11 @@
         Từ khóa
       </nz-form-label>
       <nz-form-control [nzSpan]="14">
-        <nz-select
-        id="keywords"
-        [(ngModel)]="keywordString"
-        name="keywords"
-        nzMode="tags"
-        nzPlaceHolder="Nhập hoặc chọn từ khóa"
-        (nzOnSearch)="onSearchKeyword($event)"
-      (ngModelChange)="updateKeywordString()"
-      >
-        <nz-option *ngFor="let keyword of suggestedKeywords" [nzValue]="keyword" [nzLabel]="keyword"></nz-option>
-      </nz-select>      </nz-form-control>
+        <nz-select id="keywords" [(ngModel)]="keywordString" name="keywords" nzMode="tags"
+          nzPlaceHolder="Nhập hoặc chọn từ khóa" (nzOnSearch)="onSearchKeyword($event)"
+          (ngModelChange)="updateKeywordString()">
+          <nz-option *ngFor="let keyword of suggestedKeywords" [nzValue]="keyword" [nzLabel]="keyword"></nz-option>
+        </nz-select> </nz-form-control>
     </nz-form-item>
   </form>
 </nz-modal>
