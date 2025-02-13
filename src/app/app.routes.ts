@@ -7,5 +7,6 @@ export const routes: Routes = [
   { path: 'home', loadChildren: () => import('./pages/home/home.routes').then(m => m.HOME_ROUTES) },
   { path: 'email-confirmation', loadChildren: () => import('./email-confirmation/email-confirmation.routes').then(m => EMAIL_CONFIRMATION_ROUTES) },
   { path: 'admin', loadChildren: () => import('./pages/admin/admin.routes').then(m => m.ADMIN_ROUTES), canActivate: [AuthGuard], data: { role: 'Admin' } },
-  { path: 'lecturer', loadChildren: () => import('./pages/lecturer/lecturer.routes').then(m => m.LECTURER_ROUTES), canActivate: [AuthGuard], data: { role: 'Lecturer' } }
+  { path: 'lecturer', loadChildren: () => import('./pages/lecturer/lecturer.routes').then(m => m.LECTURER_ROUTES), canActivate: [AuthGuard], data: { role: 'Lecturer' } },
+  { path: 'learning', loadChildren: () => import('./pages/learning/learning.routes').then(m => m.LEARNING_ROUTES) }
 ];
