@@ -5,6 +5,7 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { Client } from '../../../shared/api-client';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { Location } from '@angular/common';
 
 @Component({
   selector: 'app-course-content',
@@ -21,7 +22,7 @@ export class CourseContentComponent implements OnInit {
     private client: Client,
     private message: NzMessageService,
     private route: ActivatedRoute,
-    private router: Router
+    private location: Location
   ) {
     this.courseId = Number(this.route.snapshot.paramMap.get('courseId'));
   }
@@ -48,6 +49,6 @@ export class CourseContentComponent implements OnInit {
     );
   }
   goBack(): void {
-    this.router.navigate(['/lecturer/courses-management']);
+    this.location.back();
   }
 }

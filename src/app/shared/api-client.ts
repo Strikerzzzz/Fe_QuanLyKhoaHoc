@@ -23,7 +23,12 @@ export interface IClient {
     /**
      * @return OK
      */
-    assignmentsGET(id: number): Observable<AssignmentResult>;
+    questions(assignmentId: number): Observable<ObjectIEnumerableResult>;
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    assignmentsPOST(body: CreateAssignmentRequest | undefined): Observable<StringResult>;
     /**
      * @param body (optional) 
      * @return OK
@@ -33,11 +38,6 @@ export interface IClient {
      * @return OK
      */
     assignmentsDELETE(id: number): Observable<StringResult>;
-    /**
-     * @param body (optional) 
-     * @return OK
-     */
-    assignmentsPOST(body: CreateAssignmentRequest | undefined): Observable<StringResult>;
     /**
      * @param body (optional) 
      * @return OK
@@ -80,11 +80,16 @@ export interface IClient {
     /**
      * @return OK
      */
-    course(courseId: number): Observable<ObjectIEnumerableResult>;
+    course(courseId: number): Observable<ObjectResult>;
     /**
      * @return OK
      */
-    examsGET(id: number): Observable<ExamResult>;
+    questions2(examId: number): Observable<ObjectIEnumerableResult>;
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    examsPOST(body: CreateExamRequest | undefined): Observable<StringResult>;
     /**
      * @param body (optional) 
      * @return OK
@@ -94,11 +99,6 @@ export interface IClient {
      * @return OK
      */
     examsDELETE(id: number): Observable<StringResult>;
-    /**
-     * @param body (optional) 
-     * @return OK
-     */
-    examsPOST(body: CreateExamRequest | undefined): Observable<StringResult>;
     /**
      * @param body (optional) 
      * @return OK
@@ -130,6 +130,24 @@ export interface IClient {
      * @return OK
      */
     lessonsDELETE(id: number): Observable<StringResult>;
+    /**
+     * @return OK
+     */
+    questions3(entityType: string, entityId: number, questionType: QuestionType): Observable<ObjectIEnumerableResult>;
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    questionsPOST(body: QuestionDto | undefined): Observable<StringResult>;
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    questionsPUT(id: number, body: QuestionDto | undefined): Observable<QuestionResult>;
+    /**
+     * @return OK
+     */
+    questionsDELETE(id: number): Observable<ObjectResult>;
     /**
      * @param body (optional) 
      * @return OK
@@ -271,11 +289,11 @@ export class Client implements IClient {
     /**
      * @return OK
      */
-    assignmentsGET(id: number): Observable<AssignmentResult> {
-        let url_ = this.baseUrl + "/api/Assignments/{id}";
-        if (id === undefined || id === null)
-            throw new Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+    questions(assignmentId: number): Observable<ObjectIEnumerableResult> {
+        let url_ = this.baseUrl + "/api/Assignments/{assignmentId}/questions";
+        if (assignmentId === undefined || assignmentId === null)
+            throw new Error("The parameter 'assignmentId' must be defined.");
+        url_ = url_.replace("{assignmentId}", encodeURIComponent("" + assignmentId));
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -287,20 +305,20 @@ export class Client implements IClient {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processAssignmentsGET(response_);
+            return this.processQuestions(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processAssignmentsGET(response_ as any);
+                    return this.processQuestions(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<AssignmentResult>;
+                    return _observableThrow(e) as any as Observable<ObjectIEnumerableResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<AssignmentResult>;
+                return _observableThrow(response_) as any as Observable<ObjectIEnumerableResult>;
         }));
     }
 
-    protected processAssignmentsGET(response: HttpResponseBase): Observable<AssignmentResult> {
+    protected processQuestions(response: HttpResponseBase): Observable<ObjectIEnumerableResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -311,8 +329,15 @@ export class Client implements IClient {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = AssignmentResult.fromJS(resultData200);
+            result200 = ObjectIEnumerableResult.fromJS(resultData200);
             return _observableOf(result200);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ObjectResult.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
             }));
         } else if (status === 404) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -320,6 +345,83 @@ export class Client implements IClient {
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ObjectResult.fromJS(resultData404);
             return throwException("Not Found", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result401 = ObjectResult.fromJS(resultData401);
+            return throwException("Unauthorized", status, _responseText, _headers, result401);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    assignmentsPOST(body: CreateAssignmentRequest | undefined): Observable<StringResult> {
+        let url_ = this.baseUrl + "/api/Assignments";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processAssignmentsPOST(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processAssignmentsPOST(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<StringResult>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<StringResult>;
+        }));
+    }
+
+    protected processAssignmentsPOST(response: HttpResponseBase): Observable<StringResult> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = StringResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ObjectResult.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 403) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result403: any = null;
+            let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result403 = ObjectResult.fromJS(resultData403);
+            return throwException("Forbidden", status, _responseText, _headers, result403);
             }));
         } else if (status === 500) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -489,90 +591,6 @@ export class Client implements IClient {
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ObjectResult.fromJS(resultData404);
             return throwException("Not Found", status, _responseText, _headers, result404);
-            }));
-        } else if (status === 403) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result403: any = null;
-            let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result403 = ObjectResult.fromJS(resultData403);
-            return throwException("Forbidden", status, _responseText, _headers, result403);
-            }));
-        } else if (status === 500) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result500: any = null;
-            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result500 = ObjectResult.fromJS(resultData500);
-            return throwException("Internal Server Error", status, _responseText, _headers, result500);
-            }));
-        } else if (status === 401) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result401: any = null;
-            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result401 = ObjectResult.fromJS(resultData401);
-            return throwException("Unauthorized", status, _responseText, _headers, result401);
-            }));
-        } else if (status !== 200 && status !== 204) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            }));
-        }
-        return _observableOf(null as any);
-    }
-
-    /**
-     * @param body (optional) 
-     * @return OK
-     */
-    assignmentsPOST(body: CreateAssignmentRequest | undefined): Observable<StringResult> {
-        let url_ = this.baseUrl + "/api/Assignments";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_ : any = {
-            body: content_,
-            observe: "response",
-            responseType: "blob",
-            headers: new HttpHeaders({
-                "Content-Type": "application/json",
-                "Accept": "text/plain"
-            })
-        };
-
-        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processAssignmentsPOST(response_);
-        })).pipe(_observableCatch((response_: any) => {
-            if (response_ instanceof HttpResponseBase) {
-                try {
-                    return this.processAssignmentsPOST(response_ as any);
-                } catch (e) {
-                    return _observableThrow(e) as any as Observable<StringResult>;
-                }
-            } else
-                return _observableThrow(response_) as any as Observable<StringResult>;
-        }));
-    }
-
-    protected processAssignmentsPOST(response: HttpResponseBase): Observable<StringResult> {
-        const status = response.status;
-        const responseBlob =
-            response instanceof HttpResponse ? response.body :
-            (response as any).error instanceof Blob ? (response as any).error : undefined;
-
-        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = StringResult.fromJS(resultData200);
-            return _observableOf(result200);
-            }));
-        } else if (status === 400) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result400: any = null;
-            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = ObjectResult.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
             }));
         } else if (status === 403) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -1317,7 +1335,7 @@ export class Client implements IClient {
     /**
      * @return OK
      */
-    course(courseId: number): Observable<ObjectIEnumerableResult> {
+    course(courseId: number): Observable<ObjectResult> {
         let url_ = this.baseUrl + "/api/Exams/course/{courseId}";
         if (courseId === undefined || courseId === null)
             throw new Error("The parameter 'courseId' must be defined.");
@@ -1339,6 +1357,81 @@ export class Client implements IClient {
                 try {
                     return this.processCourse(response_ as any);
                 } catch (e) {
+                    return _observableThrow(e) as any as Observable<ObjectResult>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ObjectResult>;
+        }));
+    }
+
+    protected processCourse(response: HttpResponseBase): Observable<ObjectResult> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ObjectResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ObjectResult.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ObjectResult.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result401 = ObjectResult.fromJS(resultData401);
+            return throwException("Unauthorized", status, _responseText, _headers, result401);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    questions2(examId: number): Observable<ObjectIEnumerableResult> {
+        let url_ = this.baseUrl + "/api/Exams/{examId}/questions";
+        if (examId === undefined || examId === null)
+            throw new Error("The parameter 'examId' must be defined.");
+        url_ = url_.replace("{examId}", encodeURIComponent("" + examId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processQuestions2(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processQuestions2(response_ as any);
+                } catch (e) {
                     return _observableThrow(e) as any as Observable<ObjectIEnumerableResult>;
                 }
             } else
@@ -1346,7 +1439,7 @@ export class Client implements IClient {
         }));
     }
 
-    protected processCourse(response: HttpResponseBase): Observable<ObjectIEnumerableResult> {
+    protected processQuestions2(response: HttpResponseBase): Observable<ObjectIEnumerableResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1390,38 +1483,40 @@ export class Client implements IClient {
     }
 
     /**
+     * @param body (optional) 
      * @return OK
      */
-    examsGET(id: number): Observable<ExamResult> {
-        let url_ = this.baseUrl + "/api/Exams/{id}";
-        if (id === undefined || id === null)
-            throw new Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+    examsPOST(body: CreateExamRequest | undefined): Observable<StringResult> {
+        let url_ = this.baseUrl + "/api/Exams";
         url_ = url_.replace(/[?&]$/, "");
 
+        const content_ = JSON.stringify(body);
+
         let options_ : any = {
+            body: content_,
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
+                "Content-Type": "application/json",
                 "Accept": "text/plain"
             })
         };
 
-        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processExamsGET(response_);
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processExamsPOST(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processExamsGET(response_ as any);
+                    return this.processExamsPOST(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<ExamResult>;
+                    return _observableThrow(e) as any as Observable<StringResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<ExamResult>;
+                return _observableThrow(response_) as any as Observable<StringResult>;
         }));
     }
 
-    protected processExamsGET(response: HttpResponseBase): Observable<ExamResult> {
+    protected processExamsPOST(response: HttpResponseBase): Observable<StringResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1432,15 +1527,22 @@ export class Client implements IClient {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ExamResult.fromJS(resultData200);
+            result200 = StringResult.fromJS(resultData200);
             return _observableOf(result200);
             }));
-        } else if (status === 404) {
+        } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result404: any = null;
-            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result404 = ObjectResult.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ObjectResult.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 403) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result403: any = null;
+            let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result403 = ObjectResult.fromJS(resultData403);
+            return throwException("Forbidden", status, _responseText, _headers, result403);
             }));
         } else if (status === 500) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -1610,90 +1712,6 @@ export class Client implements IClient {
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ObjectResult.fromJS(resultData404);
             return throwException("Not Found", status, _responseText, _headers, result404);
-            }));
-        } else if (status === 403) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result403: any = null;
-            let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result403 = ObjectResult.fromJS(resultData403);
-            return throwException("Forbidden", status, _responseText, _headers, result403);
-            }));
-        } else if (status === 500) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result500: any = null;
-            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result500 = ObjectResult.fromJS(resultData500);
-            return throwException("Internal Server Error", status, _responseText, _headers, result500);
-            }));
-        } else if (status === 401) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result401: any = null;
-            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result401 = ObjectResult.fromJS(resultData401);
-            return throwException("Unauthorized", status, _responseText, _headers, result401);
-            }));
-        } else if (status !== 200 && status !== 204) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            }));
-        }
-        return _observableOf(null as any);
-    }
-
-    /**
-     * @param body (optional) 
-     * @return OK
-     */
-    examsPOST(body: CreateExamRequest | undefined): Observable<StringResult> {
-        let url_ = this.baseUrl + "/api/Exams";
-        url_ = url_.replace(/[?&]$/, "");
-
-        const content_ = JSON.stringify(body);
-
-        let options_ : any = {
-            body: content_,
-            observe: "response",
-            responseType: "blob",
-            headers: new HttpHeaders({
-                "Content-Type": "application/json",
-                "Accept": "text/plain"
-            })
-        };
-
-        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processExamsPOST(response_);
-        })).pipe(_observableCatch((response_: any) => {
-            if (response_ instanceof HttpResponseBase) {
-                try {
-                    return this.processExamsPOST(response_ as any);
-                } catch (e) {
-                    return _observableThrow(e) as any as Observable<StringResult>;
-                }
-            } else
-                return _observableThrow(response_) as any as Observable<StringResult>;
-        }));
-    }
-
-    protected processExamsPOST(response: HttpResponseBase): Observable<StringResult> {
-        const status = response.status;
-        const responseBlob =
-            response instanceof HttpResponse ? response.body :
-            (response as any).error instanceof Blob ? (response as any).error : undefined;
-
-        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
-        if (status === 200) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = StringResult.fromJS(resultData200);
-            return _observableOf(result200);
-            }));
-        } else if (status === 400) {
-            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
-            let result400: any = null;
-            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result400 = ObjectResult.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
             }));
         } else if (status === 403) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2273,6 +2291,305 @@ export class Client implements IClient {
             let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result403 = ObjectResult.fromJS(resultData403);
             return throwException("Forbidden", status, _responseText, _headers, result403);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ObjectResult.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    questions3(entityType: string, entityId: number, questionType: QuestionType): Observable<ObjectIEnumerableResult> {
+        let url_ = this.baseUrl + "/api/Questions/{entityType}/{entityId}/questions/{questionType}";
+        if (entityType === undefined || entityType === null)
+            throw new Error("The parameter 'entityType' must be defined.");
+        url_ = url_.replace("{entityType}", encodeURIComponent("" + entityType));
+        if (entityId === undefined || entityId === null)
+            throw new Error("The parameter 'entityId' must be defined.");
+        url_ = url_.replace("{entityId}", encodeURIComponent("" + entityId));
+        if (questionType === undefined || questionType === null)
+            throw new Error("The parameter 'questionType' must be defined.");
+        url_ = url_.replace("{questionType}", encodeURIComponent("" + questionType));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processQuestions3(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processQuestions3(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ObjectIEnumerableResult>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ObjectIEnumerableResult>;
+        }));
+    }
+
+    protected processQuestions3(response: HttpResponseBase): Observable<ObjectIEnumerableResult> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ObjectIEnumerableResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ObjectResult.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ObjectResult.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result401 = ObjectResult.fromJS(resultData401);
+            return throwException("Unauthorized", status, _responseText, _headers, result401);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    questionsPOST(body: QuestionDto | undefined): Observable<StringResult> {
+        let url_ = this.baseUrl + "/api/Questions";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processQuestionsPOST(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processQuestionsPOST(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<StringResult>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<StringResult>;
+        }));
+    }
+
+    protected processQuestionsPOST(response: HttpResponseBase): Observable<StringResult> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = StringResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ObjectResult.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ObjectResult.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    questionsPUT(id: number, body: QuestionDto | undefined): Observable<QuestionResult> {
+        let url_ = this.baseUrl + "/api/Questions/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processQuestionsPUT(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processQuestionsPUT(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<QuestionResult>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<QuestionResult>;
+        }));
+    }
+
+    protected processQuestionsPUT(response: HttpResponseBase): Observable<QuestionResult> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = QuestionResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ObjectResult.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ObjectResult.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ObjectResult.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    questionsDELETE(id: number): Observable<ObjectResult> {
+        let url_ = this.baseUrl + "/api/Questions/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processQuestionsDELETE(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processQuestionsDELETE(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ObjectResult>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ObjectResult>;
+        }));
+    }
+
+    protected processQuestionsDELETE(response: HttpResponseBase): Observable<ObjectResult> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ObjectResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ObjectResult.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
             }));
         } else if (status === 500) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -3266,58 +3583,6 @@ export interface IAssignment {
     fillInBlankQuestions?: FillInBlankQuestion[] | undefined;
 }
 
-export class AssignmentResult implements IAssignmentResult {
-    succeeded?: boolean;
-    errors?: string[] | undefined;
-    data?: Assignment;
-
-    constructor(data?: IAssignmentResult) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.succeeded = _data["succeeded"];
-            if (Array.isArray(_data["errors"])) {
-                this.errors = [] as any;
-                for (let item of _data["errors"])
-                    this.errors!.push(item);
-            }
-            this.data = _data["data"] ? Assignment.fromJS(_data["data"]) : <any>undefined;
-        }
-    }
-
-    static fromJS(data: any): AssignmentResult {
-        data = typeof data === 'object' ? data : {};
-        let result = new AssignmentResult();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["succeeded"] = this.succeeded;
-        if (Array.isArray(this.errors)) {
-            data["errors"] = [];
-            for (let item of this.errors)
-                data["errors"].push(item);
-        }
-        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
-        return data;
-    }
-}
-
-export interface IAssignmentResult {
-    succeeded?: boolean;
-    errors?: string[] | undefined;
-    data?: Assignment;
-}
-
 export class ConfirmEmailRequest implements IConfirmEmailRequest {
     email?: string | undefined;
     token?: string | undefined;
@@ -3434,7 +3699,6 @@ export class CreateAssignmentRequest implements ICreateAssignmentRequest {
     lessonId?: number;
     title?: string | undefined;
     description?: string | undefined;
-    assignmentType?: string | undefined;
 
     constructor(data?: ICreateAssignmentRequest) {
         if (data) {
@@ -3450,7 +3714,6 @@ export class CreateAssignmentRequest implements ICreateAssignmentRequest {
             this.lessonId = _data["lessonId"];
             this.title = _data["title"];
             this.description = _data["description"];
-            this.assignmentType = _data["assignmentType"];
         }
     }
 
@@ -3466,7 +3729,6 @@ export class CreateAssignmentRequest implements ICreateAssignmentRequest {
         data["lessonId"] = this.lessonId;
         data["title"] = this.title;
         data["description"] = this.description;
-        data["assignmentType"] = this.assignmentType;
         return data;
     }
 }
@@ -3475,7 +3737,6 @@ export interface ICreateAssignmentRequest {
     lessonId?: number;
     title?: string | undefined;
     description?: string | undefined;
-    assignmentType?: string | undefined;
 }
 
 export class CreateCourseRequest implements ICreateCourseRequest {
@@ -3692,58 +3953,6 @@ export interface IExam {
     description?: string | undefined;
     multipleChoiceQuestions?: MultipleChoiceQuestion[] | undefined;
     fillInBlankQuestions?: FillInBlankQuestion[] | undefined;
-}
-
-export class ExamResult implements IExamResult {
-    succeeded?: boolean;
-    errors?: string[] | undefined;
-    data?: Exam;
-
-    constructor(data?: IExamResult) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.succeeded = _data["succeeded"];
-            if (Array.isArray(_data["errors"])) {
-                this.errors = [] as any;
-                for (let item of _data["errors"])
-                    this.errors!.push(item);
-            }
-            this.data = _data["data"] ? Exam.fromJS(_data["data"]) : <any>undefined;
-        }
-    }
-
-    static fromJS(data: any): ExamResult {
-        data = typeof data === 'object' ? data : {};
-        let result = new ExamResult();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["succeeded"] = this.succeeded;
-        if (Array.isArray(this.errors)) {
-            data["errors"] = [];
-            for (let item of this.errors)
-                data["errors"].push(item);
-        }
-        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
-        return data;
-    }
-}
-
-export interface IExamResult {
-    succeeded?: boolean;
-    errors?: string[] | undefined;
-    data?: Exam;
 }
 
 export class FillInBlankQuestion implements IFillInBlankQuestion {
@@ -4158,6 +4367,182 @@ export interface IObjectResult {
     data?: any | undefined;
 }
 
+export class Question implements IQuestion {
+    id?: number;
+    content!: string;
+    type!: QuestionType;
+    createdAt?: Date;
+    assignmentId?: number | undefined;
+    assignment?: Assignment;
+    examId?: number | undefined;
+    exam?: Exam;
+
+    constructor(data?: IQuestion) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.content = _data["content"];
+            this.type = _data["type"];
+            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : <any>undefined;
+            this.assignmentId = _data["assignmentId"];
+            this.assignment = _data["assignment"] ? Assignment.fromJS(_data["assignment"]) : <any>undefined;
+            this.examId = _data["examId"];
+            this.exam = _data["exam"] ? Exam.fromJS(_data["exam"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): Question {
+        data = typeof data === 'object' ? data : {};
+        let result = new Question();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["content"] = this.content;
+        data["type"] = this.type;
+        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
+        data["assignmentId"] = this.assignmentId;
+        data["assignment"] = this.assignment ? this.assignment.toJSON() : <any>undefined;
+        data["examId"] = this.examId;
+        data["exam"] = this.exam ? this.exam.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IQuestion {
+    id?: number;
+    content: string;
+    type: QuestionType;
+    createdAt?: Date;
+    assignmentId?: number | undefined;
+    assignment?: Assignment;
+    examId?: number | undefined;
+    exam?: Exam;
+}
+
+export class QuestionDto implements IQuestionDto {
+    content?: string | undefined;
+    type?: QuestionType;
+    choices?: string | undefined;
+    correctAnswerIndex?: number | undefined;
+    correctAnswer?: string | undefined;
+    assignmentId?: number | undefined;
+    examId?: number | undefined;
+
+    constructor(data?: IQuestionDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.content = _data["content"];
+            this.type = _data["type"];
+            this.choices = _data["choices"];
+            this.correctAnswerIndex = _data["correctAnswerIndex"];
+            this.correctAnswer = _data["correctAnswer"];
+            this.assignmentId = _data["assignmentId"];
+            this.examId = _data["examId"];
+        }
+    }
+
+    static fromJS(data: any): QuestionDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new QuestionDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["content"] = this.content;
+        data["type"] = this.type;
+        data["choices"] = this.choices;
+        data["correctAnswerIndex"] = this.correctAnswerIndex;
+        data["correctAnswer"] = this.correctAnswer;
+        data["assignmentId"] = this.assignmentId;
+        data["examId"] = this.examId;
+        return data;
+    }
+}
+
+export interface IQuestionDto {
+    content?: string | undefined;
+    type?: QuestionType;
+    choices?: string | undefined;
+    correctAnswerIndex?: number | undefined;
+    correctAnswer?: string | undefined;
+    assignmentId?: number | undefined;
+    examId?: number | undefined;
+}
+
+export class QuestionResult implements IQuestionResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: Question;
+
+    constructor(data?: IQuestionResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            this.data = _data["data"] ? Question.fromJS(_data["data"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): QuestionResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new QuestionResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IQuestionResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: Question;
+}
+
 export enum QuestionType {
     _1 = 1,
     _2 = 2,
@@ -4434,7 +4819,6 @@ export interface ISubmitExamRequest {
 export class UpdateAssignmentRequest implements IUpdateAssignmentRequest {
     title?: string | undefined;
     description?: string | undefined;
-    assignmentType?: string | undefined;
 
     constructor(data?: IUpdateAssignmentRequest) {
         if (data) {
@@ -4449,7 +4833,6 @@ export class UpdateAssignmentRequest implements IUpdateAssignmentRequest {
         if (_data) {
             this.title = _data["title"];
             this.description = _data["description"];
-            this.assignmentType = _data["assignmentType"];
         }
     }
 
@@ -4464,7 +4847,6 @@ export class UpdateAssignmentRequest implements IUpdateAssignmentRequest {
         data = typeof data === 'object' ? data : {};
         data["title"] = this.title;
         data["description"] = this.description;
-        data["assignmentType"] = this.assignmentType;
         return data;
     }
 }
@@ -4472,7 +4854,6 @@ export class UpdateAssignmentRequest implements IUpdateAssignmentRequest {
 export interface IUpdateAssignmentRequest {
     title?: string | undefined;
     description?: string | undefined;
-    assignmentType?: string | undefined;
 }
 
 export class UpdateCourseRequest implements IUpdateCourseRequest {

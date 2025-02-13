@@ -58,7 +58,6 @@ export class LessonComponent implements OnInit {
 
   // Lấy danh sách bài học của khóa học
   loadLessons(): void {
-    console.log(this.courseId);
     this.client.course2(this.courseId).subscribe(
       res => {
         this.lessons = res.data || [];
@@ -158,10 +157,11 @@ export class LessonComponent implements OnInit {
 
   // Điều hướng
   goToContent(lessonId: number): void {
-    this.router.navigate(['/lecturer/lesson-content', lessonId]);
+    this.router.navigate([`/lecturer/courses-content/${this.courseId}/content`, lessonId]);
   }
 
   goToAssignment(lessonId: number): void {
-    this.router.navigate(['/lecturer/lesson-assignment', lessonId]);
+    this.router.navigate([`/lecturer/courses-content/${this.courseId}/assignment`, lessonId]);
   }
+
 }

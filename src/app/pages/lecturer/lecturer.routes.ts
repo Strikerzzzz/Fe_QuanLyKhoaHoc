@@ -20,8 +20,8 @@ export const LECTURER_ROUTES: Route[] = [
                     { path: "", redirectTo: "lesson", pathMatch: "full" },
                     { path: "lesson", component: LessonComponent },
                     { path: "exam", component: ExamComponent },
-                    { path: "assignment", component: LessonAssignmentComponent },
-                    { path: "content", component: LessonContentComponent }
+                    { path: "assignment/:lessonId", component: LessonAssignmentComponent },
+                    { path: "content/:lessonId", component: LessonContentComponent }
                 ]
             }
         ]
