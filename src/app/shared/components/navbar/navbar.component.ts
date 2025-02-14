@@ -12,6 +12,7 @@ import { JwtHelperService } from '@auth0/angular-jwt';
 import { Router, RouterModule } from '@angular/router';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -26,19 +27,23 @@ export class NavbarComponent implements OnInit {
   roles: string[] = [];
   isLoggedIn: boolean = false;
   authForm!: FormGroup;
-  userName: string = '';
-
-  // ADDED: Các biến để điều khiển hiển thị mật khẩu (toggle giữa password và text)
+  userName: string | null = null;
   passwordVisible: boolean = false;
   confirmPasswordVisible: boolean = false;
 
   private jwtHelper = new JwtHelperService();
 
-  constructor(private fb: FormBuilder, private apiClient: Client, private message: NzMessageService, private router: Router) {
+  constructor(private fb: FormBuilder,
+    private authService: AuthService,
+    private apiClient: Client,
+    private message: NzMessageService,
+    private router: Router) {
     this.initializeForm();
   }
 
   ngOnInit(): void {
+    this.authService.isLoggedIn$.subscribe((status) => this.isLoggedIn = status);
+    this.authService.userName$.subscribe((name) => this.userName = name);
     this.loadUserRoles();
   }
 
@@ -46,14 +51,12 @@ export class NavbarComponent implements OnInit {
     this.authForm = this.fb.group({
       username: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: [''] // Thêm control này để xác nhận mật khẩu
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', [Validators.required, Validators.minLength(8)]]
     });
   }
 
-  // Validator cho confirmPassword: so sánh với trường password
   confirmPasswordValidator(control: AbstractControl): { [key: string]: boolean } | null {
-    // Kiểm tra xem control đã được gắn với form group hay chưa
     if (!control.parent) return null;
     const password = control.parent.get('password');
     if (!password) return null;
@@ -84,14 +87,13 @@ export class NavbarComponent implements OnInit {
     if (this.authForm.valid) {
       const formData = this.authForm.value;
 
-      // Nếu đang ở chế độ đăng ký, kiểm tra lại confirmPassword
       if (this.isRegisterMode) {
         if (formData.password !== formData.confirmPassword) {
           this.message.error('Mật khẩu và xác nhận mật khẩu không khớp');
-          return; // Không gửi yêu cầu đăng ký nếu 2 trường không khớp
+          return;
         }
         // Gửi yêu cầu đăng ký
-        this.apiClient.register(formData).subscribe(
+        this.authService.register(formData).subscribe(
           (response: any) => {
             this.message.info(response.data);
             this.isAuthPopupVisible = false;
@@ -101,11 +103,11 @@ export class NavbarComponent implements OnInit {
           }
         );
       } else {
-        this.apiClient.login(formData).subscribe(
-          (response: any) => {
+        this.authService.login(formData).subscribe(
+          () => {
             this.message.info('Đăng nhập thành công');
             this.isAuthPopupVisible = false;
-            this.saveToken(response.data);
+            this.loadUserRoles();
           },
           (error) => {
             this.message.info('Lỗi đăng nhập: ' + error.errors);
@@ -115,15 +117,8 @@ export class NavbarComponent implements OnInit {
     }
   }
 
-  // Lưu token vào localStorage sau khi đăng nhập
-  saveToken(token: string): void {
-    localStorage.setItem('access_token', token);
-    this.loadUserRoles(); // Cập nhật thông tin user sau khi đăng nhập
-  }
-
-  // Giải mã token và lấy thông tin role
   loadUserRoles(): void {
-    const token = localStorage.getItem('access_token');
+    const token = this.authService.getToken();
     if (token) {
       try {
         const decodedToken = this.jwtHelper.decodeToken(token);
@@ -147,13 +142,12 @@ export class NavbarComponent implements OnInit {
   }
 
   logout(): void {
-    localStorage.removeItem('access_token');
+    this.authService.logout();
     this.roles = [];
     this.userName = '';
     this.isLoggedIn = false;
-    this.router.navigate(['/home']);
   }
-  // ADDED: Hàm chuyển đổi hiển thị mật khẩu cho trường "password" và "confirmPassword"
+  
   togglePasswordVisibility(field: string): void {
     if (field === 'password') {
       this.passwordVisible = !this.passwordVisible;

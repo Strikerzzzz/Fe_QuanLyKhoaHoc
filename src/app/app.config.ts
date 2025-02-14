@@ -9,9 +9,10 @@ import { registerLocaleData } from '@angular/common';
 import vi from '@angular/common/locales/vi';
 import { FormsModule } from '@angular/forms';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { API_BASE_URL } from './shared/api-client';
 import { environment } from '../environments/environment';
+import { jwtInterceptor } from './services/jwt.interceptor';
 
 registerLocaleData(vi);
 
@@ -23,7 +24,7 @@ export const appConfig: ApplicationConfig = {
     provideNzI18n(vi_VN),
     importProvidersFrom(FormsModule),
     provideAnimationsAsync(),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([jwtInterceptor])),
     {
       provide: API_BASE_URL,
       useValue: environment.API_BASE_URL

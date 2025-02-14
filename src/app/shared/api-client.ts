@@ -19,7 +19,7 @@ export interface IClient {
     /**
      * @return OK
      */
-    lesson(lessonId: number): Observable<ObjectIEnumerableResult>;
+    lesson(lessonId: number): Observable<ObjectResult>;
     /**
      * @return OK
      */
@@ -164,6 +164,11 @@ export interface IClient {
      */
     login(body: LoginRequest | undefined): Observable<StringResult>;
     /**
+     * @param body (optional) 
+     * @return OK
+     */
+    refreshToken(body: RefreshTokenRequest | undefined): Observable<RefreshTokenResponseResult>;
+    /**
      * @return OK
      */
     usersGET(): Observable<UserIEnumerableResult>;
@@ -214,7 +219,7 @@ export class Client implements IClient {
     /**
      * @return OK
      */
-    lesson(lessonId: number): Observable<ObjectIEnumerableResult> {
+    lesson(lessonId: number): Observable<ObjectResult> {
         let url_ = this.baseUrl + "/api/Assignments/lesson/{lessonId}";
         if (lessonId === undefined || lessonId === null)
             throw new Error("The parameter 'lessonId' must be defined.");
@@ -236,14 +241,14 @@ export class Client implements IClient {
                 try {
                     return this.processLesson(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<ObjectIEnumerableResult>;
+                    return _observableThrow(e) as any as Observable<ObjectResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<ObjectIEnumerableResult>;
+                return _observableThrow(response_) as any as Observable<ObjectResult>;
         }));
     }
 
-    protected processLesson(response: HttpResponseBase): Observable<ObjectIEnumerableResult> {
+    protected processLesson(response: HttpResponseBase): Observable<ObjectResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -254,7 +259,7 @@ export class Client implements IClient {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ObjectIEnumerableResult.fromJS(resultData200);
+            result200 = ObjectResult.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status === 500) {
@@ -2825,6 +2830,76 @@ export class Client implements IClient {
     }
 
     /**
+     * @param body (optional) 
+     * @return OK
+     */
+    refreshToken(body: RefreshTokenRequest | undefined): Observable<RefreshTokenResponseResult> {
+        let url_ = this.baseUrl + "/api/Users/refresh-token";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processRefreshToken(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processRefreshToken(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<RefreshTokenResponseResult>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<RefreshTokenResponseResult>;
+        }));
+    }
+
+    protected processRefreshToken(response: HttpResponseBase): Observable<RefreshTokenResponseResult> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = RefreshTokenResponseResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ObjectResult.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ObjectResult.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
      * @return OK
      */
     usersGET(): Observable<UserIEnumerableResult> {
@@ -4546,6 +4621,134 @@ export interface IQuestionResult {
 export enum QuestionType {
     _1 = 1,
     _2 = 2,
+}
+
+export class RefreshTokenRequest implements IRefreshTokenRequest {
+    refreshToken?: string | undefined;
+
+    constructor(data?: IRefreshTokenRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.refreshToken = _data["refreshToken"];
+        }
+    }
+
+    static fromJS(data: any): RefreshTokenRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new RefreshTokenRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["refreshToken"] = this.refreshToken;
+        return data;
+    }
+}
+
+export interface IRefreshTokenRequest {
+    refreshToken?: string | undefined;
+}
+
+export class RefreshTokenResponse implements IRefreshTokenResponse {
+    accessToken?: string | undefined;
+    refreshToken?: string | undefined;
+
+    constructor(data?: IRefreshTokenResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.accessToken = _data["accessToken"];
+            this.refreshToken = _data["refreshToken"];
+        }
+    }
+
+    static fromJS(data: any): RefreshTokenResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new RefreshTokenResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["accessToken"] = this.accessToken;
+        data["refreshToken"] = this.refreshToken;
+        return data;
+    }
+}
+
+export interface IRefreshTokenResponse {
+    accessToken?: string | undefined;
+    refreshToken?: string | undefined;
+}
+
+export class RefreshTokenResponseResult implements IRefreshTokenResponseResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: RefreshTokenResponse;
+
+    constructor(data?: IRefreshTokenResponseResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            this.data = _data["data"] ? RefreshTokenResponse.fromJS(_data["data"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): RefreshTokenResponseResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new RefreshTokenResponseResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IRefreshTokenResponseResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: RefreshTokenResponse;
 }
 
 export class RegisterRequest implements IRegisterRequest {
