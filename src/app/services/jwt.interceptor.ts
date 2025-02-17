@@ -6,6 +6,9 @@ import { Observable, catchError, switchMap, throwError } from 'rxjs';
 export const jwtInterceptor: HttpInterceptorFn = (req, next: HttpHandlerFn): Observable<any> => {
     const authService = inject(AuthService);
     const token = authService.getToken();
+    if (req.url.includes('amazonaws.com')) {
+        return next(req);
+    }
 
     let authReq = req;
     if (token) {

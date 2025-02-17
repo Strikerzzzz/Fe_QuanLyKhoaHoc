@@ -15,10 +15,11 @@
     <tr *ngFor="let course of displayedCourses">
       <td>
         <ng-container *ngIf="course.avatarUrl; else noAvatar">
-          <img [src]="course.avatarUrl" alt="Avatar" class="avatar" />
+          <img [src]="course.avatarUrl" alt="Avatar" class="avatar" (click)="openAvatarModal(course)"
+            style="cursor: pointer;" />
         </ng-container>
         <ng-template #noAvatar>
-          <div class="avatar placeholder">
+          <div class="avatar placeholder" (click)="openAvatarModal(course)" style="cursor: pointer;">
             <i nz-icon nzType="user" nzTheme="outline"></i>
           </div>
         </ng-template>
@@ -64,6 +65,24 @@
   </div>
 </div>
 
+<nz-modal [(nzVisible)]="isAvatarModalVisible" nzTitle="Cập nhật Avatar Khóa Học" (nzOnCancel)="closeAvatarModal()"
+  (nzOnOk)="handleAvatarUpload()">
+  <ng-container *nzModalContent>
+    <div nz-row nzJustify="center">
+      <div nz-col nzSpan="24">
+        <div class="upload-container" (drop)="onFileDrop($event)" (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)" (click)="triggerFileInput()">
+          <p *ngIf="!avatarPreviewUrl">Kéo thả ảnh vào đây hoặc click để chọn</p>
+          <img *ngIf="avatarPreviewUrl" [src]="avatarPreviewUrl" alt="Preview Avatar" class="avatar-preview" />
+          <input type="file" class="file-input" (change)="onAvatarFileSelected($event)" accept="image/*" #fileInput />
+        </div>
+      </div>
+    </div>
+    <div *ngIf="avatarUploadProgress > 0">
+      Tiến trình upload: {{ avatarUploadProgress }}%
+    </div>
+  </ng-container>
+</nz-modal>
 <nz-modal [(nzVisible)]="isVisible" [nzTitle]="isEditMode ? 'Sửa khóa học' : 'Thêm khóa học'" (nzOnOk)="handleOk()"
   (nzOnCancel)="handleCancel()">
   <!-- Sử dụng nzLayout="horizontal" để tạo layout 2 cột -->
