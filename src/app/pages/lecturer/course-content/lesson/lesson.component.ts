@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Client, CreateLessonRequest, UpdateLessonRequest } from '../../../../shared/api-client';
+import { Client, CreateAssignmentRequest, CreateLessonRequest, UpdateLessonRequest } from '../../../../shared/api-client';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -33,13 +33,15 @@ export class LessonComponent implements OnInit {
   displayedLessons: any[] = [];
   lessonData: Partial<CreateLessonRequest | UpdateLessonRequest> = {};
   selectedLessonId?: number;
-
+  assignmentData: Partial<CreateAssignmentRequest> = {};
   isVisible = false;    // Điều khiển hiển thị modal
   isEditMode = false;   // true: cập nhật, false: tạo mới
 
   currentPage = 1;
   pageSize = 5;
   courseId!: number; // ID khóa học chứa bài học
+
+  isAssignmentModalVisible = false;
 
   constructor(
     private client: Client,
@@ -87,7 +89,7 @@ export class LessonComponent implements OnInit {
       this.lessonData = { ...lesson };
     } else {
       this.selectedLessonId = undefined;
-      this.lessonData = {};
+      this.lessonData = {title: '' };
     }
     this.isVisible = true;
   }
@@ -153,15 +155,77 @@ export class LessonComponent implements OnInit {
     );
   }
 
-
-
   // Điều hướng
   goToContent(lessonId: number): void {
     this.router.navigate([`/lecturer/courses-content/${this.courseId}/content`, lessonId]);
   }
 
   goToAssignment(lessonId: number): void {
-    this.router.navigate([`/lecturer/courses-content/${this.courseId}/assignment`, lessonId]);
+    this.client.lesson(lessonId).subscribe(
+      (response) => {
+        if (response && response.succeeded) {
+          this.router.navigate([`/lecturer/courses-content/${this.courseId}/assignment`, lessonId]);
+        } else {
+          this.selectedLessonId = lessonId;
+          this.assignmentData = { title: '', description: '' }; 
+          this.isAssignmentModalVisible = true; // 🟢 Hiển thị modal tạo bài tập
+        }
+      },
+      (error) => { 
+        // Kiểm tra nếu `error` có `errors` → API phản hồi hợp lệ nhưng không có bài tập
+        if (error?.errors) {
+          console.warn("⚠️ API trả về lỗi từ server:", error.errors);
+          this.selectedLessonId = lessonId;
+          this.assignmentData = { title: '', description: '' }; 
+          this.isAssignmentModalVisible = true;
+          return;
+        }
+  
+        // Kiểm tra lỗi HTTP thực sự (404, 500...)
+        if (error.status === 404) {
+          this.selectedLessonId = lessonId;
+          this.isAssignmentModalVisible = true;
+          return;
+        }
+  
+        // Trường hợp lỗi khác (mạng, server...)
+        this.message.error("Lỗi khi kiểm tra bài tập!");
+      }
+    );
   }
+  
+  handleAssignmentOk(): void {
+    if (!this.assignmentData.title || !this.assignmentData.description) {
+      this.message.warning("Vui lòng nhập đủ thông tin bài tập!");
+      return;
+    }
+  
+    // Khởi tạo đúng kiểu CreateAssignmentRequest
+    const newAssignment = new CreateAssignmentRequest();
+    newAssignment.lessonId = this.selectedLessonId!;
+    newAssignment.title = this.assignmentData.title;
+    newAssignment.description = this.assignmentData.description;
+  
+    // Gọi API tạo bài tập
+    this.client.assignmentsPOST(newAssignment).subscribe(
+      () => {
+        this.message.success("Tạo bài tập thành công!");
+        this.isAssignmentModalVisible = false;
+  
+        // Chuyển hướng đến trang bài tập sau khi tạo thành công
+        this.router.navigate([`/lecturer/courses-content/${this.courseId}/assignment`, this.selectedLessonId]);
+      },
+      () => {
+        this.message.error("Lỗi khi tạo mới bài tập!");
+      }
+    );
+  }
+  
+  
+
+  handleAssignmentCancel(): void {
+    this.isAssignmentModalVisible = false;
+  }
+
 
 }
