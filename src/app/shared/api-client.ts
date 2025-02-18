@@ -78,6 +78,11 @@ export interface IClient {
      */
     coursesPOST(body: CreateCourseRequest | undefined): Observable<StringResult>;
     /**
+     * @param body (optional) 
+     * @return OK
+     */
+    avatarCourse(courseId: number, body: UpdateAvatarRequest | undefined): Observable<StringResult>;
+    /**
      * @return OK
      */
     course(courseId: number): Observable<ObjectResult>;
@@ -148,6 +153,13 @@ export interface IClient {
      * @return OK
      */
     questionsDELETE(id: number): Observable<ObjectResult>;
+    /**
+     * @param courseId (optional) 
+     * @param fileName (optional) 
+     * @param contentType (optional) 
+     * @return OK
+     */
+    avatarPresignedUrl(courseId: number | undefined, fileName: string | undefined, contentType: string | undefined): Observable<AvatarUploadResponseResult>;
     /**
      * @param body (optional) 
      * @return OK
@@ -1307,6 +1319,100 @@ export class Client implements IClient {
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ObjectResult.fromJS(resultData400);
             return throwException("Bad Request", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result401 = ObjectResult.fromJS(resultData401);
+            return throwException("Unauthorized", status, _responseText, _headers, result401);
+            }));
+        } else if (status === 403) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result403: any = null;
+            let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result403 = ObjectResult.fromJS(resultData403);
+            return throwException("Forbidden", status, _responseText, _headers, result403);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ObjectResult.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    avatarCourse(courseId: number, body: UpdateAvatarRequest | undefined): Observable<StringResult> {
+        let url_ = this.baseUrl + "/api/Courses/{courseId}/avatar-course";
+        if (courseId === undefined || courseId === null)
+            throw new Error("The parameter 'courseId' must be defined.");
+        url_ = url_.replace("{courseId}", encodeURIComponent("" + courseId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processAvatarCourse(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processAvatarCourse(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<StringResult>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<StringResult>;
+        }));
+    }
+
+    protected processAvatarCourse(response: HttpResponseBase): Observable<StringResult> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = StringResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ObjectResult.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ObjectResult.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
             }));
         } else if (status === 401) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2612,6 +2718,100 @@ export class Client implements IClient {
     }
 
     /**
+     * @param courseId (optional) 
+     * @param fileName (optional) 
+     * @param contentType (optional) 
+     * @return OK
+     */
+    avatarPresignedUrl(courseId: number | undefined, fileName: string | undefined, contentType: string | undefined): Observable<AvatarUploadResponseResult> {
+        let url_ = this.baseUrl + "/api/Upload/avatar-presigned-url?";
+        if (courseId === null)
+            throw new Error("The parameter 'courseId' cannot be null.");
+        else if (courseId !== undefined)
+            url_ += "courseId=" + encodeURIComponent("" + courseId) + "&";
+        if (fileName === null)
+            throw new Error("The parameter 'fileName' cannot be null.");
+        else if (fileName !== undefined)
+            url_ += "fileName=" + encodeURIComponent("" + fileName) + "&";
+        if (contentType === null)
+            throw new Error("The parameter 'contentType' cannot be null.");
+        else if (contentType !== undefined)
+            url_ += "contentType=" + encodeURIComponent("" + contentType) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processAvatarPresignedUrl(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processAvatarPresignedUrl(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<AvatarUploadResponseResult>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<AvatarUploadResponseResult>;
+        }));
+    }
+
+    protected processAvatarPresignedUrl(response: HttpResponseBase): Observable<AvatarUploadResponseResult> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = AvatarUploadResponseResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ObjectResult.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result401 = ObjectResult.fromJS(resultData401);
+            return throwException("Unauthorized", status, _responseText, _headers, result401);
+            }));
+        } else if (status === 403) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result403: any = null;
+            let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result403 = ObjectResult.fromJS(resultData403);
+            return throwException("Forbidden", status, _responseText, _headers, result403);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ObjectResult.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
      * @param body (optional) 
      * @return OK
      */
@@ -3656,6 +3856,98 @@ export interface IAssignment {
     description?: string | undefined;
     multipleChoiceQuestions?: MultipleChoiceQuestion[] | undefined;
     fillInBlankQuestions?: FillInBlankQuestion[] | undefined;
+}
+
+export class AvatarUploadResponse implements IAvatarUploadResponse {
+    presignedUrl?: string | undefined;
+    objectKey?: string | undefined;
+
+    constructor(data?: IAvatarUploadResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.presignedUrl = _data["presignedUrl"];
+            this.objectKey = _data["objectKey"];
+        }
+    }
+
+    static fromJS(data: any): AvatarUploadResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new AvatarUploadResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["presignedUrl"] = this.presignedUrl;
+        data["objectKey"] = this.objectKey;
+        return data;
+    }
+}
+
+export interface IAvatarUploadResponse {
+    presignedUrl?: string | undefined;
+    objectKey?: string | undefined;
+}
+
+export class AvatarUploadResponseResult implements IAvatarUploadResponseResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: AvatarUploadResponse;
+
+    constructor(data?: IAvatarUploadResponseResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            this.data = _data["data"] ? AvatarUploadResponse.fromJS(_data["data"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): AvatarUploadResponseResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new AvatarUploadResponseResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IAvatarUploadResponseResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: AvatarUploadResponse;
 }
 
 export class ConfirmEmailRequest implements IConfirmEmailRequest {
@@ -5057,6 +5349,42 @@ export class UpdateAssignmentRequest implements IUpdateAssignmentRequest {
 export interface IUpdateAssignmentRequest {
     title?: string | undefined;
     description?: string | undefined;
+}
+
+export class UpdateAvatarRequest implements IUpdateAvatarRequest {
+    avatarObjectKey?: string | undefined;
+
+    constructor(data?: IUpdateAvatarRequest) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.avatarObjectKey = _data["avatarObjectKey"];
+        }
+    }
+
+    static fromJS(data: any): UpdateAvatarRequest {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateAvatarRequest();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["avatarObjectKey"] = this.avatarObjectKey;
+        return data;
+    }
+}
+
+export interface IUpdateAvatarRequest {
+    avatarObjectKey?: string | undefined;
 }
 
 export class UpdateCourseRequest implements IUpdateCourseRequest {
