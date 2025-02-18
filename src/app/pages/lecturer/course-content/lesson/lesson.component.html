@@ -60,3 +60,26 @@
     </nz-form-item>
   </form>
 </nz-modal>
+
+<nz-modal [(nzVisible)]="isAssignmentModalVisible" nzTitle="Tạo bài tập"
+  (nzOnOk)="handleAssignmentOk()" (nzOnCancel)="handleAssignmentCancel()">
+  <form nz-form nzLayout="vertical" *nzModalContent>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="title" nzRequired>
+        Tiêu đề bài tập
+      </nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="assignmentData.title" name="title" required />
+      </nz-form-control>
+    </nz-form-item>
+    
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="description" nzRequired>
+        Mô tả bài tập
+      </nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <textarea nz-input [(ngModel)]="assignmentData.description" name="description" required></textarea>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>
