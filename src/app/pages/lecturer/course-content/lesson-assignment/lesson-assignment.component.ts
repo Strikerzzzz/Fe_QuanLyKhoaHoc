@@ -44,16 +44,6 @@ export class LessonAssignmentComponent implements OnInit {
   fillInBlankQuestions: any[] = [];
   totalQuestions: number = 0;
 
-  // Biến trang cho tab Trắc nghiệm
-  mcPageIndex = 1;
-  mcPageSize = 5; // tuỳ bạn muốn
-  mcDisplayedQuestions: any[] = [];
-
-  // Biến trang cho tab Điền
-  fibPageIndex = 1;
-  fibPageSize = 5;
-  fibDisplayedQuestions: any[] = [];
-
   isQuestionModalVisible: boolean = false;
   isEditingQuestion: boolean = false;
   questionData: any = {};
@@ -78,27 +68,26 @@ export class LessonAssignmentComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private modalService: NzModalService
-  ) { }
+  ) {
+    this.route.parent?.paramMap.subscribe(params => {
+      this.courseId = Number(params.get('courseId'));
+    });
+   }
 
   ngOnInit(): void {
-    this.updateMCDisplayedQuestions();
-    this.updateFIBDisplayedQuestions();
     this.lessonId = Number(this.route.snapshot.paramMap.get('lessonId'));
 
     if (!this.lessonId) {
-      console.error('lessonId bị undefined hoặc không hợp lệ!');
       this.message.error('Lỗi: lessonId không hợp lệ!');
       return;
     }
     this.loadAssignment();
-    // Gọi API để lấy thông tin assignment dựa trên lessonId
     this.client.lesson(this.lessonId).subscribe(
       res => {
         if (res.data) {
           this.assignmentId = res.data.assignmentId;
           this.assignmentTitle = res.data.title;
           this.assignmentDescription = res.data.description;
-          // Kiểm tra lại assignmentId trước khi gọi loadQuestions
           if (this.assignmentId !== undefined && this.assignmentId !== null) {
             this.loadQuestions();
           } else {
@@ -154,9 +143,6 @@ export class LessonAssignmentComponent implements OnInit {
               correctAnswer: correctAnswerText // Lấy đáp án đúng
             };
           });
-           // Cập nhật dữ liệu phân trang cho tab Trắc nghiệm
-        this.mcPageIndex = 1; // có thể reset trang nếu cần
-        this.updateMCDisplayedQuestions();
         }
       },
     );
@@ -165,13 +151,10 @@ export class LessonAssignmentComponent implements OnInit {
         if (res.data && Array.isArray(res.data)) {
           this.fillInBlankQuestions = res.data.map(q => ({
             ...q,
-            choices: null, // Không có choices
-            correctAnswerIndex: null, // Không có index
-            correctAnswer: q.correctAnswer // Đáp án đúng
+            choices: null, 
+            correctAnswerIndex: null, 
+            correctAnswer: q.correctAnswer 
           }));
-          // Cập nhật dữ liệu phân trang cho tab Điền vào chỗ trống
-        this.fibPageIndex = 1;
-        this.updateFIBDisplayedQuestions();
         }
       }
     );
@@ -179,8 +162,8 @@ export class LessonAssignmentComponent implements OnInit {
   }
 
   getAnswerLabel(index: number): string {
-    const labels = ["A", "B", "C", "D", "E"]; // Có thể mở rộng nếu cần
-    return labels[index] || String.fromCharCode(65 + index); // Tránh lỗi nếu có nhiều đáp án
+    const labels = ["A", "B", "C", "D", "E"]; 
+    return labels[index] || String.fromCharCode(65 + index);
   }
 
   fixChoices(choices: any): any {
@@ -201,7 +184,7 @@ export class LessonAssignmentComponent implements OnInit {
     if (!this.questionData.answers) {
       this.questionData.answers = [];
     }
-    this.questionData.answers.push(''); // Thêm một ô nhập mới
+    this.questionData.answers.push(''); 
   }
 
   // Xóa đáp án theo chỉ mục
@@ -217,28 +200,6 @@ export class LessonAssignmentComponent implements OnInit {
   trackByIndex(index: number, item: any): number {
     return index;
   }
-
-  // Xử lý phân trang
-  onMCPageChange(pageIndex: number): void {
-    this.mcPageIndex = pageIndex;
-    this.updateMCDisplayedQuestions();
-  }
-// ====== Tab Trắc nghiệm ======
-updateMCDisplayedQuestions(): void {
-  const startIndex = (this.mcPageIndex - 1) * this.mcPageSize;
-  this.mcDisplayedQuestions = this.multipleChoiceQuestions.slice(startIndex, startIndex + this.mcPageSize);
-}
- // ====== Tab Điền vào chỗ trống ======
- updateFIBDisplayedQuestions(): void {
-  const startIndex = (this.fibPageIndex - 1) * this.fibPageSize;
-  this.fibDisplayedQuestions = this.fillInBlankQuestions.slice(startIndex, startIndex + this.fibPageSize);
-}
-
-onFIBPageChange(pageIndex: number): void {
-  this.fibPageIndex = pageIndex;
-  this.updateFIBDisplayedQuestions();
-}
-
 
   openMCQuestionModal(): void {
     this.isEditingQuestion = false;
@@ -290,8 +251,6 @@ onFIBPageChange(pageIndex: number): void {
   addFIBQuestion(): void {
     this.questionData.assignmentId = this.assignmentId;
     this.questionData.type = QuestionType._2;
-
-    // Kiểm tra nếu `correctAnswer` là null, undefined hoặc chuỗi rỗng
     if (!this.questionData.correctAnswer || this.questionData.correctAnswer.trim() === "") {
       this.message.error("Đáp án đúng không được để trống!");
       return;
@@ -304,7 +263,6 @@ onFIBPageChange(pageIndex: number): void {
         this.loadQuestions();
       },
       err => {
-        console.error("❌ Lỗi khi thêm câu hỏi điền từ:", err);
         this.message.error("Lỗi khi thêm câu hỏi điền từ!");
       }
     );
@@ -334,7 +292,6 @@ onFIBPageChange(pageIndex: number): void {
       correctAnswer: question.correctAnswer
     };
     this.isFillBlankModalVisible = true;
-    console.log("Đang sửa câu hỏi điền từ:", this.questionData);
   }
   
 
@@ -372,7 +329,7 @@ onFIBPageChange(pageIndex: number): void {
 
     this.isQuestionModalVisible = false;
     this.isEditMode = false;
-    this.editingQuestion = null; // Reset lại sau khi sửa xong
+    this.editingQuestion = null;
   }
 
 
@@ -421,13 +378,11 @@ onFIBPageChange(pageIndex: number): void {
     this.client.questionsDELETE(question.id).subscribe(
       () => {
         this.message.success('Xóa câu hỏi thành công!');
-        // Xóa trực tiếp khỏi danh sách để cập nhật UI ngay lập tức
         this.multipleChoiceQuestions = this.multipleChoiceQuestions.filter(q => q.id !== question.id);
 
         this.loadQuestions();
       },
       err => {
-        console.error('Lỗi khi xóa câu hỏi:', err);
         this.message.error('Lỗi khi xóa câu hỏi!');
       }
     );
@@ -438,18 +393,16 @@ onFIBPageChange(pageIndex: number): void {
     this.client.questionsDELETE(question.id).subscribe(
       () => {
         this.message.success('Xóa câu hỏi thành công!');
-        // Xóa trực tiếp khỏi danh sách để cập nhật UI ngay lập tức
         this.fillInBlankQuestions = this.fillInBlankQuestions.filter(q => q.id !== question.id);
         this.loadQuestions();
       },
       err => {
-        console.error('Lỗi khi xóa câu hỏi:', err);
         this.message.error('Lỗi khi xóa câu hỏi!');
       }
     );
   }
 
-// 🔹 Mở modal chỉnh sửa bài tập
+// Mở modal chỉnh sửa bài tập
 editAssignment(): void {
   this.editAssignmentData = {
     title: this.assignmentTitle,
@@ -457,7 +410,7 @@ editAssignment(): void {
   };
   this.isEditModalVisible = true;
 }
-// 🔹 Tải thông tin bài tập từ API
+//Tải thông tin bài tập từ API
 loadAssignment(): void {
   this.client.lesson(this.lessonId).subscribe(
     res => {
@@ -474,7 +427,7 @@ loadAssignment(): void {
     }
   );
 }
- // 🔹 Lưu chỉnh sửa bài tập
+ // Lưu chỉnh sửa bài tập
  handleEditOk(): void {
   if (!this.assignmentId) {
     this.message.error("Không tìm thấy bài tập!");
@@ -498,7 +451,6 @@ loadAssignment(): void {
   this.isEditModalVisible = false;
 }
 
-// 🔹 Xóa bài tập
 deleteAssignment(): void {
   if (!this.assignmentId) {
     this.message.error("Không tìm thấy bài tập!");
@@ -511,10 +463,51 @@ deleteAssignment(): void {
       this.assignmentId = 0;
       this.assignmentTitle = "";
       this.assignmentDescription = "";
+
+      // Điều hướng về trang bài học
+      this.router.navigate([`/lecturer/courses-content/${this.courseId}/lesson`]);
     },
     err => {
-      this.message.error("Lỗi khi xóa bài tập!");
+      console.error("Lỗi khi xóa bài tập:", err);
+      this.message.error("Lỗi khi xóa bài tập!"); 
     }
   );
 }
+/*deleteAssignment(): void {
+  if (!this.assignmentId) {
+    this.message.error("Không tìm thấy bài tập!");
+    return;
+  }
+
+  // Gọi API xóa tất cả câu hỏi trước
+  this.client.questionsDELETE(this.assignmentId).subscribe(
+    () => {
+      console.log("Đã xóa toàn bộ câu hỏi liên quan đến bài tập:", this.assignmentId);
+
+      // Sau khi xóa câu hỏi, tiếp tục xóa bài tập
+      this.client.assignmentsDELETE(this.assignmentId).subscribe(
+        () => {
+          this.message.success("Xóa bài tập thành công!");
+          this.assignmentId = 0;
+          this.assignmentTitle = "";
+          this.assignmentDescription = "";
+
+          // Điều hướng về trang bài học sau khi xóa thành công
+          this.router.navigate([`/lecturer/courses-content/${this.courseId}/lesson`]);
+        },
+        (err) => {
+          console.error("Lỗi khi xóa bài tập:", err);
+          this.message.error("Lỗi khi xóa bài tập, vui lòng thử lại!");
+        }
+      );
+    },
+    (err) => {
+      console.error("Lỗi khi xóa câu hỏi của bài tập:", err);
+      this.message.error("Lỗi khi xóa câu hỏi của bài tập, vui lòng thử lại!");
+    }
+  );
+}*/
+
+
+
 }

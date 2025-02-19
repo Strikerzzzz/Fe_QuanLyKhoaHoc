@@ -28,8 +28,8 @@ nz-modal .ant-modal-content {
 button[nz-button] {
   padding: 6px 12px;
   font-size: 14px;
-  border-radius: 4px;
   transition: all 0.3s ease-in-out;
+  
 }
 
 button[nz-button][nzType="default"] {
@@ -41,10 +41,50 @@ button[nz-button][nzType="default"] {
 button[nz-button][nzType="primary"][nzDanger] {
   background-color: #ff4d4f;
   color: white;
-  border: none;
+  border-top: 10px;
 }
 
 button[nz-button][nzType="primary"][nzDanger]:hover {
+  background-color: #d9363e;
+}
+button[nz-button][nzType="dashed"] {
+  background-color: #1890ff; /* Màu xanh giống nút OK */
+  color: white;
+  border: none;
+}
+
+button[nz-button][nzType="dashed"]:hover {
+  background-color: #40a9ff;
+}
+
+button[nz-button][nzDanger] {
+  background-color: #ff4d4f; /* Màu đỏ giống nút Xóa */
+  color: white;
+  border: none;
+  padding: 6px 12px;
+}
+ul {
+  padding: 0; /* Xóa padding mặc định của danh sách */
+  list-style: none; /* Xóa dấu chấm trước mỗi đáp án */
+}
+
+ul li {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Tạo khoảng cách giữa input và nút Xóa */
+  margin-bottom: 8px; /* Thêm khoảng cách giữa các dòng */
+}
+
+ul li input {
+  flex: 1; /* Giúp input mở rộng tối đa trong không gian */
+}
+
+ul li button {
+  min-width: 60px; /* Đảm bảo nút "Xóa" không bị thu nhỏ quá */
+}
+
+
+button[nz-button][nzDanger]:hover {
   background-color: #d9363e;
 }
 

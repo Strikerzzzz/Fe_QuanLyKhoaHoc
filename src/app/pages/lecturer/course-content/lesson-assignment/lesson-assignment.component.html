@@ -1,8 +1,4 @@
-<!-- <div class="assignment-header">
-  <h2 class="assignment-title">{{ assignmentTitle }}</h2>
-  <p class="assignment-description">{{ assignmentDescription }}</p>
-</div>-->
-<nz-table #assignmentTable [nzData]="[{ title: assignmentTitle, description: assignmentDescription }]" [nzBordered]="true" [nzShowPagination]="false">
+<nz-table [nzData]="[{ title: assignmentTitle, description: assignmentDescription }]" [nzBordered]="true" [nzShowPagination]="false">
   <thead>
     <tr>
       <th>Tiêu đề</th>
@@ -29,7 +25,7 @@
 <nz-tabset>
   <!-- Tab Trắc nghiệm -->
   <nz-tab nzTitle="Trắc nghiệm">
-    <nz-table [nzData]="mcDisplayedQuestions" [nzBordered]="true" [nzShowPagination]="false">
+    <nz-table [nzData]="multipleChoiceQuestions" [nzBordered]="true" [nzShowPagination]="false">
       <thead>
         <tr>
           <th>STT</th>
@@ -40,7 +36,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let question of mcDisplayedQuestions; let i = index">
+        <tr *ngFor="let question of multipleChoiceQuestions; let i = index">
           <td>{{ i + 1 }}</td>
           <td>{{ question.content }}</td>
           <td>
@@ -52,7 +48,6 @@
             <ng-template #noAnswers>Không có đáp án</ng-template>
           </td>
           <td>
-            <!-- Lấy đáp án từ chỉ mục correctAnswerIndex -->
             {{ question.choices[question.correctAnswerIndex] || 'Chưa có đáp án đúng' }}
           </td>
 
@@ -66,28 +61,18 @@
         </tr>
       </tbody>
     </nz-table>
-     <!--<button nz-button nzType="primary" (click)="openMCQuestionModal()">Thêm câu hỏi trắc nghiệm</button>
-    Hàng chứa nút thêm và pagination -->
     <div class="action-row">
       <div class="action-add">
         <button nz-button nzType="primary" nzSize="large" (click)="openMCQuestionModal()">
           <i nz-icon nzType="plus" nzTheme="outline"></i> Thêm câu hỏi trắc nghiệm
         </button>
       </div>
-      <div class="action-pagination">
-        <nz-pagination
-          [(nzPageIndex)]="mcPageIndex"
-          [nzPageSize]="mcPageSize"
-          [nzTotal]="multipleChoiceQuestions.length"
-          (nzPageIndexChange)="onMCPageChange($event)">
-        </nz-pagination>
-      </div>
     </div>
   </nz-tab>
 
   <!-- Tab Điền vào chỗ trống -->
   <nz-tab nzTitle="Điền vào chỗ trống">
-    <nz-table [nzData]="fibDisplayedQuestions" [nzBordered]="true" [nzShowPagination]="false">
+    <nz-table [nzData]="fillInBlankQuestions" [nzBordered]="true" [nzShowPagination]="false">
       <thead>
         <tr>
           <th>STT</th>
@@ -97,7 +82,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let question of fibDisplayedQuestions; let i = index">
+        <tr *ngFor="let question of fillInBlankQuestions; let i = index">
           <td>{{ i + 1 }}</td>
           <td>{{ question.content }}</td>
           <td>{{ question.correctAnswer }}</td>
@@ -111,21 +96,11 @@
         </tr>
       </tbody>
     </nz-table>
-    <!--<button nz-button nzType="primary" (click)="openFIBQuestionModal()">Thêm câu hỏi điền</button>
-     Hàng chứa nút thêm và pagination -->
     <div class="action-row">
       <div class="action-add">
         <button nz-button nzType="primary" nzSize="large" (click)="openFIBQuestionModal()">
           <i nz-icon nzType="plus" nzTheme="outline"></i> Thêm câu hỏi điền từ
         </button>
-      </div>
-      <div class="action-pagination">
-        <nz-pagination
-          [(nzPageIndex)]="fibPageIndex"
-          [nzPageSize]="fibPageSize"
-          [nzTotal]="fillInBlankQuestions.length"
-          (nzPageIndexChange)="onFIBPageChange($event)">
-        </nz-pagination>
       </div>
     </div>
   </nz-tab>
@@ -151,7 +126,7 @@
         <ul>
           <li *ngFor="let answer of questionData.answers; let i = index; trackBy: trackByIndex">
             <input nz-input [(ngModel)]="questionData.answers[i]" name="answer{{i}}" required />
-            <button nz-button nzDanger (click)="removeAnswer(i)" type="button">Xóa</button>
+            <button nz-button nzType="primary" nzDanger (click)="removeAnswer(i)" type="button">Xóa</button>
           </li>
         </ul>
         <button nz-button nzType="dashed" (click)="addAnswer()" type="button">Thêm đáp án</button>

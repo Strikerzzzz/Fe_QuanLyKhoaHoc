@@ -9,7 +9,7 @@
                         <a [routerLink]="['lesson']" routerLinkActive="active">Bài học</a>
                     </li>
                     <li nz-menu-item nzMatchRouter>
-                        <a [routerLink]="['exam']" routerLinkActive="active">Kiểm tra</a>
+                        <a (click)="goToExam(courseId)">Kiểm tra</a>
                     </li>
                 </ul>
             </li>
@@ -42,3 +42,25 @@
         </nz-content>
     </nz-layout>
 </nz-layout>
+<nz-modal [(nzVisible)]="isAssignmentModalVisible" nzTitle="Tạo bài tập"
+  (nzOnOk)="handleExamtOk()" (nzOnCancel)="handleExamCancel()">
+  <form nz-form nzLayout="vertical" *nzModalContent>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="title" nzRequired>
+        Tiêu đề bài kiểm tra
+      </nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="exemData.title" name="title" required />
+      </nz-form-control>
+    </nz-form-item>
+    
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="description" nzRequired>
+        Mô tả bài kiểm tra
+      </nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <textarea nz-input [(ngModel)]="exemData.description" name="description" required></textarea>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>

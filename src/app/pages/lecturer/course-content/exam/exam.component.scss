@@ -1,22 +1,131 @@
 .exam-header {
-    background-color: #fff;              
-    padding: 20px;                 
-    border-radius: 4px;             
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); 
-    margin-bottom: 20px;           
-    font-size: 18px;
-    font-weight: bold;
-    text-align: center;
-  }
-  
-  .exam-title {
-    font-size: 24px;
-    font-weight: bold;
-    margin: 0 0 10px 0;             
-  }
-  
-  .course-info {
-    margin: 0;
-    font-weight: bold;
-  }
-  
+  background-color: #fff;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.exam-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0 0 10px 0;
+}
+
+.course-info {
+  margin: 0;
+  font-weight: bold;
+}
+
+.nz-table {
+  margin-top: 20px; 
+}
+
+button {
+  margin: 5px; 
+}
+
+.nz-table td button {
+  margin-right: 10px;
+}
+
+.nz-button {
+  font-size: 14px;
+  padding: 6px 12px;
+}
+
+button.nz-button.default {
+  background-color: #f0f0f0;
+  border-color: #d9d9d9;
+}
+
+button.nz-button.primary {
+  background-color: #1890ff;
+  border-color: #1890ff;
+  color: #fff;
+}
+/* Button thêm đáp án căn thẳng lề trái với input */
+.answer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Căn thẳng lề trái */
+  gap: 10px;
+}
+
+button.nz-button.danger {
+  background-color: #ff4d4f;
+  border-color: #ff4d4f;
+  color: #fff;
+  padding: 6px 12px;
+}
+
+.nz-button.dashed {
+  background-color: #f0f0f0;
+  border-color: #d9d9d9;
+  color: #1890ff;
+  font-size: 14px;
+}
+
+.nz-button.dashed:hover {
+  background-color: #e6f7ff;
+}
+
+.action-row {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.action-add {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.action-add button {
+  font-size: 16px;
+  padding: 8px 16px;
+}
+
+ul {
+  padding: 0;
+  list-style: none; 
+}
+
+ul li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+ul li input {
+  flex: 1; 
+}
+
+ul li button {
+  min-width: 60px;
+}
+
+/* Button thêm */
+button[nz-button][nzType="dashed"] {
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+button[nz-button][nzType="dashed"]:hover {
+  background-color: #40a9ff;
+}
+
+/* Button Xóa */
+button[nz-button][nzDanger] {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+}

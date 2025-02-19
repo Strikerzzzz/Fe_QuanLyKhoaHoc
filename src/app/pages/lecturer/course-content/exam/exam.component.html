@@ -1,75 +1,199 @@
-<!-- Header hiển thị thông tin bài kiểm tra và khóa học -->
-<div class="exam-header">
-    <h2 class="exam-title">{{ examTitle }}</h2>
-    <p class="exam-description">{{ examDescription }}</p>
-  </div>
-  
-  <!-- Tab phân loại câu hỏi -->
-  <nz-tabset>
-    <nz-tab nzTitle="Trắc nghiệm">
-      <nz-table #mcTable [nzData]="multipleChoiceQuestions" [nzBordered]="true" [nzSize]="'middle'" [nzShowPagination]="false">
-        <thead>
-          <tr>
-            <th>STT</th>
-            <th>Nội dung câu hỏi</th>
-            <th>Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let question of multipleChoiceQuestions; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ question.content }}</td>
-            <td>
-              <button nz-button nzType="default" (click)="editMCQuestion(question)">Sửa</button>
-              <button nz-button nzType="primary" nzDanger (click)="deleteMCQuestion(question)">Xóa</button>
-            </td>
-          </tr>
-        </tbody>
-      </nz-table>
-      <button nz-button nzType="primary" (click)="openMCQuestionModal()">Thêm câu hỏi trắc nghiệm</button>
-    </nz-tab>
-    <nz-tab nzTitle="Điền vào chỗ trống">
-      <nz-table #fibTable [nzData]="fillInBlankQuestions" [nzBordered]="true" [nzSize]="'middle'" [nzShowPagination]="false">
-        <thead>
-          <tr>
-            <th>STT</th>
-            <th>Nội dung câu hỏi</th>
-            <th>Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let question of fillInBlankQuestions; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ question.content }}</td>
-            <td>
-              <button nz-button nzType="default" (click)="editFIBQuestion(question)">Sửa</button>
-              <button nz-button nzType="primary" nzDanger>Xóa</button>
-            </td>
-          </tr>
-        </tbody>
-      </nz-table>
-      <button nz-button nzType="primary" (click)="openFIBQuestionModal()">Thêm câu hỏi điền</button>
-    </nz-tab>
-  </nz-tabset>
-  
-  <!-- Phân trang nếu cần -->
-  <nz-pagination [(nzPageIndex)]="currentPage" [nzPageSize]="pageSize" [nzTotal]="totalQuestions" (nzPageIndexChange)="onPageChange($event)"></nz-pagination>
-  
-  <!-- Modal cho thêm/sửa câu hỏi (ví dụ cho câu hỏi trắc nghiệm, tương tự cho điền vào chỗ trống) -->
-  <nz-modal [(nzVisible)]="isQuestionModalVisible"
-            [nzTitle]="isEditingQuestion ? 'Sửa câu hỏi' : 'Thêm câu hỏi'"
-            (nzOnCancel)="handleCancel()"
-  (nzOnOk)="handleOk()">
-    <form nz-form nzLayout="horizontal" *nzModalContent>
-      <nz-form-item>
-        <nz-form-label [nzSpan]="6" nzFor="content" nzRequired>
-          Nội dung câu hỏi
-        </nz-form-label>
-        <nz-form-control [nzSpan]="14">
-          <input nz-input id="content" [(ngModel)]="questionData.content" name="content" required />
-        </nz-form-control>
-      </nz-form-item>
-      <!-- Các trường khác tùy loại câu hỏi -->
-    </form>
-  </nz-modal>
-  
+<nz-table [nzData]="[{ title: examTitle, description: examDescription }]" [nzBordered]="true"
+  [nzShowPagination]="false">
+  <thead>
+    <tr>
+      <th>Tiêu đề</th>
+      <th>Mô tả</th>
+      <th>Hành động</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ examTitle }}</td>
+      <td>{{ examDescription }}</td>
+      <td>
+        <button nz-button nzType="default" (click)="editExam()">
+          <i nz-icon nzType="edit" nzTheme="outline"></i> Sửa
+        </button>
+        <button nz-button nzType="primary" nzDanger nz-popconfirm nzPopconfirmTitle="Bạn có chắc chắn xóa?"
+          (nzOnConfirm)="deleteExam()">
+          <i nz-icon nzType="delete" nzTheme="outline"></i> Xóa
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</nz-table>
+<nz-tabset>
+  <!-- Tab Trắc nghiệm -->
+  <nz-tab nzTitle="Trắc nghiệm">
+    <nz-table [nzData]="multipleChoiceQuestions" [nzBordered]="true" [nzShowPagination]="false">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Nội dung câu hỏi bài kiểm tra</th>
+          <th>Các đáp án</th>
+          <th>Đáp án đúng</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let question of multipleChoiceQuestions; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ question.content }}</td>
+          <td>
+            <ul *ngIf="question.choices && question.choices.length > 0; else noAnswers">
+              <li *ngFor="let answer of question.choices; let j = index">
+                {{ getAnswerLabel(j) }}. {{ answer }}
+              </li>
+            </ul>
+            <ng-template #noAnswers>Không có đáp án</ng-template>
+          </td>
+          <td>
+            <!-- Lấy đáp án từ chỉ mục correctAnswerIndex -->
+            {{ question.choices[question.correctAnswerIndex] || 'Chưa có đáp án đúng' }}
+          </td>
+
+          <td>
+            <button nz-button nzType="default" (click)="editMCQuestion(question)">Sửa</button>
+            <button nz-button nzType="primary" nzDanger nz-popconfirm nzPopconfirmTitle="Bạn có chắc chắn xóa?"
+              (nzOnConfirm)="deleteMCQuestion(question)">
+              <i nz-icon nzType="delete" nzTheme="outline"></i> Xóa
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+    <div class="action-row">
+      <div class="action-add">
+        <button nz-button nzType="primary" nzSize="large" (click)="openMCQuestionModal()">
+          <i nz-icon nzType="plus" nzTheme="outline"></i> Thêm câu hỏi trắc nghiệm
+        </button>
+      </div>
+    </div>
+  </nz-tab>
+
+  <!-- Tab Điền vào chỗ trống -->
+  <nz-tab nzTitle="Điền vào chỗ trống">
+    <nz-table [nzData]="fillInBlankQuestions" [nzBordered]="true" [nzShowPagination]="false">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Nội dung câu hỏi</th>
+          <th>Đáp án đúng</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let question of fillInBlankQuestions; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ question.content }}</td>
+          <td>{{ question.correctAnswer }}</td>
+          <td>
+            <button nz-button nzType="default" (click)="editFIBQuestion(question)">Sửa</button>
+            <button nz-button nzType="primary" nzDanger nz-popconfirm nzPopconfirmTitle="Bạn có chắc chắn xóa?"
+              (nzOnConfirm)="deleteFIBQuestion(question)">
+              <i nz-icon nzType="delete" nzTheme="outline"></i> Xóa
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+    <!--<button nz-button nzType="primary" (click)="openFIBQuestionModal()">Thêm câu hỏi điền</button>
+       Hàng chứa nút thêm và pagination -->
+    <div class="action-row">
+      <div class="action-add">
+        <button nz-button nzType="primary" nzSize="large" (click)="openFIBQuestionModal()">
+          <i nz-icon nzType="plus" nzTheme="outline"></i> Thêm câu hỏi điền từ
+        </button>
+      </div>
+    </div>
+  </nz-tab>
+</nz-tabset>
+<!-- Modal dùng chung cho thêm & sửa câu hỏi trắc nghiệm -->
+<nz-modal [(nzVisible)]="isQuestionModalVisible" [nzTitle]="isEditMode ? 'Sửa câu hỏi' : 'Thêm câu hỏi'"
+  (nzOnOk)="isEditMode ? handleEditQuestionOk() : handleQuestionOk()" (nzOnCancel)="handleCancel()">
+  <form nz-form nzLayout="vertical" *nzModalContent>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="questionContent" nzRequired>
+        Nội dung câu hỏi
+      </nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="questionData.content" name="questionContent" required />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="answers" nzRequired>
+        Danh sách đáp án
+      </nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <ul>
+          <li *ngFor="let answer of questionData.answers; let i = index; trackBy: trackByIndex">
+            <input nz-input [(ngModel)]="questionData.answers[i]" name="answer{{i}}" required />
+            <button nz-button nzDanger (click)="removeAnswer(i)" type="button">Xóa</button>
+          </li>
+        </ul>
+        <button nz-button nzType="dashed" (click)="addAnswer()" type="button">Thêm đáp án</button>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="correctAnswer">
+        Chọn đáp án đúng
+      </nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <nz-select [(ngModel)]="questionData.correctIndex" name="correctAnswer">
+          <nz-option *ngFor="let answer of questionData.answers; let i = index" [nzValue]="i"
+            [nzLabel]="answer"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>
+
+<!-- Modal thêm câu hỏi điền từ -->
+<nz-modal [(nzVisible)]="isFillBlankModalVisible" nzTitle="Thêm câu hỏi điền từ" (nzOnOk)="handleFillBlankOk()"
+  (nzOnCancel)="handleCancel()">
+  <form nz-form nzLayout="vertical" *nzModalContent>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="fillBlankContent" nzRequired>
+        Nội dung câu hỏi
+      </nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="questionData.content" name="fillBlankContent" required />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="correctFillAnswer" nzRequired>
+        Đáp án đúng
+      </nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="questionData.correctAnswer" name="correctFillAnswer" required />
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>
+
+<!-- Modal sửa bài tập -->
+<nz-modal [(nzVisible)]="isEditModalVisible" nzTitle="Sửa bài kiểm tra" (nzOnOk)="handleEditOk()"
+  (nzOnCancel)="handleEditCancel()">
+  <form nz-form nzLayout="vertical" *nzModalContent>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="editTitle" nzRequired>
+        Tiêu đề bài tập
+      </nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input [(ngModel)]="editExamData.title" name="editTitle" required />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="editDescription" nzRequired>
+        Mô tả bài tập
+      </nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <textarea nz-input [(ngModel)]="editExamData.description" name="editDescription" required></textarea>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>
