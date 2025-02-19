@@ -1,1 +1,33 @@
-<p>learning works!</p>
+<div class="course-container">
+    <!-- Header sử dụng nz-page-header -->
+    <nz-page-header nzTitle="Danh sách khóa học"></nz-page-header>
+
+    <!-- Hiển thị loading -->
+    <div *ngIf="loading" class="loading-container">
+        <nz-spin></nz-spin>
+    </div>
+
+    <!-- Hiển thị thông báo lỗi -->
+    <div *ngIf="error" class="error-container">
+        <nz-alert nzType="error" [nzMessage]="error"></nz-alert>
+    </div>
+    <nz-row *ngIf="!loading && !error" [nzGutter]="[24, 32]" class="courses-row">
+        <nz-col *ngFor="let course of courses" [nzSpan]="6" [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+            <nz-card class="course-card" [nzHoverable]="true" [nzCover]="coverTemplate">
+                <ng-template #coverTemplate>
+                    <img [src]="course.avatarUrl" alt="{{ course.title }}" class="course-image" />
+                </ng-template>
+                <nz-card-meta [nzTitle]="course.title"></nz-card-meta>
+                <div class="course-details">
+                    <p class="course-price">
+                        {{ course.price === null || course.price === 0 ? 'Miễn Phí' : (course.price |
+                        currency:'VND':'symbol':'1.0-0':'vi-VN') }}
+                    </p>
+                    <p class="course-difficulty">
+                        <strong>Độ khó:</strong> {{ course.difficulty || 'Không xác định' }}
+                    </p>
+                </div>
+            </nz-card>
+        </nz-col>
+    </nz-row>
+</div>

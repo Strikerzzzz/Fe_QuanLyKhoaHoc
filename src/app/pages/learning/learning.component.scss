@@ -1,0 +1,65 @@
+.course-container {
+  max-width: 1200px;
+  /* Giới hạn chiều rộng container */
+  margin: 0 auto;
+  /* Căn giữa container */
+  padding: 24px 20px;
+  /* Padding cho container */
+  background: #f0f2f5;
+  min-height: 100vh;
+}
+
+.loading-container,
+.error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+/* Lớp courses-row dùng cho toàn bộ grid */
+.courses-row {
+  margin-top: 24px;
+}
+
+.course-card {
+  border-radius: 12px;
+  /* Bo góc mềm mại */
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* Shadow ban đầu */
+}
+
+.course-card:hover {
+  transform: translateY(-8px);
+  /* Nâng lên nhẹ khi hover */
+  box-shadow: 0 12px 18px rgba(0, 0, 0, 0.2);
+  /* Shadow mạnh hơn tạo hiệu ứng 3D */
+}
+
+.course-image {
+  width: 100%;
+  height: 150px;
+  /* Chiều cao hình ảnh nhỏ gọn */
+  object-fit: cover;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.course-details {
+  padding: 12px;
+  /* Padding bên trong cho nội dung */
+}
+
+.course-price {
+  font-size: 15px;
+  font-weight: bold;
+  color: #1890ff;
+}
+
+.course-difficulty {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+  margin: 0;
+}

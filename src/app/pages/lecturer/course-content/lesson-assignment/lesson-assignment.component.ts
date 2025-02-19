@@ -13,7 +13,6 @@ import { RouterModule, Router } from '@angular/router';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { QuestionType } from '../../../../shared/api-client';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzModalService } from 'ng-zorro-antd/modal';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 
 @Component({
@@ -66,13 +65,12 @@ export class LessonAssignmentComponent implements OnInit {
     private client: Client,
     private message: NzMessageService,
     private route: ActivatedRoute,
-    private router: Router,
-    private modalService: NzModalService
+    private router: Router
   ) {
     this.route.parent?.paramMap.subscribe(params => {
       this.courseId = Number(params.get('courseId'));
     });
-   }
+  }
 
   ngOnInit(): void {
     this.lessonId = Number(this.route.snapshot.paramMap.get('lessonId'));
@@ -151,9 +149,9 @@ export class LessonAssignmentComponent implements OnInit {
         if (res.data && Array.isArray(res.data)) {
           this.fillInBlankQuestions = res.data.map(q => ({
             ...q,
-            choices: null, 
-            correctAnswerIndex: null, 
-            correctAnswer: q.correctAnswer 
+            choices: null,
+            correctAnswerIndex: null,
+            correctAnswer: q.correctAnswer
           }));
         }
       }
@@ -162,7 +160,7 @@ export class LessonAssignmentComponent implements OnInit {
   }
 
   getAnswerLabel(index: number): string {
-    const labels = ["A", "B", "C", "D", "E"]; 
+    const labels = ["A", "B", "C", "D", "E"];
     return labels[index] || String.fromCharCode(65 + index);
   }
 
@@ -184,7 +182,7 @@ export class LessonAssignmentComponent implements OnInit {
     if (!this.questionData.answers) {
       this.questionData.answers = [];
     }
-    this.questionData.answers.push(''); 
+    this.questionData.answers.push('');
   }
 
   // Xóa đáp án theo chỉ mục
@@ -286,14 +284,14 @@ export class LessonAssignmentComponent implements OnInit {
   editFIBQuestion(question: any): void {
     this.isEditMode = true;
     this.isEditingQuestion = true;
-    this.questionData = { 
+    this.questionData = {
       id: question.id,
       content: question.content,
       correctAnswer: question.correctAnswer
     };
     this.isFillBlankModalVisible = true;
   }
-  
+
 
   updateMCQuestion(): void {
     if (!this.questionData.id) {
@@ -402,111 +400,111 @@ export class LessonAssignmentComponent implements OnInit {
     );
   }
 
-// Mở modal chỉnh sửa bài tập
-editAssignment(): void {
-  this.editAssignmentData = {
-    title: this.assignmentTitle,
-    description: this.assignmentDescription
-  };
-  this.isEditModalVisible = true;
-}
-//Tải thông tin bài tập từ API
-loadAssignment(): void {
-  this.client.lesson(this.lessonId).subscribe(
-    res => {
-      if (res.data) {
-        this.assignmentId = res.data.assignmentId;
-        this.assignmentTitle = res.data.title;
-        this.assignmentDescription = res.data.description;
-      } else {
-        this.message.error('Không tìm thấy bài tập!');
-      }
-    },
-    err => {
-      this.message.error('Lỗi khi tải bài tập!');
-    }
-  );
-}
- // Lưu chỉnh sửa bài tập
- handleEditOk(): void {
-  if (!this.assignmentId) {
-    this.message.error("Không tìm thấy bài tập!");
-    return;
+  // Mở modal chỉnh sửa bài tập
+  editAssignment(): void {
+    this.editAssignmentData = {
+      title: this.assignmentTitle,
+      description: this.assignmentDescription
+    };
+    this.isEditModalVisible = true;
   }
-
-  this.client.assignmentsPUT(this.assignmentId, this.editAssignmentData).subscribe(
-    () => {
-      this.message.success("Cập nhật bài tập thành công!");
-      this.assignmentTitle = this.editAssignmentData.title;
-      this.assignmentDescription = this.editAssignmentData.description;
-      this.isEditModalVisible = false;
-    },
-    err => {
-      this.message.error("Lỗi khi cập nhật bài tập!");
-    }
-  );
-}
- // 🔹 Đóng modal chỉnh sửa
- handleEditCancel(): void {
-  this.isEditModalVisible = false;
-}
-
-deleteAssignment(): void {
-  if (!this.assignmentId) {
-    this.message.error("Không tìm thấy bài tập!");
-    return;
-  }
-
-  this.client.assignmentsDELETE(this.assignmentId).subscribe(
-    () => {
-      this.message.success("Xóa bài tập thành công!");
-      this.assignmentId = 0;
-      this.assignmentTitle = "";
-      this.assignmentDescription = "";
-
-      // Điều hướng về trang bài học
-      this.router.navigate([`/lecturer/courses-content/${this.courseId}/lesson`]);
-    },
-    err => {
-      console.error("Lỗi khi xóa bài tập:", err);
-      this.message.error("Lỗi khi xóa bài tập!"); 
-    }
-  );
-}
-/*deleteAssignment(): void {
-  if (!this.assignmentId) {
-    this.message.error("Không tìm thấy bài tập!");
-    return;
-  }
-
-  // Gọi API xóa tất cả câu hỏi trước
-  this.client.questionsDELETE(this.assignmentId).subscribe(
-    () => {
-      console.log("Đã xóa toàn bộ câu hỏi liên quan đến bài tập:", this.assignmentId);
-
-      // Sau khi xóa câu hỏi, tiếp tục xóa bài tập
-      this.client.assignmentsDELETE(this.assignmentId).subscribe(
-        () => {
-          this.message.success("Xóa bài tập thành công!");
-          this.assignmentId = 0;
-          this.assignmentTitle = "";
-          this.assignmentDescription = "";
-
-          // Điều hướng về trang bài học sau khi xóa thành công
-          this.router.navigate([`/lecturer/courses-content/${this.courseId}/lesson`]);
-        },
-        (err) => {
-          console.error("Lỗi khi xóa bài tập:", err);
-          this.message.error("Lỗi khi xóa bài tập, vui lòng thử lại!");
+  //Tải thông tin bài tập từ API
+  loadAssignment(): void {
+    this.client.lesson(this.lessonId).subscribe(
+      res => {
+        if (res.data) {
+          this.assignmentId = res.data.assignmentId;
+          this.assignmentTitle = res.data.title;
+          this.assignmentDescription = res.data.description;
+        } else {
+          this.message.error('Không tìm thấy bài tập!');
         }
-      );
-    },
-    (err) => {
-      console.error("Lỗi khi xóa câu hỏi của bài tập:", err);
-      this.message.error("Lỗi khi xóa câu hỏi của bài tập, vui lòng thử lại!");
+      },
+      err => {
+        this.message.error('Lỗi khi tải bài tập!');
+      }
+    );
+  }
+  // Lưu chỉnh sửa bài tập
+  handleEditOk(): void {
+    if (!this.assignmentId) {
+      this.message.error("Không tìm thấy bài tập!");
+      return;
     }
-  );
-}*/
+
+    this.client.assignmentsPUT(this.assignmentId, this.editAssignmentData).subscribe(
+      () => {
+        this.message.success("Cập nhật bài tập thành công!");
+        this.assignmentTitle = this.editAssignmentData.title;
+        this.assignmentDescription = this.editAssignmentData.description;
+        this.isEditModalVisible = false;
+      },
+      err => {
+        this.message.error("Lỗi khi cập nhật bài tập!");
+      }
+    );
+  }
+  // 🔹 Đóng modal chỉnh sửa
+  handleEditCancel(): void {
+    this.isEditModalVisible = false;
+  }
+
+  deleteAssignment(): void {
+    if (!this.assignmentId) {
+      this.message.error("Không tìm thấy bài tập!");
+      return;
+    }
+
+    this.client.assignmentsDELETE(this.assignmentId).subscribe(
+      () => {
+        this.message.success("Xóa bài tập thành công!");
+        this.assignmentId = 0;
+        this.assignmentTitle = "";
+        this.assignmentDescription = "";
+
+        // Điều hướng về trang bài học
+        this.router.navigate([`/lecturer/courses-content/${this.courseId}/lesson`]);
+      },
+      err => {
+        console.error("Lỗi khi xóa bài tập:", err);
+        this.message.error("Lỗi khi xóa bài tập!");
+      }
+    );
+  }
+  /*deleteAssignment(): void {
+    if (!this.assignmentId) {
+      this.message.error("Không tìm thấy bài tập!");
+      return;
+    }
+  
+    // Gọi API xóa tất cả câu hỏi trước
+    this.client.questionsDELETE(this.assignmentId).subscribe(
+      () => {
+        console.log("Đã xóa toàn bộ câu hỏi liên quan đến bài tập:", this.assignmentId);
+  
+        // Sau khi xóa câu hỏi, tiếp tục xóa bài tập
+        this.client.assignmentsDELETE(this.assignmentId).subscribe(
+          () => {
+            this.message.success("Xóa bài tập thành công!");
+            this.assignmentId = 0;
+            this.assignmentTitle = "";
+            this.assignmentDescription = "";
+  
+            // Điều hướng về trang bài học sau khi xóa thành công
+            this.router.navigate([`/lecturer/courses-content/${this.courseId}/lesson`]);
+          },
+          (err) => {
+            console.error("Lỗi khi xóa bài tập:", err);
+            this.message.error("Lỗi khi xóa bài tập, vui lòng thử lại!");
+          }
+        );
+      },
+      (err) => {
+        console.error("Lỗi khi xóa câu hỏi của bài tập:", err);
+        this.message.error("Lỗi khi xóa câu hỏi của bài tập, vui lòng thử lại!");
+      }
+    );
+  }*/
 
 
 

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router, ActivatedRoute, } from '@angular/router';
-import { Client, CreateCourseRequest, UpdateCourseRequest } from '../../../../shared/api-client';
+import { Client } from '../../../../shared/api-client';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzModalModule } from 'ng-zorro-antd/modal';
@@ -15,6 +15,8 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { QuestionType } from '../../../../shared/api-client';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzModalService } from 'ng-zorro-antd/modal';
+import { switchMap } from 'rxjs';
+import { ExamStateService } from '../../../../services/exam-state.service';
 
 @Component({
   selector: 'app-exam',
@@ -57,16 +59,18 @@ export class ExamComponent implements OnInit {
     private message: NzMessageService,
     private route: ActivatedRoute,
     private router: Router,
-    private modalService: NzModalService
+    private examStateService: ExamStateService
   ) {
-    this.route.parent?.paramMap.subscribe(params => {
-      this.courseId = Number(params.get('courseId'));
-    });
   }
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
-      this.courseId = Number(params.get('courseId'));
-      this.client.course(this.courseId).subscribe(
+    this.route.parent?.paramMap
+      .pipe(
+        switchMap(params => {
+          this.courseId = Number(params.get('courseId'));
+          return this.client.course(this.courseId);
+        })
+      )
+      .subscribe(
         res => {
           if (res.data) {
             this.examId = res.data.examId;
@@ -81,7 +85,6 @@ export class ExamComponent implements OnInit {
           this.message.error('Lỗi khi tải dữ liệu bài kiểm tra!');
         }
       );
-    });
   }
 
   // Lấy danh sách câu hỏi của bài kiểm tra
@@ -420,7 +423,7 @@ export class ExamComponent implements OnInit {
         this.examId = 0;
         this.examTitle = "";
         this.examDescription = "";
-
+        this.examStateService.setExamExists(false);
         // Điều hướng về trang bài học
         this.router.navigate([`/lecturer/courses-content/${this.courseId}/lesson`]);
       },

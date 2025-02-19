@@ -11,15 +11,12 @@
     <div class="course-navigation">
       <!-- Nút Prev -->
       <button class="btn-prev" (click)="prev()" [disabled]="currentIndex === 0">
-        &#9664; 
+        &#9664;
       </button>
 
       <!-- Hiển thị các khóa học -->
       <div class="course-grid">
-        <div
-          class="course-card"
-          *ngFor="let course of courses.slice(currentIndex, currentIndex + itemsPerPage)"
-        >
+        <div class="course-card" *ngFor="let course of courses.slice(currentIndex, currentIndex + itemsPerPage)">
           <div class="course-image">
             <img [src]="course.image" alt="Hình ảnh khóa học" />
           </div>
@@ -32,12 +29,8 @@
       </div>
 
       <!-- Nút Next -->
-      <button
-        class="btn-next"
-        (click)="next()"
-        [disabled]="currentIndex + itemsPerPage >= courses.length"
-      >
-         &#9654;
+      <button class="btn-next" (click)="next()" [disabled]="currentIndex + itemsPerPage >= courses.length">
+        &#9654;
       </button>
     </div>
   </div>
@@ -46,15 +39,17 @@
     <div class="text">
       <h2>Giới thiệu về khóa học</h2>
       <p>
-        Chào mừng đến với ứng dụng học tập trực tuyến đột phá, nơi bạn có thể dễ dàng quản lý các khóa học, tiến độ học tập và bài kiểm tra chỉ trong vài cú click.
-        Khóa học này sẽ giúp bạn hiểu rõ về lập trình và cách ứng dụng trong doanh nghiệp. Bạn sẽ học từ cơ bản đến nâng cao, có cơ hội thực hành qua các dự án thực tế.
+        Chào mừng đến với ứng dụng học tập trực tuyến đột phá, nơi bạn có thể dễ dàng quản lý các khóa học, tiến độ học
+        tập và bài kiểm tra chỉ trong vài cú click.
+        Khóa học này sẽ giúp bạn hiểu rõ về lập trình và cách ứng dụng trong doanh nghiệp. Bạn sẽ học từ cơ bản đến nâng
+        cao, có cơ hội thực hành qua các dự án thực tế.
       </p>
     </div>
     <div class="image">
       <img src="assets/images/hinhanh2.jpg" alt="Hình ảnh học tập">
     </div>
   </div>
- 
+
   <div class="image-slider">
     <div class="images" #imageContainer>
       <img *ngFor="let image of images" [src]="image" alt="Hình ảnh" />
@@ -78,6 +73,6 @@
       <button (click)="nextPage()" [disabled]="currentPage * itemsPerPage >= reviews.length">Tiếp theo</button>
     </div>
   </div>
-  
+
 
 </div>

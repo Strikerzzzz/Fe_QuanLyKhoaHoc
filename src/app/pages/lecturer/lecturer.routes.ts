@@ -19,7 +19,7 @@ export const LECTURER_ROUTES: Route[] = [
                 children: [
                     { path: "", redirectTo: "lesson", pathMatch: "full" },
                     { path: "lesson", component: LessonComponent },
-                    { path: "exam/:courseId", component: ExamComponent },
+                    { path: "exam", component: ExamComponent },
                     { path: "assignment/:lessonId", component: LessonAssignmentComponent },
                     { path: "content/:lessonId", component: LessonContentComponent }
                 ]
