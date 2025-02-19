@@ -60,7 +60,9 @@ export class CoursesManagementComponent {
   selectedAvatarFile: File | null = null;
   avatarUploadProgress = 0;
   avatarPreviewUrl: string | null = null;
-
+  allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
+  allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
+  maxFileSize = 5 * 1024 * 1024;
 
   constructor(
     private client: Client,
@@ -233,9 +235,7 @@ export class CoursesManagementComponent {
   onAvatarFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
-      const maxSize = 5 * 1024 * 1024;
-      if (file.size > maxSize) {
-        this.message.error("File quá lớn! Vui lòng chọn file nhỏ hơn 5MB.");
+      if (!this.isValidImageFile(file)) {
         this.isAvatarModalVisible = false;
         return;
       }
@@ -247,6 +247,26 @@ export class CoursesManagementComponent {
       };
       reader.readAsDataURL(file);
     }
+  }
+  isValidImageFile(file: File): boolean {
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+
+    if (!fileExtension || !this.allowedExtensions.includes('.' + fileExtension)) {
+      this.message.error("Định dạng file không hợp lệ! Chỉ chấp nhận JPG, JPEG, PNG, GIF, BMP, WEBP.");
+      return false;
+    }
+
+    if (!this.allowedImageTypes.includes(file.type)) {
+      this.message.error("Loại file không hợp lệ! Chỉ chấp nhận file ảnh.");
+      return false;
+    }
+
+    if (file.size > this.maxFileSize) {
+      this.message.error("File quá lớn! Vui lòng chọn file nhỏ hơn 5MB.");
+      return false;
+    }
+
+    return true;
   }
 
 
@@ -317,8 +337,9 @@ export class CoursesManagementComponent {
         });
       },
       error: (err) => {
-        this.message.error("Lỗi lấy Presigned URL ");
+        this.message.error("Lỗi lấy Presigned URL: " + err.errors);
         console.error(err);
+        this.isAvatarModalVisible = false;
       }
     });
   }
