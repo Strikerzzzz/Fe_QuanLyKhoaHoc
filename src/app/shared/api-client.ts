@@ -181,9 +181,12 @@ export interface IClient {
      */
     refreshToken(body: RefreshTokenRequest | undefined): Observable<RefreshTokenResponseResult>;
     /**
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @param options (optional) 
      * @return OK
      */
-    usersGET(): Observable<UserIEnumerableResult>;
+    usersGET(page: number | undefined, pageSize: number | undefined, options: string | undefined): Observable<UserPagedResultResult>;
     /**
      * @return OK
      */
@@ -3100,10 +3103,25 @@ export class Client implements IClient {
     }
 
     /**
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @param options (optional) 
      * @return OK
      */
-    usersGET(): Observable<UserIEnumerableResult> {
-        let url_ = this.baseUrl + "/api/Users";
+    usersGET(page: number | undefined, pageSize: number | undefined, options: string | undefined): Observable<UserPagedResultResult> {
+        let url_ = this.baseUrl + "/api/Users?";
+        if (page === null)
+            throw new Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (options === null)
+            throw new Error("The parameter 'options' cannot be null.");
+        else if (options !== undefined)
+            url_ += "options=" + encodeURIComponent("" + options) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -3121,14 +3139,14 @@ export class Client implements IClient {
                 try {
                     return this.processUsersGET(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<UserIEnumerableResult>;
+                    return _observableThrow(e) as any as Observable<UserPagedResultResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<UserIEnumerableResult>;
+                return _observableThrow(response_) as any as Observable<UserPagedResultResult>;
         }));
     }
 
-    protected processUsersGET(response: HttpResponseBase): Observable<UserIEnumerableResult> {
+    protected processUsersGET(response: HttpResponseBase): Observable<UserPagedResultResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -3139,7 +3157,7 @@ export class Client implements IClient {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = UserIEnumerableResult.fromJS(resultData200);
+            result200 = UserPagedResultResult.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status === 400) {
@@ -5623,12 +5641,60 @@ export interface IUser {
     avatarUrl?: string | undefined;
 }
 
-export class UserIEnumerableResult implements IUserIEnumerableResult {
+export class UserPagedResult implements IUserPagedResult {
+    users?: User[] | undefined;
+    totalCount?: number;
+
+    constructor(data?: IUserPagedResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["users"])) {
+                this.users = [] as any;
+                for (let item of _data["users"])
+                    this.users!.push(User.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): UserPagedResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserPagedResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.users)) {
+            data["users"] = [];
+            for (let item of this.users)
+                data["users"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+}
+
+export interface IUserPagedResult {
+    users?: User[] | undefined;
+    totalCount?: number;
+}
+
+export class UserPagedResultResult implements IUserPagedResultResult {
     succeeded?: boolean;
     errors?: string[] | undefined;
-    data?: User[] | undefined;
+    data?: UserPagedResult;
 
-    constructor(data?: IUserIEnumerableResult) {
+    constructor(data?: IUserPagedResultResult) {
         if (data) {
             for (var property in data) {
                 if (data.hasOwnProperty(property))
@@ -5645,17 +5711,13 @@ export class UserIEnumerableResult implements IUserIEnumerableResult {
                 for (let item of _data["errors"])
                     this.errors!.push(item);
             }
-            if (Array.isArray(_data["data"])) {
-                this.data = [] as any;
-                for (let item of _data["data"])
-                    this.data!.push(User.fromJS(item));
-            }
+            this.data = _data["data"] ? UserPagedResult.fromJS(_data["data"]) : <any>undefined;
         }
     }
 
-    static fromJS(data: any): UserIEnumerableResult {
+    static fromJS(data: any): UserPagedResultResult {
         data = typeof data === 'object' ? data : {};
-        let result = new UserIEnumerableResult();
+        let result = new UserPagedResultResult();
         result.init(data);
         return result;
     }
@@ -5668,19 +5730,15 @@ export class UserIEnumerableResult implements IUserIEnumerableResult {
             for (let item of this.errors)
                 data["errors"].push(item);
         }
-        if (Array.isArray(this.data)) {
-            data["data"] = [];
-            for (let item of this.data)
-                data["data"].push(item.toJSON());
-        }
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
         return data;
     }
 }
 
-export interface IUserIEnumerableResult {
+export interface IUserPagedResultResult {
     succeeded?: boolean;
     errors?: string[] | undefined;
-    data?: User[] | undefined;
+    data?: UserPagedResult;
 }
 
 export class SwaggerException extends Error {

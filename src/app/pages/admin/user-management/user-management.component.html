@@ -1,4 +1,10 @@
 <nz-card nzTitle="Quản lý người dùng" [nzBordered]="false">
+    <div class="search-container">
+        <nz-input-group nzSuffix>
+            <input type="text" nz-input placeholder="Tìm kiếm..." [(ngModel)]="searchOptions" />
+            <button style="margin: 16px;" nz-button nzType="primary" (click)="searchUsers()">Tìm kiếm</button>
+        </nz-input-group>
+    </div>
     <nz-table #basicTable [nzData]="users" [nzBordered]="true" [nzSize]="'middle'" [nzLoading]="loading"
         [nzShowPagination]="false">
         <thead>
@@ -37,6 +43,13 @@
             </tr>
         </tbody>
     </nz-table>
+
+    <div class="pagination-container">
+        <nz-pagination [nzPageIndex]="currentPage" [nzPageSize]="pageSize" [nzTotal]="totalItems"
+            (nzPageIndexChange)="onPageIndexChange($event)" (nzPageSizeChange)="onPageSizeChange($event)">
+        </nz-pagination>
+    </div>
+
     <nz-modal [(nzVisible)]="showRolePopup" nzTitle="Chỉnh sửa vai trò" (nzOnCancel)="showRolePopup = false"
         (nzOnOk)="saveRoles()">
 
@@ -56,9 +69,12 @@
         <div *nzModalContent>
             <label>Chọn thời gian khóa:</label>
             <div class="time-picker-inputs">
-                <nz-input-number [(ngModel)]="lockDays" [nzMin]="0" [nzMax]="365" [nzStep]="1"></nz-input-number> ngày
-                <nz-input-number [(ngModel)]="lockHours" [nzMin]="0" [nzMax]="23" [nzStep]="1"></nz-input-number> giờ
-                <nz-input-number [(ngModel)]="lockMinutes" [nzMin]="0" [nzMax]="59" [nzStep]="1"></nz-input-number> phút
+                <nz-input-number [(ngModel)]="lockDays" [nzMin]="0" [nzMax]="365" [nzStep]="1"></nz-input-number>
+                ngày
+                <nz-input-number [(ngModel)]="lockHours" [nzMin]="0" [nzMax]="23" [nzStep]="1"></nz-input-number>
+                giờ
+                <nz-input-number [(ngModel)]="lockMinutes" [nzMin]="0" [nzMax]="59" [nzStep]="1"></nz-input-number>
+                phút
             </div>
         </div>
     </nz-modal>

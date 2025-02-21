@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Client, User, UserIEnumerableResult, AssignRoleRequest, RemoveRoleRequest } from '../../../shared/api-client';
+import { Client, User, UserPagedResultResult, AssignRoleRequest, RemoveRoleRequest } from '../../../shared/api-client';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -11,6 +11,9 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { FormsModule } from '@angular/forms';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { NzInputModule } from 'ng-zorro-antd/input';
+
 @Component({
   selector: 'app-user-management',
   imports: [
@@ -23,7 +26,9 @@ import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
     NzCheckboxModule,
     FormsModule,
     NzPopconfirmModule,
-    NzInputNumberModule
+    NzInputNumberModule,
+    NzPaginationModule,
+    NzInputModule
   ],
   templateUrl: './user-management.component.html',
   styleUrl: './user-management.component.scss'
@@ -36,6 +41,14 @@ export class UserManagementComponent implements OnInit {
   selectedUser: User | null = null;
   currentRoles: string[] = [];
   originalRoles: string[] = [];
+
+  // Các biến phân trang và tìm kiếm
+  currentPage: number = 1;
+  pageSize: number = 2;
+  searchOptions: string = '';
+  totalItems: number = 0;
+
+  // Các biến liên quan đến Lock User
   lockPopupVisible: boolean = false;
   selectedUserId: string | null = null;
   lockDuration: Date = new Date(0, 0, 0, 0, 0, 0);
@@ -67,11 +80,17 @@ export class UserManagementComponent implements OnInit {
 
   loadUsers(): void {
     this.loading = true;
-    this.apiClient.usersGET().subscribe({
-      next: (response: UserIEnumerableResult) => {
+    this.apiClient.usersGET(this.currentPage, this.pageSize, this.searchOptions).subscribe({
+      next: (response: any) => {
         this.loading = false;
         if (response.succeeded) {
-          this.users = response.data || [];
+          this.users = response.data.users || [];
+          this.totalItems = response.data.totalCount || 0;
+          const maxPage = Math.ceil(this.totalItems / this.pageSize) || 1;
+          if (this.currentPage > maxPage) {
+            this.currentPage = maxPage;
+            this.loadUsers();
+          }
         } else {
           this.message.error('Lỗi khi tải danh sách người dùng!');
         }
@@ -81,6 +100,22 @@ export class UserManagementComponent implements OnInit {
         this.message.error('Không thể kết nối đến API.');
       }
     });
+  }
+
+  onPageIndexChange(page: number): void {
+    this.currentPage = page;
+    this.loadUsers();
+  }
+
+  // Hàm xử lý thay đổi số lượng bản ghi trên mỗi trang
+  onPageSizeChange(pageSize: number): void {
+    this.pageSize = pageSize;
+    this.loadUsers();
+  }
+
+  // Hàm tìm kiếm người dùng theo options
+  searchUsers(): void {
+    this.loadUsers();
   }
 
   editRoles(user: User): void {
