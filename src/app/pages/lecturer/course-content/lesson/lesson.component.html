@@ -1,6 +1,5 @@
-<!-- Hiển thị tên khóa học -->
-
-<nz-table #basicTable [nzData]="displayedLessons" [nzBordered]="true" [nzSize]="'middle'" [nzShowPagination]="false">
+<nz-table #basicTable [nzData]="lessons" [nzBordered]="true" [nzSize]="'middle'" [nzLoading]="loading"
+[nzShowPagination]="false">
   <thead>
     <tr>
       <th nzWidth="40%">Tiêu đề</th>
@@ -9,7 +8,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let lesson of displayedLessons">
+    <tr *ngFor="let lesson of lessons">
       <td>{{ lesson.title }}</td>
       <td>
         <button nz-button nzType="default" (click)="goToContent(lesson.lessonId)">
@@ -40,9 +39,13 @@
   </div>
 
   <div class="action-pagination">
-    <nz-pagination [(nzPageIndex)]="currentPage" [nzPageSize]="pageSize" [nzTotal]="lessons.length"
-      (nzPageIndexChange)="onPageChange($event)">
-    </nz-pagination>
+    <nz-pagination 
+    [(nzPageIndex)]="currentPage" 
+    [nzTotal]="totalLessons" 
+    [nzPageSize]="pageSize"
+    (nzPageIndexChange)="onPageIndexChange($event)"
+    (nzPageSizeChange)="onPageSizeChange($event)">
+  </nz-pagination>
   </div>
 </div>
 

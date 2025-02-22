@@ -30,7 +30,6 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 })
 export class LessonComponent implements OnInit {
   lessons: any[] = [];
-  displayedLessons: any[] = [];
   lessonData: Partial<CreateLessonRequest | UpdateLessonRequest> = {};
   selectedLessonId?: number;
   assignmentData: Partial<CreateAssignmentRequest> = {};
@@ -38,10 +37,11 @@ export class LessonComponent implements OnInit {
   isEditMode = false;   // true: cập nhật, false: tạo mới
 
   currentPage = 1;
-  pageSize = 5;
+  pageSize = 2;
   courseId!: number; // ID khóa học chứa bài học
-
+  totalLessons = 0;
   isAssignmentModalVisible = false;
+  loading: boolean = false;
 
   constructor(
     private client: Client,
@@ -60,27 +60,46 @@ export class LessonComponent implements OnInit {
 
   // Lấy danh sách bài học của khóa học
   loadLessons(): void {
-    this.client.course2(this.courseId).subscribe(
-      res => {
-        this.lessons = res.data || [];
-        this.updateDisplayedLessons();
-      },
-      err => {
-        this.message.error("Lỗi khi tải danh sách bài học!");
-      }
-    );
-  }
+    this.loading = true;
+    this.client.course2(this.courseId, this.currentPage, this.pageSize).subscribe({
+        next: (res) => {
+            this.loading = false;
 
-  // Cập nhật danh sách hiển thị
-  updateDisplayedLessons(): void {
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    this.displayedLessons = this.lessons.slice(startIndex, startIndex + this.pageSize);
-  }
+            if (res?.succeeded && res.data) { // Kiểm tra `succeeded` trước khi lấy `data`
+                this.lessons = res.data.lessons || [];
+                this.totalLessons = res.data.totalCount || 0;
 
-  onPageChange(pageIndex: number): void {
-    this.currentPage = pageIndex;
-    this.updateDisplayedLessons();
-  }
+                // Kiểm tra nếu currentPage vượt quá số trang có thể có
+                const maxPage = Math.max(Math.ceil(this.totalLessons / this.pageSize), 1);
+                if (this.currentPage > maxPage) {
+                    this.currentPage = maxPage;
+                    this.loadLessons();
+                }
+            } else {
+                this.lessons = [];
+                this.totalLessons = 0;
+                this.message.error(res?.errors?.join(", ") || "Lỗi khi tải danh sách bài học!");
+            }
+        },
+        error: (err) => {
+            console.error("API Error:", err);
+            this.loading = false;
+            this.message.error("Không thể kết nối đến API.");
+            this.lessons = [];
+            this.totalLessons = 0;
+        }
+    });
+}
+onPageIndexChange(page: number): void {
+  this.currentPage = page;
+  this.loadLessons();
+}
+
+// Hàm xử lý thay đổi số lượng bản ghi trên mỗi trang
+onPageSizeChange(pageSize: number): void {
+  this.pageSize = pageSize;
+  this.loadLessons();
+}
 
   showModal(isEdit: boolean, lesson?: any): void {
     this.isEditMode = isEdit;
