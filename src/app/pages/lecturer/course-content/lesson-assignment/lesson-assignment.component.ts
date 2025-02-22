@@ -471,41 +471,5 @@ export class LessonAssignmentComponent implements OnInit {
       }
     );
   }
-  /*deleteAssignment(): void {
-    if (!this.assignmentId) {
-      this.message.error("Không tìm thấy bài tập!");
-      return;
-    }
-  
-    // Gọi API xóa tất cả câu hỏi trước
-    this.client.questionsDELETE(this.assignmentId).subscribe(
-      () => {
-        console.log("Đã xóa toàn bộ câu hỏi liên quan đến bài tập:", this.assignmentId);
-  
-        // Sau khi xóa câu hỏi, tiếp tục xóa bài tập
-        this.client.assignmentsDELETE(this.assignmentId).subscribe(
-          () => {
-            this.message.success("Xóa bài tập thành công!");
-            this.assignmentId = 0;
-            this.assignmentTitle = "";
-            this.assignmentDescription = "";
-  
-            // Điều hướng về trang bài học sau khi xóa thành công
-            this.router.navigate([`/lecturer/courses-content/${this.courseId}/lesson`]);
-          },
-          (err) => {
-            console.error("Lỗi khi xóa bài tập:", err);
-            this.message.error("Lỗi khi xóa bài tập, vui lòng thử lại!");
-          }
-        );
-      },
-      (err) => {
-        console.error("Lỗi khi xóa câu hỏi của bài tập:", err);
-        this.message.error("Lỗi khi xóa câu hỏi của bài tập, vui lòng thử lại!");
-      }
-    );
-  }*/
-
-
 
 }
