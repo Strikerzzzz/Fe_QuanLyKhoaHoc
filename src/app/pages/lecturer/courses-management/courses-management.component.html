@@ -1,4 +1,10 @@
-<nz-table #basicTable [nzData]="displayedCourses" [nzBordered]="true" [nzSize]="'middle'" [nzShowPagination]="false">
+<div class="search-container">
+  <nz-input-group nzSuffix>
+    <input type="text" nz-input placeholder="Tìm kiếm..." [(ngModel)]="searchOptions" />
+    <button style="margin: 16px;" nz-button nzType="primary" (click)="searchCourses()">Tìm kiếm</button>
+  </nz-input-group>
+</div>
+<nz-table #basicTable [nzData]="courses" [nzBordered]="true" [nzSize]="'middle'" [nzLoading]="loading" [nzShowPagination]="false">
   <thead>
     <tr>
       <th nzWidth="8%">Avatar</th>
@@ -12,7 +18,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let course of displayedCourses">
+    <tr *ngFor="let course of courses">
       <td>
         <ng-container *ngIf="course.avatarUrl; else noAvatar">
           <img [src]="course.avatarUrl" alt="Avatar" class="avatar" (click)="openAvatarModal(course)"
@@ -59,8 +65,13 @@
 
   <!-- Pagination bên phải -->
   <div class="action-pagination">
-    <nz-pagination [(nzPageIndex)]="currentPage" [nzPageSize]="pageSize" [nzTotal]="courses.length"
-      (nzPageIndexChange)="onPageChange($event)">
+    <nz-pagination
+      [nzPageIndex]="currentPage"
+      [nzPageSize]="pageSize"
+      [nzTotal]="totalItems"
+      (nzPageIndexChange)="onPageIndexChange($event)"
+      (nzPageSizeChange)="onPageSizeChange($event)"
+    >
     </nz-pagination>
   </div>
 </div>

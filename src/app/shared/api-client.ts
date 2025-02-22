@@ -69,9 +69,12 @@ export interface IClient {
      */
     public(): Observable<ObjectResult>;
     /**
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @param options (optional) 
      * @return OK
      */
-    coursesGET2(): Observable<ObjectResult>;
+    coursesGET2(page: number | undefined, pageSize: number | undefined, options: string | undefined): Observable<CoursePagedResultResult>;
     /**
      * @param body (optional) 
      * @return OK
@@ -118,9 +121,11 @@ export interface IClient {
      */
     results2(examId: number): Observable<ObjectIEnumerableResult>;
     /**
+     * @param pageIndex (optional) 
+     * @param pageSize (optional) 
      * @return OK
      */
-    course2(courseId: number): Observable<ObjectIEnumerableResult>;
+    course2(courseId: number, pageIndex: number | undefined, pageSize: number | undefined): Observable<LessonPagedResultResult>;
     /**
      * @param body (optional) 
      * @return OK
@@ -1201,10 +1206,25 @@ export class Client implements IClient {
     }
 
     /**
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @param options (optional) 
      * @return OK
      */
-    coursesGET2(): Observable<ObjectResult> {
-        let url_ = this.baseUrl + "/api/Courses";
+    coursesGET2(page: number | undefined, pageSize: number | undefined, options: string | undefined): Observable<CoursePagedResultResult> {
+        let url_ = this.baseUrl + "/api/Courses?";
+        if (page === null)
+            throw new Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (options === null)
+            throw new Error("The parameter 'options' cannot be null.");
+        else if (options !== undefined)
+            url_ += "options=" + encodeURIComponent("" + options) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -1222,14 +1242,14 @@ export class Client implements IClient {
                 try {
                     return this.processCoursesGET2(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<ObjectResult>;
+                    return _observableThrow(e) as any as Observable<CoursePagedResultResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<ObjectResult>;
+                return _observableThrow(response_) as any as Observable<CoursePagedResultResult>;
         }));
     }
 
-    protected processCoursesGET2(response: HttpResponseBase): Observable<ObjectResult> {
+    protected processCoursesGET2(response: HttpResponseBase): Observable<CoursePagedResultResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1240,7 +1260,7 @@ export class Client implements IClient {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ObjectResult.fromJS(resultData200);
+            result200 = CoursePagedResultResult.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status === 401) {
@@ -2099,13 +2119,23 @@ export class Client implements IClient {
     }
 
     /**
+     * @param pageIndex (optional) 
+     * @param pageSize (optional) 
      * @return OK
      */
-    course2(courseId: number): Observable<ObjectIEnumerableResult> {
-        let url_ = this.baseUrl + "/api/Lessons/course/{courseId}";
+    course2(courseId: number, pageIndex: number | undefined, pageSize: number | undefined): Observable<LessonPagedResultResult> {
+        let url_ = this.baseUrl + "/api/Lessons/course/{courseId}?";
         if (courseId === undefined || courseId === null)
             throw new Error("The parameter 'courseId' must be defined.");
         url_ = url_.replace("{courseId}", encodeURIComponent("" + courseId));
+        if (pageIndex === null)
+            throw new Error("The parameter 'pageIndex' cannot be null.");
+        else if (pageIndex !== undefined)
+            url_ += "pageIndex=" + encodeURIComponent("" + pageIndex) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -2123,14 +2153,14 @@ export class Client implements IClient {
                 try {
                     return this.processCourse2(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<ObjectIEnumerableResult>;
+                    return _observableThrow(e) as any as Observable<LessonPagedResultResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<ObjectIEnumerableResult>;
+                return _observableThrow(response_) as any as Observable<LessonPagedResultResult>;
         }));
     }
 
-    protected processCourse2(response: HttpResponseBase): Observable<ObjectIEnumerableResult> {
+    protected processCourse2(response: HttpResponseBase): Observable<LessonPagedResultResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -2141,7 +2171,7 @@ export class Client implements IClient {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ObjectIEnumerableResult.fromJS(resultData200);
+            result200 = LessonPagedResultResult.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status === 500) {
@@ -4159,6 +4189,166 @@ export interface ICourse {
     exam?: Exam;
 }
 
+export class CourseDto implements ICourseDto {
+    courseId?: number;
+    title?: string | undefined;
+    description?: string | undefined;
+    price?: number | undefined;
+    difficulty?: string | undefined;
+    keywords?: string | undefined;
+    avatarUrl?: string | undefined;
+
+    constructor(data?: ICourseDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.courseId = _data["courseId"];
+            this.title = _data["title"];
+            this.description = _data["description"];
+            this.price = _data["price"];
+            this.difficulty = _data["difficulty"];
+            this.keywords = _data["keywords"];
+            this.avatarUrl = _data["avatarUrl"];
+        }
+    }
+
+    static fromJS(data: any): CourseDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CourseDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["courseId"] = this.courseId;
+        data["title"] = this.title;
+        data["description"] = this.description;
+        data["price"] = this.price;
+        data["difficulty"] = this.difficulty;
+        data["keywords"] = this.keywords;
+        data["avatarUrl"] = this.avatarUrl;
+        return data;
+    }
+}
+
+export interface ICourseDto {
+    courseId?: number;
+    title?: string | undefined;
+    description?: string | undefined;
+    price?: number | undefined;
+    difficulty?: string | undefined;
+    keywords?: string | undefined;
+    avatarUrl?: string | undefined;
+}
+
+export class CoursePagedResult implements ICoursePagedResult {
+    courses?: CourseDto[] | undefined;
+    totalCount?: number;
+
+    constructor(data?: ICoursePagedResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["courses"])) {
+                this.courses = [] as any;
+                for (let item of _data["courses"])
+                    this.courses!.push(CourseDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): CoursePagedResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new CoursePagedResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.courses)) {
+            data["courses"] = [];
+            for (let item of this.courses)
+                data["courses"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+}
+
+export interface ICoursePagedResult {
+    courses?: CourseDto[] | undefined;
+    totalCount?: number;
+}
+
+export class CoursePagedResultResult implements ICoursePagedResultResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: CoursePagedResult;
+
+    constructor(data?: ICoursePagedResultResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            this.data = _data["data"] ? CoursePagedResult.fromJS(_data["data"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): CoursePagedResultResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new CoursePagedResultResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface ICoursePagedResultResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: CoursePagedResult;
+}
+
 export class CreateAssignmentRequest implements ICreateAssignmentRequest {
     lessonId?: number;
     title?: string | undefined;
@@ -4617,6 +4807,146 @@ export interface ILessonContent {
     mediaType?: string | undefined;
     mediaUrl?: string | undefined;
     content?: string | undefined;
+}
+
+export class LessonDto implements ILessonDto {
+    lessonId?: number;
+    title?: string | undefined;
+
+    constructor(data?: ILessonDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.lessonId = _data["lessonId"];
+            this.title = _data["title"];
+        }
+    }
+
+    static fromJS(data: any): LessonDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new LessonDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["lessonId"] = this.lessonId;
+        data["title"] = this.title;
+        return data;
+    }
+}
+
+export interface ILessonDto {
+    lessonId?: number;
+    title?: string | undefined;
+}
+
+export class LessonPagedResult implements ILessonPagedResult {
+    lessons?: LessonDto[] | undefined;
+    totalCount?: number;
+
+    constructor(data?: ILessonPagedResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["lessons"])) {
+                this.lessons = [] as any;
+                for (let item of _data["lessons"])
+                    this.lessons!.push(LessonDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): LessonPagedResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new LessonPagedResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.lessons)) {
+            data["lessons"] = [];
+            for (let item of this.lessons)
+                data["lessons"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+}
+
+export interface ILessonPagedResult {
+    lessons?: LessonDto[] | undefined;
+    totalCount?: number;
+}
+
+export class LessonPagedResultResult implements ILessonPagedResultResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: LessonPagedResult;
+
+    constructor(data?: ILessonPagedResultResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            this.data = _data["data"] ? LessonPagedResult.fromJS(_data["data"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): LessonPagedResultResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new LessonPagedResultResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface ILessonPagedResultResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: LessonPagedResult;
 }
 
 export class LoginRequest implements ILoginRequest {

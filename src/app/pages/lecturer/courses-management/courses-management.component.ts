@@ -32,10 +32,13 @@ export class CoursesManagementComponent {
   isVisible = false;
   isEditMode = false;
 
-  currentPage = 1;
-  pageSize = 5;
-  displayedCourses: any[] = [];
+  // Các biến phân trang và tìm kiếm
+  currentPage: number = 1;
+  pageSize: number = 2;
+  searchOptions: string = '';
+  totalItems = 0;
 
+  loading: boolean = false;
 
   difficultyLevels = [
     { label: 'Dễ', value: 'Dễ' },
@@ -79,32 +82,47 @@ export class CoursesManagementComponent {
 
   // Lấy danh sách khóa học từ API
   loadCourses(): void {
-    this.client.coursesGET2().subscribe(
-      res => {
-        this.courses = res.data || [];
-        const totalPages = Math.ceil(this.courses.length / this.pageSize);
-        if (this.currentPage > totalPages && totalPages > 0) {
-          this.currentPage = totalPages;
+    this.loading = true;
+    this.client.coursesGET2(this.currentPage, this.pageSize, this.searchOptions).subscribe({
+        next: (response: any) => {
+            this.loading = false;
+            if (response.succeeded) {
+                this.courses = response.data.courses || [];
+                this.totalItems = response.data.totalCount || 0;
+                const maxPage = Math.max(Math.ceil(this.totalItems / this.pageSize), 1);
+                if (this.currentPage > maxPage) {
+                    this.currentPage = maxPage;
+                    this.loadCourses();
+                }
+            } else {
+                this.message.error('Lỗi khi tải danh sách khóa học!');
+            }
+        },
+        error: (error) => {   
+            this.loading = false;
+            console.log(error);
+            this.message.error('Không thể kết nối đến API.');
         }
-        this.updateDisplayedCourses();
-      },
-      err => {
-        this.message.error("Lỗi khi tải danh sách khóa học!");
-      }
-    );
-  }
+    });
+}
 
-  // Cập nhật dữ liệu hiển thị theo trang
-  updateDisplayedCourses(): void {
-    const startIndex = (this.currentPage - 1) * this.pageSize;
-    this.displayedCourses = this.courses.slice(startIndex, startIndex + this.pageSize);
-  }
+// Xử lý khi chuyển trang
+onPageIndexChange(page: number): void {
+    this.currentPage = page;
+    this.loadCourses();
+}
 
-  // Xử lý khi chuyển trang
-  onPageChange(pageIndex: number): void {
-    this.currentPage = pageIndex;
-    this.updateDisplayedCourses();
-  }
+// Xử lý khi thay đổi số lượng bản ghi trên mỗi trang
+onPageSizeChange(pageSize: number): void {
+    this.pageSize = pageSize;
+    this.loadCourses();
+}
+
+// Xử lý tìm kiếm khóa học theo từ khóa
+searchCourses(): void {
+    this.loadCourses();
+}
+
 
   /**
    * Hiển thị modal:
