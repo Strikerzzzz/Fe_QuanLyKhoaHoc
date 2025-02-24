@@ -1,5 +1,5 @@
 <nz-table #basicTable [nzData]="lessons" [nzBordered]="true" [nzSize]="'middle'" [nzLoading]="loading"
-[nzShowPagination]="false">
+  [nzShowPagination]="false">
   <thead>
     <tr>
       <th nzWidth="40%">Tiêu đề</th>
@@ -39,13 +39,9 @@
   </div>
 
   <div class="action-pagination">
-    <nz-pagination 
-    [(nzPageIndex)]="currentPage" 
-    [nzTotal]="totalLessons" 
-    [nzPageSize]="pageSize"
-    (nzPageIndexChange)="onPageIndexChange($event)"
-    (nzPageSizeChange)="onPageSizeChange($event)">
-  </nz-pagination>
+    <nz-pagination [(nzPageIndex)]="currentPage" [nzTotal]="totalLessons" [nzPageSize]="pageSize"
+      (nzPageIndexChange)="onPageIndexChange($event)" (nzPageSizeChange)="onPageSizeChange($event)">
+    </nz-pagination>
   </div>
 </div>
 
@@ -64,8 +60,8 @@
   </form>
 </nz-modal>
 
-<nz-modal [(nzVisible)]="isAssignmentModalVisible" nzTitle="Tạo bài tập"
-  (nzOnOk)="handleAssignmentOk()" (nzOnCancel)="handleAssignmentCancel()">
+<nz-modal [(nzVisible)]="isAssignmentModalVisible" nzTitle="Tạo bài tập" (nzOnOk)="handleAssignmentOk()"
+  (nzOnCancel)="handleAssignmentCancel()">
   <form nz-form nzLayout="vertical" *nzModalContent>
     <nz-form-item>
       <nz-form-label [nzSpan]="6" nzFor="title" nzRequired>
@@ -75,7 +71,7 @@
         <input nz-input [(ngModel)]="assignmentData.title" name="title" required />
       </nz-form-control>
     </nz-form-item>
-    
+
     <nz-form-item>
       <nz-form-label [nzSpan]="6" nzFor="description" nzRequired>
         Mô tả bài tập

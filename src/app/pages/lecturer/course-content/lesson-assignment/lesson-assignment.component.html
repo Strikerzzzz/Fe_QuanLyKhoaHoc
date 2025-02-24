@@ -1,4 +1,5 @@
-<nz-table [nzData]="[{ title: assignmentTitle, description: assignmentDescription }]" [nzBordered]="true" [nzShowPagination]="false">
+<nz-table [nzData]="[{ title: assignmentTitle, description: assignmentDescription }]" [nzBordered]="true"
+  [nzShowPagination]="false">
   <thead>
     <tr>
       <th>Tiêu đề</th>
@@ -14,7 +15,8 @@
         <button nz-button nzType="default" (click)="editAssignment()">
           <i nz-icon nzType="edit" nzTheme="outline"></i> Sửa
         </button>
-        <button nz-button nzType="primary" nzDanger nz-popconfirm nzPopconfirmTitle="Bạn có chắc chắn xóa?" (nzOnConfirm)="deleteAssignment()">
+        <button nz-button nzType="primary" nzDanger nz-popconfirm nzPopconfirmTitle="Bạn có chắc chắn xóa?"
+          (nzOnConfirm)="deleteAssignment()">
           <i nz-icon nzType="delete" nzTheme="outline"></i> Xóa
         </button>
       </td>
@@ -32,6 +34,7 @@
           <th>Nội dung câu hỏi</th>
           <th>Các đáp án</th>
           <th>Đáp án đúng</th>
+          <th>Dạng câu</th>
           <th>Hành động</th>
         </tr>
       </thead>
@@ -50,7 +53,9 @@
           <td>
             {{ question.choices[question.correctAnswerIndex] || 'Chưa có đáp án đúng' }}
           </td>
-
+          <td>
+            {{ question.answerGroupNumber}}
+          </td>
           <td>
             <button nz-button nzType="default" (click)="editMCQuestion(question)">Sửa</button>
             <button nz-button nzType="primary" nzDanger nz-popconfirm nzPopconfirmTitle="Bạn có chắc chắn xóa?"
@@ -66,6 +71,60 @@
         <button nz-button nzType="primary" nzSize="large" (click)="openMCQuestionModal()">
           <i nz-icon nzType="plus" nzTheme="outline"></i> Thêm câu hỏi trắc nghiệm
         </button>
+      </div>
+    </div>
+  </nz-tab>
+
+  <!-- Tab câu hỏi -->
+  <nz-tab nzTitle="Trắc nghiệm tạo từ văn bản">
+    <div class="container" style="display: flex; gap: 16px;">
+      <!-- Bên trái: Khu vực nhập văn bản -->
+      <div class="left-pane" style="flex: 1;">
+        <h3>Nhập văn bản câu hỏi</h3>
+        <textarea nz-input [(ngModel)]="rawText" rows="15" style="width: 100%;"></textarea>
+        <div style="margin-top: 8px;">
+          <button nz-button nzType="primary" (click)="parseText()">Chuyển đổi</button>
+          <button nz-button nzType="default" (click)="importQuestions()">Import lên Backend</button>
+        </div>
+      </div>
+      <!-- Bên phải: Preview câu hỏi -->
+      <div class="right-pane" style="flex: 1;">
+        <h3>Preview câu hỏi</h3>
+        <nz-table [nzData]="parsedQuestions" nzBordered [nzShowPagination]="false">
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Nội dung câu hỏi</th>
+              <th>Các đáp án</th>
+              <th>Đáp án đúng</th>
+              <th>Dạng câu</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let question of parsedQuestions; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ question.question }}</td>
+              <td>
+                <ul *ngIf="question.choices && question.choices.length; else noChoices">
+                  <li *ngFor="let answer of question.choices; let j = index">
+                    {{ getAnswerLabel(j) }}. {{ answer }}
+                  </li>
+                </ul>
+                <ng-template #noChoices>Không có đáp án</ng-template>
+              </td>
+              <td>
+                <ng-container *ngIf="question.choices && question.correctAnswerIndex != null; else noAnswer">
+                  {{ question.choices[question.correctAnswerIndex] }}
+                </ng-container>
+                <ng-template #noAnswer>
+                  Chưa có đáp án đúng
+                </ng-template>
+              </td>
+
+              <td>{{ question.answerGroupNumber }}</td>
+            </tr>
+          </tbody>
+        </nz-table>
       </div>
     </div>
   </nz-tab>
@@ -144,6 +203,14 @@
         </nz-select>
       </nz-form-control>
     </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="answerGroupNumber">
+        Nhập dạng câu
+      </nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input type="number" [(ngModel)]="questionData.answerGroupNumber" name="answerGroupNumber" required />
+      </nz-form-control>
+    </nz-form-item>
   </form>
 </nz-modal>
 
@@ -172,7 +239,8 @@
 </nz-modal>
 
 <!-- Modal sửa bài tập -->
-<nz-modal [(nzVisible)]="isEditModalVisible" nzTitle="Sửa bài tập" (nzOnOk)="handleEditOk()" (nzOnCancel)="handleEditCancel()">
+<nz-modal [(nzVisible)]="isEditModalVisible" nzTitle="Sửa bài tập" (nzOnOk)="handleEditOk()"
+  (nzOnCancel)="handleEditCancel()">
   <form nz-form nzLayout="vertical" *nzModalContent>
     <nz-form-item>
       <nz-form-label [nzSpan]="6" nzFor="editTitle" nzRequired>

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Client } from '../../../../shared/api-client';
+import { Client, MultipleChoiceQuestionImportDto } from '../../../../shared/api-client';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ActivatedRoute } from '@angular/router';
 import { NzTableModule } from 'ng-zorro-antd/table';
@@ -14,6 +14,15 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { QuestionType } from '../../../../shared/api-client';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+
+
+interface QuestionData {
+  question: string;
+  choices?: string[];
+  correctAnswerIndex?: number | null;
+  answerGroupNumber?: number;
+}
 
 @Component({
   selector: 'app-lesson-assignment',
@@ -28,7 +37,8 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
     RouterModule,
     NzTabsModule,
     NzSelectModule,
-    NzPopconfirmModule
+    NzPopconfirmModule,
+    NzButtonModule
   ],
   templateUrl: './lesson-assignment.component.html',
   styleUrl: './lesson-assignment.component.scss'
@@ -60,6 +70,27 @@ export class LessonAssignmentComponent implements OnInit {
   isEditModalVisible: boolean = false;
   editAssignmentData: any = {};
 
+  rawText: string = `dạng 1
+  Câu 1. Nội dung câu hỏi?
+  A. Đáp án A
+  *B. Đáp án B
+  C. Đáp án C
+  D. Đáp án D
+  
+  Câu 2. Nội dung câu hỏi khác?
+  A. Lựa chọn A
+  *B. Lựa chọn B
+  C. Lựa chọn C
+  D. Lựa chọn D
+  
+  dạng 2
+  Câu 3. Nội dung câu hỏi mới?
+  A. Option A
+  *B. Option B
+  C. Option C
+  D. Option D`;
+
+  parsedQuestions: QuestionData[] = [];
 
   constructor(
     private client: Client,
@@ -122,6 +153,7 @@ export class LessonAssignmentComponent implements OnInit {
               } else if (typeof q.choices === "object" && q.choices !== null) {
                 choiceArray = Object.values(q.choices);
               }
+
             } catch (error) {
               choiceArray = []; // Nếu lỗi, gán mảng rỗng để tránh crash
             }
@@ -134,7 +166,6 @@ export class LessonAssignmentComponent implements OnInit {
             ) {
               correctAnswerText = choiceArray[q.correctAnswerIndex];
             }
-
             return {
               ...q,
               choices: choiceArray, // Chuyển thành mảng hợp lệ
@@ -274,7 +305,8 @@ export class LessonAssignmentComponent implements OnInit {
     this.questionData = {
       content: question.content,
       answers: [...question.choices],
-      correctIndex: question.correctAnswerIndex
+      correctIndex: question.correctAnswerIndex,
+      answerGroupNumber: question.answerGroupNumber
     };
 
     this.isQuestionModalVisible = true;
@@ -323,6 +355,7 @@ export class LessonAssignmentComponent implements OnInit {
       this.editingQuestion.content = this.questionData.content;
       this.editingQuestion.choices = [...this.questionData.answers];
       this.editingQuestion.correctAnswerIndex = this.questionData.correctIndex;
+      this.editingQuestion.answerGroupNumber = this.questionData.answerGroupNumber;
     }
 
     this.isQuestionModalVisible = false;
@@ -470,6 +503,97 @@ export class LessonAssignmentComponent implements OnInit {
         this.message.error("Lỗi khi xóa bài tập!");
       }
     );
+  }
+
+  parseText(): void {
+    const lines = this.rawText
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line !== '');
+    let currentGroupNumber: number | null = null;
+    let currentQuestion: QuestionData | null = null;
+    const questions: QuestionData[] = [];
+    let answerLines: string[] = [];
+    let collectingAnswers = false;
+
+    const finalizeQuestion = () => {
+      if (currentQuestion) {
+        let correctAnswerIndex: number | null = null;
+        // Xử lý đáp án: loại bỏ dấu '*' nếu có và loại bỏ prefix chữ (A., B., …)
+        const choices = answerLines.map((line, index) => {
+          let processedLine = line;
+          if (processedLine.startsWith('*')) {
+            processedLine = processedLine.substring(1).trim();
+            correctAnswerIndex = index;
+          }
+          processedLine = processedLine.replace(/^[A-Z]\.\s*/, '');
+          return processedLine;
+        });
+        currentQuestion.choices = choices;
+        currentQuestion.correctAnswerIndex = correctAnswerIndex;
+        if (currentGroupNumber !== null) {
+          currentQuestion.answerGroupNumber = currentGroupNumber;
+        }
+        // Loại bỏ prefix "Câu X. " khỏi nội dung câu hỏi
+        currentQuestion.question = currentQuestion.question.replace(/^Câu\s+\d+\.\s*/, '');
+        questions.push(currentQuestion);
+        currentQuestion = null;
+        answerLines = [];
+        collectingAnswers = false;
+      }
+    };
+
+    // Duyệt qua từng dòng
+    for (const line of lines) {
+      if (/^dạng\s+\d+/i.test(line)) {
+        // Nếu gặp header nhóm ("dạng X"), hoàn thiện câu hỏi hiện tại và cập nhật nhóm
+        finalizeQuestion();
+        const match = line.match(/^dạng\s+(\d+)/i);
+        if (match) {
+          currentGroupNumber = parseInt(match[1], 10);
+        }
+      } else if (/^câu\s+\d+\./i.test(line)) {
+        // Khi gặp dòng bắt đầu câu hỏi ("Câu X. ..."), hoàn thiện câu hỏi trước và tạo mới
+        finalizeQuestion();
+        currentQuestion = { question: line };
+        collectingAnswers = true;
+      } else {
+        // Các dòng còn lại là đáp án
+        if (collectingAnswers && currentQuestion) {
+          answerLines.push(line);
+        }
+      }
+    }
+    finalizeQuestion();
+    this.parsedQuestions = questions;
+    console.log("Parsed Questions:", this.parsedQuestions);
+  }
+  importQuestions(): void {
+    if (!this.parsedQuestions.length) {
+      this.message.warning('Không có câu hỏi để import.');
+      return;
+    }
+    // Chuyển đổi parsedQuestions sang DTO theo định dạng backend
+    const dtos: MultipleChoiceQuestionImportDto[] = this.parsedQuestions.map(q =>
+      MultipleChoiceQuestionImportDto.fromJS({
+        content: q.question,
+        // Sử dụng JSON.stringify để chuyển mảng đáp án thành chuỗi JSON
+        choices: q.choices ? JSON.stringify(q.choices) : "[]",
+        correctAnswerIndex: q.correctAnswerIndex,
+        answerGroupNumber: q.answerGroupNumber,
+        assignmentId: this.assignmentId,
+        examId: null
+      })
+    );
+    this.client.multipleChoice(dtos).subscribe({
+      next: result => {
+        this.message.success('Import câu hỏi trắc nghiệm thành công.');
+        this.loadQuestions();
+      },
+      error: error => {
+        this.message.error('Import thất bại: ' + error);
+      }
+    });
   }
 
 }
