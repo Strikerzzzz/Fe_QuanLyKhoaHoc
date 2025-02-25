@@ -4,6 +4,7 @@
     <tr>
       <th>Tiêu đề</th>
       <th>Mô tả</th>
+      <th>Số lượng câu hỏi ngẫu nhiên</th>
       <th>Hành động</th>
     </tr>
   </thead>
@@ -11,6 +12,7 @@
     <tr>
       <td>{{ assignmentTitle }}</td>
       <td>{{ assignmentDescription }}</td>
+      <td>{{ randomMultipleChoiceCount }}</td>
       <td>
         <button nz-button nzType="default" (click)="editAssignment()">
           <i nz-icon nzType="edit" nzTheme="outline"></i> Sửa
@@ -256,6 +258,14 @@
       </nz-form-label>
       <nz-form-control [nzSpan]="18">
         <textarea nz-input [(ngModel)]="editAssignmentData.description" name="editDescription" required></textarea>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSpan]="6" nzFor="editDescription" nzRequired>
+        Số lượng câu hỏi ngẫu nhiên
+      </nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <input nz-input type="number" [(ngModel)]="editAssignmentData.randomMultipleChoiceCount" name="editDescription" required />
       </nz-form-control>
     </nz-form-item>
   </form>

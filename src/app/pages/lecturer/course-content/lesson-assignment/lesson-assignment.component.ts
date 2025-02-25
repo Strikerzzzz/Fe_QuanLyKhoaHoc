@@ -46,6 +46,8 @@ interface QuestionData {
 export class LessonAssignmentComponent implements OnInit {
   assignmentTitle: string = '';
   assignmentDescription: string = '';
+  randomMultipleChoiceCount: number = 0;
+
   courseTitle: string = '';
   fillBlankQuestion: any = { content: '', correctAnswer: '' };
 
@@ -117,6 +119,7 @@ export class LessonAssignmentComponent implements OnInit {
           this.assignmentId = res.data.assignmentId;
           this.assignmentTitle = res.data.title;
           this.assignmentDescription = res.data.description;
+          this.randomMultipleChoiceCount = res.data.randomMultipleChoiceCount;
           if (this.assignmentId !== undefined && this.assignmentId !== null) {
             this.loadQuestions();
           } else {
@@ -437,7 +440,8 @@ export class LessonAssignmentComponent implements OnInit {
   editAssignment(): void {
     this.editAssignmentData = {
       title: this.assignmentTitle,
-      description: this.assignmentDescription
+      description: this.assignmentDescription,
+      randomMultipleChoiceCount: this.randomMultipleChoiceCount
     };
     this.isEditModalVisible = true;
   }
@@ -449,6 +453,7 @@ export class LessonAssignmentComponent implements OnInit {
           this.assignmentId = res.data.assignmentId;
           this.assignmentTitle = res.data.title;
           this.assignmentDescription = res.data.description;
+          this.randomMultipleChoiceCount = res.data.randomMultipleChoiceCount;
         } else {
           this.message.error('Không tìm thấy bài tập!');
         }
@@ -470,6 +475,7 @@ export class LessonAssignmentComponent implements OnInit {
         this.message.success("Cập nhật bài tập thành công!");
         this.assignmentTitle = this.editAssignmentData.title;
         this.assignmentDescription = this.editAssignmentData.description;
+        this.randomMultipleChoiceCount = this.editAssignmentData.randomMultipleChoiceCount;
         this.isEditModalVisible = false;
       },
       err => {
@@ -494,6 +500,7 @@ export class LessonAssignmentComponent implements OnInit {
         this.assignmentId = 0;
         this.assignmentTitle = "";
         this.assignmentDescription = "";
+        this.randomMultipleChoiceCount = 0;
 
         // Điều hướng về trang bài học
         this.router.navigate([`/lecturer/courses-content/${this.courseId}/lesson`]);

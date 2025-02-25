@@ -84,7 +84,6 @@ export class LessonComponent implements OnInit {
       error: (err) => {
         console.error("API Error:", err);
         this.loading = false;
-        this.message.error("Không thể kết nối đến API.");
         this.lessons = [];
         this.totalLessons = 0;
       }
