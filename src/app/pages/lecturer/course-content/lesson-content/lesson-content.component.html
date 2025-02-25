@@ -1,71 +1,96 @@
-<nz-table #basicTable [nzData]="lessonContents" [nzBordered]="true" [nzSize]="'middle'" [nzShowPagination]="false" >
-    <thead>
-      <tr>
-        <th>Nội dung</th>
-        <th>Định dạng</th>
-        <th>File đính kèm</th>
-        <th>Thao tác</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let content of lessonContents">
-        <td>{{ content.content | slice:0:50 }}...</td>
-        <td>{{ content.mediaType }}</td>
-        <td>
-          <ng-container *ngIf="content.mediaUrl">
-            <a [href]="content.mediaUrl" target="_blank">Xem file</a>
-          </ng-container>
-        </td>
-        <td>
-            <div class="action-buttons">
-              <button nz-button nzType="default" (click)="showModal(true, content)">Sửa</button>
-              <button nz-button nzType="primary" nzDanger>Xóa</button>
-            </div>
-          </td>
-          
-      </tr>
-    </tbody>
-  </nz-table>
-  <!-- Hàng thao tác (nút Thêm + Phân trang) -->
+<nz-table #basicTable [nzData]="paginatedContents" [nzBordered]="true" [nzSize]="'middle'" [nzShowPagination]="false">
+  <thead>
+    <tr>
+      <th>Nội dung</th>
+      <th>Định dạng</th>
+      <th>File đính kèm</th>
+      <th>Thao tác</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let content of paginatedContents">
+      <td>{{ content.content }}</td>
+      <td>{{ getMediaTypeLabel(content.mediaType) }}</td>
+      <td>
+        <ng-container *ngIf="content.mediaUrl">
+          <a [href]="content.mediaUrl" target="_blank">Xem file</a>
+        </ng-container>
+      </td>
+      <td>
+        <div class="action-buttons">
+          <button style="margin-right: 8px;" nz-button nzType="default" (click)="showModal(true, content)">Sửa</button>
+          <button nz-button nzType="primary" nzDanger nz-popconfirm nzPopconfirmTitle="Bạn có chắc chắn xóa?"
+            (nzOnConfirm)="deleteContent(content)">
+            <i nz-icon nzType="delete" nzTheme="outline"></i> Xóa
+          </button>
+        </div>
+      </td>
+    </tr>
+  </tbody>
+</nz-table>
+
+<!-- Hàng thao tác: Nút Thêm và Phân trang -->
 <div class="action-row">
-    <div class="action-add">
-      <button nz-button nzType="primary" (click)="showModal(false)">
-        <i nz-icon nzType="plus" nzTheme="outline"></i> Thêm nội dung
-      </button>
-    </div>
-    <div class="action-pagination">
-      <nz-pagination [(nzPageIndex)]="currentPage" [nzPageSize]="pageSize" [nzTotal]="lessonContents.length"
-        (nzPageIndexChange)="onPageChange($event)">
-      </nz-pagination>
-    </div>
+  <div class="action-add">
+    <button nz-button nzType="primary" (click)="showModal(false)">
+      <i nz-icon nzType="plus" nzTheme="outline"></i> Thêm nội dung
+    </button>
   </div>
-  
-  <!-- Modal thêm/sửa nội dung bài học -->
-  <nz-modal [(nzVisible)]="isVisible" [nzTitle]="isEditMode ? 'Sửa nội dung bài học' : 'Thêm nội dung bài học'" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
-    <ng-container *nzModalContent>
+  <div class="action-pagination">
+    <nz-pagination [(nzPageIndex)]="currentPage" [nzPageSize]="pageSize" [nzTotal]="lessonContents.length"
+      (nzPageIndexChange)="onPageChange($event)"></nz-pagination>
+  </div>
+</div>
+
+<!-- Modal Thêm/Sửa nội dung bài học -->
+<nz-modal [(nzVisible)]="isVisible" [nzTitle]="isEditMode ? 'Sửa nội dung bài học' : 'Thêm nội dung bài học'"
+  (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
+  <ng-container *nzModalContent>
+    <!-- Nội dung bài học -->
     <nz-form-item>
       <nz-form-label [nzSpan]="6">Nội dung</nz-form-label>
       <nz-form-control [nzSpan]="18">
         <textarea nz-input [(ngModel)]="lessonContentData.content"></textarea>
       </nz-form-control>
     </nz-form-item>
-  
+
+    <!-- Lựa chọn định dạng -->
     <nz-form-item>
-        <nz-form-label [nzSpan]="6">Định dạng</nz-form-label>
-        <nz-form-control [nzSpan]="18">
-          <nz-checkbox-group [(ngModel)]="selectedFormats">
-            <label nz-checkbox [nzValue]="'image'" [(ngModel)]="lessonContentData.isImage">Ảnh</label>
-            <label nz-checkbox [nzValue]="'video'" [(ngModel)]="lessonContentData.isVideo">Video</label>
-          </nz-checkbox-group>
-        </nz-form-control>
-      </nz-form-item>
-      
-    <nz-form-item>
-      <nz-form-label [nzSpan]="6">Tải file</nz-form-label>
+      <nz-form-label [nzSpan]="6">Định dạng</nz-form-label>
       <nz-form-control [nzSpan]="18">
-        <input type="file"  />
+        <nz-button-group>
+          <button nz-button [nzType]="mediaOption === 'text' ? 'primary' : 'default'"
+            (click)="selectMediaOption('text')">
+            Chỉ văn bản
+          </button>
+          <button nz-button [nzType]="mediaOption === 'file' ? 'primary' : 'default'"
+            (click)="selectMediaOption('file')">
+            Ảnh/Video
+          </button>
+        </nz-button-group>
       </nz-form-control>
     </nz-form-item>
-</ng-container>
-  </nz-modal>
-  
+
+    <!-- Phần tải file chỉ hiển thị khi chọn "Ảnh/Video" -->
+    <nz-form-item *ngIf="mediaOption === 'file'">
+      <nz-form-label [nzSpan]="6">Tải file</nz-form-label>
+      <nz-form-control [nzSpan]="18">
+        <div class="upload-container" (drop)="onFileDrop($event)" (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)" (click)="triggerFileInput()">
+          <p *ngIf="!mediaPreviewUrl">
+            Kéo thả ảnh hoặc video vào đây hoặc click để chọn
+          </p>
+          <ng-container *ngIf="mediaPreviewUrl">
+            <img *ngIf="isImage()" [src]="mediaPreviewUrl" alt="Preview Media" class="media-preview" />
+            <video *ngIf="!isImage()" [src]="mediaPreviewUrl" controls class="media-preview">
+              Trình duyệt của bạn không hỗ trợ video.
+            </video>
+          </ng-container>
+          <input type="file" accept="image/*,video/*" (change)="onFileChange($event)" #fileInput
+            style="display: none;" />
+
+        </div>
+      </nz-form-control>
+    </nz-form-item>
+  </ng-container>
+</nz-modal>
