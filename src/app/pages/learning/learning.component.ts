@@ -27,7 +27,7 @@ export class LearningComponent implements OnInit {
 
   totalItems: number = 0;
   currentPage: number = 1;
-  pageSize: number = 30;
+  pageSize: number = 20;
   searchOptions: string = '';
 
   constructor(private client: Client, private router: Router) { }

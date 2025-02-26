@@ -13,9 +13,9 @@
       <td>{{ getMediaTypeLabel(content.mediaType) }}</td>
       <td>
         <ng-container *ngIf="content.mediaUrl">
-          <a [href]="content.mediaUrl" target="_blank">Xem file</a>
+          <a [href]="'http://localhost:8080' + content.mediaUrl" target="_blank">Xem file</a>
         </ng-container>
-      </td>
+      </td> 
       <td>
         <div class="action-buttons">
           <button style="margin-right: 8px;" nz-button nzType="default" (click)="showModal(true, content)">Sửa</button>

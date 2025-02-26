@@ -2,7 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Client, ContentDtoIEnumerableResult, CreateLessonContentRequest, UpdateLessonContentRequest } from '../../../../shared/api-client';
+import { Client, ContentDtoIEnumerableResult, CreateLessonContentRequest, FileParameter, UpdateLessonContentRequest } from '../../../../shared/api-client';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -42,7 +42,6 @@ export class LessonContentComponent implements OnInit {
   isEditMode = false;
   currentPage = 1;
   pageSize = 5;
-  // LessonId lấy từ route
   lessonId!: number;
   mediaPreviewUrl: string | null = null;
   selectedFile: File | null = null;
@@ -54,7 +53,6 @@ export class LessonContentComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // Lấy lessonId từ route parameter và tải nội dung bài học
     this.route.paramMap.subscribe(params => {
       this.lessonId = Number(params.get('lessonId'));
       this.loadLessonContents();
@@ -100,12 +98,10 @@ export class LessonContentComponent implements OnInit {
     }
   }
 
-
-
   handleOk(): void {
     if (this.mediaOption === 'file') {
-      // Nếu có file được chọn, tự động xác định định dạng dựa trên MIME type
       if (this.selectedFile) {
+        // Xác định mediaType theo MIME type
         if (this.selectedFile.type.startsWith('image')) {
           this.lessonContentData.mediaType = 'image';
         } else if (this.selectedFile.type.startsWith('video')) {
@@ -113,65 +109,63 @@ export class LessonContentComponent implements OnInit {
         } else {
           this.lessonContentData.mediaType = 'text';
         }
-        // Tạo URL tạm thời để lưu (hoặc upload sau)
-        this.lessonContentData.mediaUrl = URL.createObjectURL(this.selectedFile);
+
+        // Gọi hàm upload file trước khi lưu
+        this.uploadFile();
       } else {
-        // Nếu không chọn file khi nhấn nút file, cảnh báo hoặc mặc định là text
         this.message.warning('Vui lòng chọn file!');
         return;
       }
     } else {
-      // Nếu chọn Chỉ văn bản
+      // Nếu chỉ nhập văn bản
       this.lessonContentData.mediaType = 'text';
       this.lessonContentData.mediaUrl = '';
+      this.saveLessonContent();
     }
-
-    const performSave = () => {
-      if (this.isEditMode) {
-        // Lấy ID cập nhật
-        const updateId = this.lessonContentData.lessonContentId;
-        if (!updateId) {
-          this.message.error("ID không được xác định!");
-          return;
-        }
-        const updateRequest = new UpdateLessonContentRequest();
-        updateRequest.lessonContentId = updateId;
-        updateRequest.mediaType = this.lessonContentData.mediaType;  // Đã có giá trị "image" hoặc "video"
-        updateRequest.mediaUrl = this.lessonContentData.mediaUrl;
-        updateRequest.content = this.lessonContentData.content;
-
-        this.client.lessonContentsPUT(updateId, updateRequest).subscribe(
-          res => {
-            this.message.success("Cập nhật nội dung thành công!");
-            this.loadLessonContents();
-          },
-          err => {
-            this.message.error("Lỗi khi cập nhật nội dung!");
-          }
-        );
-      } else {
-        const createRequest = new CreateLessonContentRequest();
-        createRequest.lessonId = this.lessonId;
-        createRequest.mediaType = this.lessonContentData.mediaType;
-        createRequest.mediaUrl = this.lessonContentData.mediaUrl;
-        createRequest.content = this.lessonContentData.content;
-
-        this.client.lessonContentsPOST(createRequest).subscribe(
-          res => {
-            this.message.success("Thêm nội dung thành công!");
-            this.loadLessonContents();
-          },
-          err => {
-            this.message.error("Lỗi khi thêm nội dung!");
-          }
-        );
-      }
-    };
-
-    performSave();
-    this.isVisible = false;
   }
 
+  handleUploadSuccess(uploadedUrl: string): void {
+    this.lessonContentData.mediaUrl = uploadedUrl;
+    this.saveLessonContent();
+  }
+
+  saveLessonContent(): void {
+    if (this.isEditMode) {
+      const updateRequest = new UpdateLessonContentRequest();
+      updateRequest.lessonContentId = this.lessonContentData.lessonContentId!;
+      updateRequest.mediaType = this.lessonContentData.mediaType;
+      updateRequest.mediaUrl = this.lessonContentData.mediaUrl;
+      updateRequest.content = this.lessonContentData.content;
+
+      this.client.lessonContentsPUT(updateRequest.lessonContentId!, updateRequest).subscribe(
+        () => {
+          this.message.success('Cập nhật nội dung thành công!');
+          this.loadLessonContents();
+        },
+        err => {
+          this.message.error('Lỗi khi cập nhật nội dung!');
+        }
+      );
+    } else {
+      const createRequest = new CreateLessonContentRequest();
+      createRequest.lessonId = this.lessonId!;
+      createRequest.mediaType = this.lessonContentData.mediaType;
+      createRequest.mediaUrl = this.lessonContentData.mediaUrl;
+      createRequest.content = this.lessonContentData.content;
+
+      this.client.lessonContentsPOST(createRequest).subscribe(
+        () => {
+          this.message.success('Thêm nội dung thành công!');
+          this.loadLessonContents();
+        },
+        err => {
+          this.message.error('Lỗi khi thêm nội dung!');
+        }
+      );
+    }
+
+    this.isVisible = false;
+  }
 
 
   handleCancel(): void {
@@ -274,4 +268,31 @@ export class LessonContentComponent implements OnInit {
       this.mediaPreviewUrl = null;
     }
   }
+
+  uploadFile(): void {
+    if (!this.selectedFile) {
+      this.message.error('Vui lòng chọn file trước khi tải lên!');
+      return;
+    }
+
+    const fileParam = {
+      data: this.selectedFile,
+      fileName: this.selectedFile.name
+    };
+
+    this.client.upload(fileParam).subscribe(
+      res => {
+        if (res.succeeded && res.data?.url) {
+          this.handleUploadSuccess(res.data.url);
+        } else {
+          this.message.error('Lỗi khi tải file lên!');
+        }
+      },
+      err => {
+        this.message.error('Lỗi khi tải file lên!');
+        console.error(err);
+      }
+    );
+  }
+
 }

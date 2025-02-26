@@ -7,7 +7,7 @@
   /* Padding cho container */
   background: #f0f2f5;
   min-height: 100vh;
-  
+
 }
 
 .loading-container,
@@ -33,7 +33,7 @@
 }
 
 .course-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-5px);
   /* Nâng lên nhẹ khi hover */
   box-shadow: 0 12px 18px rgba(0, 0, 0, 0.2);
   /* Shadow mạnh hơn tạo hiệu ứng 3D */
@@ -64,6 +64,7 @@
   color: rgba(0, 0, 0, 0.65);
   margin: 0;
 }
+
 /* Thanh tìm kiếm */
 .search-container {
   display: flex;
@@ -89,7 +90,7 @@
 }
 
 .search-container button {
-  
+
   background: #1890ff;
   color: white;
   border: none;
@@ -114,4 +115,3 @@
   margin-top: 32px;
   padding-right: 20px;
 }
-

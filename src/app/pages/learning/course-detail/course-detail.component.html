@@ -39,7 +39,7 @@
     </div>
 
     <div id="gioiThieu" class="course-description">
-      <p style="white-space: pre-line;" *ngIf="course.description">{{ course.description }}</p>
+      <p *ngIf="course.description">{{ course.description }}</p>
       <p *ngIf="!course.description; ">Không có mô tả</p>
     </div>
 
