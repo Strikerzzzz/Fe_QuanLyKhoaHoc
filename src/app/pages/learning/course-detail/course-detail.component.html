@@ -1,0 +1,67 @@
+<div class="container">
+
+  <div class="course-container">
+    <!-- Sidebar cố định bên phải -->
+    <div class="sidebar">
+      <div class="course-price">
+        <span *ngIf="course.price && course.price !== 0; else freePrice">
+          {{ course.price | currency: 'VND':'symbol':'1.0-0':'vi-VN' }}
+        </span>
+        <ng-template #freePrice>Miễn phí</ng-template>
+      </div>
+      <div class="course-info-side">
+        <p><strong>Thông tin khóa học</strong></p>
+        <p>Số bài học: {{ lessons.length || 0 }}</p>
+      </div>
+      <button nz-button nzType="primary">Đăng nhập để tiếp tục</button>
+    </div>
+    <div class="course-header">
+      <div class="course-banner">
+        <h1>{{ course.title }}</h1>
+        <div class="keyword-container" *ngIf="course.keywords">
+          <span class="keyword-pill" *ngFor="let keyword of keywordList">
+            {{ keyword }}
+          </span>
+        </div>
+
+        <div class="course-meta">
+          <span>Độ khó: {{ course.difficulty || "Không xác định" }}</span>
+        </div>
+      </div>
+      <div class="course-info">
+        <img [src]="course.avatarUrl" alt="{{ course.title }}">
+      </div>
+    </div>
+
+    <div class="tab-container">
+      <button (click)="scrollToSection('gioiThieu')">Giới thiệu</button>
+      <button (click)="scrollToSection('noiDung')">Nội dung</button>
+    </div>
+
+    <div id="gioiThieu" class="course-description">
+      <p style="white-space: pre-line;" *ngIf="course.description">{{ course.description }}</p>
+      <p *ngIf="!course.description; ">Không có mô tả</p>
+    </div>
+
+    <div id="noiDung" class="lesson-container">
+      <h3>📚 Danh sách bài học</h3>
+      <nz-list *ngIf="lessons.length > 0" [nzBordered]="true" class="lesson-list">
+        <nz-list-item *ngFor="let lesson of lessons; let i = index" (click)="selectLesson(lesson)"
+          [class.selected]="selectedLesson?.lessonId === lesson.lessonId">
+          <nz-list-item-meta [nzAvatar]="lessonIcon" [nzTitle]="'Bài ' + (i + 1) + ': ' + lesson.title">
+          </nz-list-item-meta>
+        </nz-list-item>
+      </nz-list>
+
+      <p *ngIf="lessons.length === 0" class="no-lessons">❌ Chưa có bài học nào!</p>
+    </div>
+
+    <ng-template #lessonIcon>
+      <i nz-icon nzType="book" nzTheme="outline"></i>
+    </ng-template>
+
+
+  </div>
+
+
+</div>

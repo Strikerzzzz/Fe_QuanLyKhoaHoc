@@ -67,7 +67,14 @@ export interface IClient {
     /**
      * @return OK
      */
-    public(): Observable<ObjectResult>;
+    details(id: number): Observable<CourseDtoResult>;
+    /**
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @param options (optional) 
+     * @return OK
+     */
+    public(page: number | undefined, pageSize: number | undefined, options: string | undefined): Observable<CoursePagedResultResult>;
     /**
      * @param page (optional) 
      * @param pageSize (optional) 
@@ -1145,8 +1152,91 @@ export class Client implements IClient {
     /**
      * @return OK
      */
-    public(): Observable<ObjectResult> {
-        let url_ = this.baseUrl + "/api/Courses/public";
+    details(id: number): Observable<CourseDtoResult> {
+        let url_ = this.baseUrl + "/api/Courses/details/{id}";
+        if (id === undefined || id === null)
+            throw new Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDetails(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDetails(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<CourseDtoResult>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<CourseDtoResult>;
+        }));
+    }
+
+    protected processDetails(response: HttpResponseBase): Observable<CourseDtoResult> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = CourseDtoResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ObjectResult.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ObjectResult.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @param options (optional) 
+     * @return OK
+     */
+    public(page: number | undefined, pageSize: number | undefined, options: string | undefined): Observable<CoursePagedResultResult> {
+        let url_ = this.baseUrl + "/api/Courses/public?";
+        if (page === null)
+            throw new Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (options === null)
+            throw new Error("The parameter 'options' cannot be null.");
+        else if (options !== undefined)
+            url_ += "options=" + encodeURIComponent("" + options) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -1164,14 +1254,14 @@ export class Client implements IClient {
                 try {
                     return this.processPublic(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<ObjectResult>;
+                    return _observableThrow(e) as any as Observable<CoursePagedResultResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<ObjectResult>;
+                return _observableThrow(response_) as any as Observable<CoursePagedResultResult>;
         }));
     }
 
-    protected processPublic(response: HttpResponseBase): Observable<ObjectResult> {
+    protected processPublic(response: HttpResponseBase): Observable<CoursePagedResultResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1182,7 +1272,7 @@ export class Client implements IClient {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ObjectResult.fromJS(resultData200);
+            result200 = CoursePagedResultResult.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status === 500) {
@@ -4168,6 +4258,58 @@ export interface ICourseDto {
     difficulty?: string | undefined;
     keywords?: string | undefined;
     avatarUrl?: string | undefined;
+}
+
+export class CourseDtoResult implements ICourseDtoResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: CourseDto;
+
+    constructor(data?: ICourseDtoResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            this.data = _data["data"] ? CourseDto.fromJS(_data["data"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): CourseDtoResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new CourseDtoResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface ICourseDtoResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: CourseDto;
 }
 
 export class CoursePagedResult implements ICoursePagedResult {

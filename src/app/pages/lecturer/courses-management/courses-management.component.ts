@@ -34,7 +34,7 @@ export class CoursesManagementComponent {
 
   // Các biến phân trang và tìm kiếm
   currentPage: number = 1;
-  pageSize: number = 2;
+  pageSize: number = 10;
   searchOptions: string = '';
   totalItems = 0;
 

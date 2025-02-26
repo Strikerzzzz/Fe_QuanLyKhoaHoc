@@ -1,4 +1,11 @@
 <div class="course-container">
+    <div class="search-container">
+        <nz-input-group nzSuffix>
+          <input type="text" nz-input placeholder="Tìm kiếm..." [(ngModel)]="searchOptions" />
+          <button nz-button nzType="primary" (click)="searchCourses()">Tìm kiếm</button>
+        </nz-input-group>
+      </div>
+
     <!-- Header sử dụng nz-page-header -->
     <nz-page-header nzTitle="Danh sách khóa học"></nz-page-header>
 
@@ -13,7 +20,7 @@
     </div>
     <nz-row *ngIf="!loading && !error" [nzGutter]="[24, 32]" class="courses-row">
         <nz-col *ngFor="let course of courses" [nzSpan]="6" [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
-            <nz-card class="course-card" [nzHoverable]="true" [nzCover]="coverTemplate">
+            <nz-card class="course-card" [nzHoverable]="true" [nzCover]="coverTemplate"  (click)="goToCourseDetail(course.courseId)">
                 <ng-template #coverTemplate>
                     <img [src]="course.avatarUrl" alt="{{ course.title }}" class="course-image" />
                 </ng-template>
@@ -30,4 +37,14 @@
             </nz-card>
         </nz-col>
     </nz-row>
+    <div class="action-pagination">
+        <nz-pagination
+          [nzPageIndex]="currentPage"
+          [nzPageSize]="pageSize"
+          [nzTotal]="totalItems"
+          (nzPageIndexChange)="onPageIndexChange($event)"
+          (nzPageSizeChange)="onPageSizeChange($event)"
+        >
+        </nz-pagination>
+      </div>
 </div>
