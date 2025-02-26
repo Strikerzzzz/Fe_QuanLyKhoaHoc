@@ -4,12 +4,12 @@
     <button style="margin: 16px;" nz-button nzType="primary" (click)="searchCourses()">Tìm kiếm</button>
   </nz-input-group>
 </div>
-<nz-table #basicTable [nzData]="courses" [nzBordered]="true" [nzSize]="'middle'" [nzLoading]="loading" [nzShowPagination]="false">
+<nz-table #basicTable [nzData]="courses" [nzBordered]="true" [nzSize]="'middle'" [nzLoading]="loading"
+  [nzShowPagination]="false">
   <thead>
     <tr>
       <th nzWidth="8%">Avatar</th>
       <th nzWidth="15%">Tên khóa học</th>
-      <th nzWidth="20%">Mô tả</th>
       <th nzWidth="10%">Giá</th>
       <th nzWidth="10%">Độ khó</th>
       <th nzWidth="10%">Từ khóa</th>
@@ -32,7 +32,6 @@
       </td>
       <!-- Các cột thông tin -->
       <td>{{ course.title }}</td>
-      <td>{{ course.description }}</td>
       <td>{{ course.price | currency:'VND':'symbol':'1.0-0':'vi-VN' }}</td>
       <td>{{ course.difficulty }}</td>
       <td>{{ course.keywords }}</td>
@@ -65,13 +64,8 @@
 
   <!-- Pagination bên phải -->
   <div class="action-pagination">
-    <nz-pagination
-      [nzPageIndex]="currentPage"
-      [nzPageSize]="pageSize"
-      [nzTotal]="totalItems"
-      (nzPageIndexChange)="onPageIndexChange($event)"
-      (nzPageSizeChange)="onPageSizeChange($event)"
-    >
+    <nz-pagination [nzPageIndex]="currentPage" [nzPageSize]="pageSize" [nzTotal]="totalItems"
+      (nzPageIndexChange)="onPageIndexChange($event)" (nzPageSizeChange)="onPageSizeChange($event)">
     </nz-pagination>
   </div>
 </div>
@@ -95,44 +89,44 @@
   </ng-container>
 </nz-modal>
 <nz-modal [(nzVisible)]="isVisible" [nzTitle]="isEditMode ? 'Sửa khóa học' : 'Thêm khóa học'" (nzOnOk)="handleOk()"
-  (nzOnCancel)="handleCancel()">
+  (nzOnCancel)="handleCancel()" [nzWidth]="'90%'">
   <!-- Sử dụng nzLayout="horizontal" để tạo layout 2 cột -->
   <form nz-form nzLayout="horizontal" *nzModalContent>
     <nz-form-item>
-      <nz-form-label [nzSpan]="6" nzFor="title" nzRequired>
+      <nz-form-label [nzSpan]="2" nzFor="title" nzRequired>
         Tên khóa học
       </nz-form-label>
-      <nz-form-control [nzSpan]="14">
+      <nz-form-control [nzSpan]="24">
         <input nz-input id="title" [(ngModel)]="courseData.title" name="title" required />
       </nz-form-control>
     </nz-form-item>
 
     <nz-form-item>
-      <nz-form-label [nzSpan]="6" nzFor="description">
+      <nz-form-label [nzSpan]="2" nzFor="description">
         Mô tả
       </nz-form-label>
-      <nz-form-control [nzSpan]="14">
+      <nz-form-control [nzSpan]="24">
         <!-- Tăng số dòng tối thiểu và tối đa để trường mô tả rộng hơn -->
         <textarea nz-input id="description" [(ngModel)]="courseData.description" name="description"
-          nzAutosize="{ minRows: 7, maxRows: 12 }">
+          nzAutosize="{ minRows: 7, maxRows: 30 }">
         </textarea>
       </nz-form-control>
     </nz-form-item>
 
     <nz-form-item>
-      <nz-form-label [nzSpan]="6" nzFor="price">
+      <nz-form-label [nzSpan]="2" nzFor="price">
         Giá
       </nz-form-label>
-      <nz-form-control [nzSpan]="14">
+      <nz-form-control [nzSpan]="24">
         <input nz-input id="price" type="number" [(ngModel)]="courseData.price" name="price" />
       </nz-form-control>
     </nz-form-item>
 
     <nz-form-item>
-      <nz-form-label [nzSpan]="6" nzFor="difficulty">
+      <nz-form-label [nzSpan]="2" nzFor="difficulty">
         Độ khó
       </nz-form-label>
-      <nz-form-control [nzSpan]="14">
+      <nz-form-control [nzSpan]="24">
         <nz-select id="difficulty" [(ngModel)]="courseData.difficulty" name="difficulty" nzPlaceHolder="Chọn độ khó">
           <nz-option *ngFor="let level of difficultyLevels" [nzValue]="level.value" [nzLabel]="level.label"></nz-option>
         </nz-select>
@@ -140,10 +134,10 @@
     </nz-form-item>
 
     <nz-form-item>
-      <nz-form-label [nzSpan]="6" nzFor="keywords">
+      <nz-form-label [nzSpan]="2" nzFor="keywords">
         Từ khóa
       </nz-form-label>
-      <nz-form-control [nzSpan]="14">
+      <nz-form-control [nzSpan]="24">
         <nz-select id="keywords" [(ngModel)]="keywordString" name="keywords" nzMode="tags"
           nzPlaceHolder="Nhập hoặc chọn từ khóa" (nzOnSearch)="onSearchKeyword($event)"
           (ngModelChange)="updateKeywordString()">

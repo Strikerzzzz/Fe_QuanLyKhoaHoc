@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router, ActivatedRoute, } from '@angular/router';
-import { Client } from '../../../../shared/api-client';
+import { Client, MultipleChoiceQuestionImportDto } from '../../../../shared/api-client';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzModalModule } from 'ng-zorro-antd/modal';
@@ -14,9 +14,15 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { QuestionType } from '../../../../shared/api-client';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzModalService } from 'ng-zorro-antd/modal';
 import { switchMap } from 'rxjs';
 import { ExamStateService } from '../../../../services/exam-state.service';
+
+interface QuestionData {
+  question: string;
+  choices?: string[];
+  correctAnswerIndex?: number | null;
+  answerGroupNumber?: number;
+}
 
 @Component({
   selector: 'app-exam',
@@ -30,6 +36,7 @@ export class ExamComponent implements OnInit {
   examTitle: string = '';
   examDescription: string = '';
   courseTitle: string = '';
+  randomMultipleChoiceCount: number = 0;
 
   multipleChoiceQuestions: any[] = [];
   fillInBlankQuestions: any[] = [];
@@ -54,6 +61,28 @@ export class ExamComponent implements OnInit {
   editingQuestion: any | null = null;
   isEditMode = false;
 
+  rawText: string = `dạng 1
+  Câu 1. Nội dung câu hỏi?
+  A. Đáp án A
+  *B. Đáp án B
+  C. Đáp án C
+  D. Đáp án D
+  
+  Câu 2. Nội dung câu hỏi khác?
+  A. Lựa chọn A
+  *B. Lựa chọn B
+  C. Lựa chọn C
+  D. Lựa chọn D
+  
+  dạng 2
+  Câu 3. Nội dung câu hỏi mới?
+  A. Option A
+  *B. Option B
+  C. Option C
+  D. Option D`;
+
+  parsedQuestions: QuestionData[] = [];
+
   constructor(
     private client: Client,
     private message: NzMessageService,
@@ -76,6 +105,7 @@ export class ExamComponent implements OnInit {
             this.examId = res.data.examId;
             this.examTitle = res.data.title;
             this.examDescription = res.data.description;
+            this.randomMultipleChoiceCount = res.data.randomMultipleChoiceCount;
             this.loadQuestions();
           } else {
             this.message.error('Không tìm thấy bài kiểm tra!');
@@ -382,7 +412,8 @@ export class ExamComponent implements OnInit {
   editExam(): void {
     this.editExamData = {
       title: this.examTitle,
-      description: this.examDescription
+      description: this.examDescription,
+      randomMultipleChoiceCount: this.randomMultipleChoiceCount
     };
     this.isEditModalVisible = true;
   }
@@ -399,6 +430,7 @@ export class ExamComponent implements OnInit {
         this.message.success("Cập nhật bài kiểm tra thành công!");
         this.examTitle = this.editExamData.title;
         this.examDescription = this.editExamData.description;
+        this.randomMultipleChoiceCount = this.editExamData.randomMultipleChoiceCount;
         this.isEditModalVisible = false;
       },
       err => {
@@ -423,6 +455,7 @@ export class ExamComponent implements OnInit {
         this.examId = 0;
         this.examTitle = "";
         this.examDescription = "";
+        this.randomMultipleChoiceCount = 0;
         this.examStateService.setExamExists(false);
         // Điều hướng về trang bài học
         this.router.navigate([`/lecturer/courses-content/${this.courseId}/lesson`]);
@@ -433,4 +466,94 @@ export class ExamComponent implements OnInit {
     );
   }
 
+  parseText(): void {
+    const lines = this.rawText
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line !== '');
+    let currentGroupNumber: number | null = null;
+    let currentQuestion: QuestionData | null = null;
+    const questions: QuestionData[] = [];
+    let answerLines: string[] = [];
+    let collectingAnswers = false;
+
+    const finalizeQuestion = () => {
+      if (currentQuestion) {
+        let correctAnswerIndex: number | null = null;
+        // Xử lý đáp án: loại bỏ dấu '*' nếu có và loại bỏ prefix chữ (A., B., …)
+        const choices = answerLines.map((line, index) => {
+          let processedLine = line;
+          if (processedLine.startsWith('*')) {
+            processedLine = processedLine.substring(1).trim();
+            correctAnswerIndex = index;
+          }
+          processedLine = processedLine.replace(/^[A-Z]\.\s*/, '');
+          return processedLine;
+        });
+        currentQuestion.choices = choices;
+        currentQuestion.correctAnswerIndex = correctAnswerIndex;
+        if (currentGroupNumber !== null) {
+          currentQuestion.answerGroupNumber = currentGroupNumber;
+        }
+        // Loại bỏ prefix "Câu X. " khỏi nội dung câu hỏi
+        currentQuestion.question = currentQuestion.question.replace(/^Câu\s+\d+\.\s*/, '');
+        questions.push(currentQuestion);
+        currentQuestion = null;
+        answerLines = [];
+        collectingAnswers = false;
+      }
+    };
+
+    // Duyệt qua từng dòng
+    for (const line of lines) {
+      if (/^dạng\s+\d+/i.test(line)) {
+        // Nếu gặp header nhóm ("dạng X"), hoàn thiện câu hỏi hiện tại và cập nhật nhóm
+        finalizeQuestion();
+        const match = line.match(/^dạng\s+(\d+)/i);
+        if (match) {
+          currentGroupNumber = parseInt(match[1], 10);
+        }
+      } else if (/^câu\s+\d+\./i.test(line)) {
+        // Khi gặp dòng bắt đầu câu hỏi ("Câu X. ..."), hoàn thiện câu hỏi trước và tạo mới
+        finalizeQuestion();
+        currentQuestion = { question: line };
+        collectingAnswers = true;
+      } else {
+        // Các dòng còn lại là đáp án
+        if (collectingAnswers && currentQuestion) {
+          answerLines.push(line);
+        }
+      }
+    }
+    finalizeQuestion();
+    this.parsedQuestions = questions;
+    console.log("Parsed Questions:", this.parsedQuestions);
+  }
+  importQuestions(): void {
+    if (!this.parsedQuestions.length) {
+      this.message.warning('Không có câu hỏi để import.');
+      return;
+    }
+    // Chuyển đổi parsedQuestions sang DTO theo định dạng backend
+    const dtos: MultipleChoiceQuestionImportDto[] = this.parsedQuestions.map(q =>
+      MultipleChoiceQuestionImportDto.fromJS({
+        content: q.question,
+        // Sử dụng JSON.stringify để chuyển mảng đáp án thành chuỗi JSON
+        choices: q.choices ? JSON.stringify(q.choices) : "[]",
+        correctAnswerIndex: q.correctAnswerIndex,
+        answerGroupNumber: q.answerGroupNumber,
+        assignmentId: null,
+        examId: this.examId
+      })
+    );
+    this.client.multipleChoice(dtos).subscribe({
+      next: result => {
+        this.message.success('Import câu hỏi trắc nghiệm thành công.');
+        this.loadQuestions();
+      },
+      error: error => {
+        this.message.error('Import thất bại: ' + error);
+      }
+    });
+  }
 }

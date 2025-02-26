@@ -44,7 +44,7 @@ export class UserManagementComponent implements OnInit {
 
   // Các biến phân trang và tìm kiếm
   currentPage: number = 1;
-  pageSize: number = 2;
+  pageSize: number = 10;
   searchOptions: string = '';
   totalItems: number = 0;
 
@@ -97,7 +97,7 @@ export class UserManagementComponent implements OnInit {
       },
       error: () => {
         this.loading = false;
-        this.message.error('Không thể kết nối đến API.');
+        this.message.error('Không tìm thấy người dùng.');
       }
     });
   }

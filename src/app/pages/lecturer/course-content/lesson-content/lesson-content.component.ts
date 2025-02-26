@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, ActivatedRoute, RouterModule } from '@angular/router';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Client, CreateLessonRequest, UpdateLessonRequest } from '../../../../shared/api-client';
+import { Client, ContentDtoIEnumerableResult, CreateLessonContentRequest, UpdateLessonContentRequest } from '../../../../shared/api-client';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -12,7 +12,8 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
+import { NzRadioModule } from 'ng-zorro-antd/radio';
+
 @Component({
   selector: 'app-lesson-content',
   imports: [
@@ -27,75 +28,250 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
     NzInputModule,
     RouterModule,
     NzSelectModule,
-    NzCheckboxModule
+    NzRadioModule
   ],
   templateUrl: './lesson-content.component.html',
   styleUrl: './lesson-content.component.scss'
 })
-export class LessonContentComponent  implements OnInit{
+export class LessonContentComponent implements OnInit {
+  @ViewChild('fileInput', { static: false }) fileInput!: ElementRef<HTMLInputElement>;
   lessonContents: any[] = [];
-  displayedContents: any[] = [];
-  lessonContentData: any = {};
+  lessonContentData: any = { content: '', mediaUrl: '' };
+  mediaOption: 'text' | 'file' = 'text';
   isVisible = false;
   isEditMode = false;
   currentPage = 1;
   pageSize = 5;
-  selectedFormats: string[] = [];
-  constructor(private message: NzMessageService) {}
+  // LessonId lấy từ route
+  lessonId!: number;
+  mediaPreviewUrl: string | null = null;
+  selectedFile: File | null = null;
+
+  constructor(
+    private message: NzMessageService,
+    private route: ActivatedRoute,
+    private client: Client
+  ) { }
 
   ngOnInit(): void {
-   
+    // Lấy lessonId từ route parameter và tải nội dung bài học
+    this.route.paramMap.subscribe(params => {
+      this.lessonId = Number(params.get('lessonId'));
+      this.loadLessonContents();
+    });
+  }
+
+  // Tải danh sách nội dung bài học qua API
+  loadLessonContents(): void {
+    this.client.lessonContentsGET(this.lessonId).subscribe(
+      (res: ContentDtoIEnumerableResult) => {
+        if (res.data) {
+          this.lessonContents = res.data;
+        } else {
+          this.lessonContents = [];
+        }
+      },
+      err => {
+        this.message.error('Lỗi khi tải danh sách nội dung bài học!');
+        console.error(err);
+      }
+    );
   }
 
   showModal(isEdit: boolean, content?: any): void {
     this.isEditMode = isEdit;
-    //this.lessonContentData = isEdit && content ? { ...content } : {};
     this.isVisible = true;
+
+    this.selectedFile = null;
+    this.mediaPreviewUrl = null;
+
     if (isEdit && content) {
       this.lessonContentData = { ...content };
-  
-      // Nếu mediaType chứa "image" thì chọn checkbox Ảnh
-      this.lessonContentData.isImage = content.mediaType.includes("image");
-  
-      // Nếu mediaType chứa "video" thì chọn checkbox Video
-      this.lessonContentData.isVideo = content.mediaType.includes("video");
+
+      if (this.lessonContentData.mediaType === 'text') {
+        this.mediaOption = 'text';
+      } else {
+        this.mediaOption = 'file';
+        this.mediaPreviewUrl = this.lessonContentData.mediaUrl || null;
+      }
     } else {
-      this.lessonContentData = { content: '', isImage: false, isVideo: false, mediaUrl: '' };
+      this.lessonContentData = { content: '', mediaType: 'text', mediaUrl: '' };
+      this.mediaOption = 'text';
     }
   }
 
+
+
   handleOk(): void {
+    if (this.mediaOption === 'file') {
+      // Nếu có file được chọn, tự động xác định định dạng dựa trên MIME type
+      if (this.selectedFile) {
+        if (this.selectedFile.type.startsWith('image')) {
+          this.lessonContentData.mediaType = 'image';
+        } else if (this.selectedFile.type.startsWith('video')) {
+          this.lessonContentData.mediaType = 'video';
+        } else {
+          this.lessonContentData.mediaType = 'text';
+        }
+        // Tạo URL tạm thời để lưu (hoặc upload sau)
+        this.lessonContentData.mediaUrl = URL.createObjectURL(this.selectedFile);
+      } else {
+        // Nếu không chọn file khi nhấn nút file, cảnh báo hoặc mặc định là text
+        this.message.warning('Vui lòng chọn file!');
+        return;
+      }
+    } else {
+      // Nếu chọn Chỉ văn bản
+      this.lessonContentData.mediaType = 'text';
+      this.lessonContentData.mediaUrl = '';
+    }
+
+    const performSave = () => {
+      if (this.isEditMode) {
+        // Lấy ID cập nhật
+        const updateId = this.lessonContentData.lessonContentId;
+        if (!updateId) {
+          this.message.error("ID không được xác định!");
+          return;
+        }
+        const updateRequest = new UpdateLessonContentRequest();
+        updateRequest.lessonContentId = updateId;
+        updateRequest.mediaType = this.lessonContentData.mediaType;  // Đã có giá trị "image" hoặc "video"
+        updateRequest.mediaUrl = this.lessonContentData.mediaUrl;
+        updateRequest.content = this.lessonContentData.content;
+
+        this.client.lessonContentsPUT(updateId, updateRequest).subscribe(
+          res => {
+            this.message.success("Cập nhật nội dung thành công!");
+            this.loadLessonContents();
+          },
+          err => {
+            this.message.error("Lỗi khi cập nhật nội dung!");
+          }
+        );
+      } else {
+        const createRequest = new CreateLessonContentRequest();
+        createRequest.lessonId = this.lessonId;
+        createRequest.mediaType = this.lessonContentData.mediaType;
+        createRequest.mediaUrl = this.lessonContentData.mediaUrl;
+        createRequest.content = this.lessonContentData.content;
+
+        this.client.lessonContentsPOST(createRequest).subscribe(
+          res => {
+            this.message.success("Thêm nội dung thành công!");
+            this.loadLessonContents();
+          },
+          err => {
+            this.message.error("Lỗi khi thêm nội dung!");
+          }
+        );
+      }
+    };
+
+    performSave();
     this.isVisible = false;
-    // Chuyển đổi checkbox thành chuỗi mediaType
-  const selectedTypes = [];
-  if (this.lessonContentData.isImage) selectedTypes.push("image");
-  if (this.lessonContentData.isVideo) selectedTypes.push("video");
-
-  this.lessonContentData.mediaType = selectedTypes.join(","); // Kết quả: "image,video"
-
-  console.log("Dữ liệu lưu:", this.lessonContentData);
   }
+
+
 
   handleCancel(): void {
     this.isVisible = false;
   }
 
+  // Xóa nội dung bài học qua API
   deleteContent(content: any): void {
-    this.message.success('Xóa nội dung thành công!');
+    this.client.lessonContentsDELETE(content.lessonContentId).subscribe(
+      res => {
+        this.message.success("Xóa nội dung thành công!");
+        this.loadLessonContents();
+      },
+      err => {
+        this.message.error("Lỗi khi xóa nội dung!");
+      }
+    );
   }
 
-  onFileChange(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.lessonContentData.mediaUrl = file.name;
-    }
-  }
+  // Phân trang: Lấy danh sách nội dung được phân trang
   get paginatedContents() {
     const startIndex = (this.currentPage - 1) * this.pageSize;
     return this.lessonContents.slice(startIndex, startIndex + this.pageSize);
   }
 
-  onPageChange(page: number) {
+  onPageChange(page: number): void {
     this.currentPage = page;
+  }
+
+  getMediaTypeLabel(mediaType: string): string {
+    switch (mediaType) {
+      case 'image':
+        return 'Ảnh';
+      case 'video':
+        return 'Video';
+      case 'text':
+        return 'Chỉ văn bản';
+      default:
+        return mediaType;
+    }
+  }
+  onFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      // Kiểm tra nếu file không phải ảnh hoặc video
+      if (!file.type.startsWith('image') && !file.type.startsWith('video')) {
+        this.message.error('Vui lòng chọn file ảnh hoặc video!');
+        this.selectedFile = null;
+        this.mediaPreviewUrl = null;
+        return;
+      }
+      this.selectedFile = file;
+      this.mediaPreviewUrl = URL.createObjectURL(file);
+    }
+  }
+
+  // Xử lý kéo thả file
+  onFileDrop(event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer && event.dataTransfer.files.length > 0) {
+      const file = event.dataTransfer.files[0];
+      // Kiểm tra nếu file không phải ảnh hoặc video
+      if (!file.type.startsWith('image') && !file.type.startsWith('video')) {
+        this.message.error('Vui lòng chọn file ảnh hoặc video!');
+        this.selectedFile = null;
+        this.mediaPreviewUrl = null;
+        return;
+      }
+      this.selectedFile = file;
+      this.mediaPreviewUrl = URL.createObjectURL(file);
+    }
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+  }
+
+  // Kích hoạt input file khi click vào vùng tải file
+  triggerFileInput(): void {
+    if (this.fileInput) {
+      this.fileInput.nativeElement.click();
+    }
+  }
+
+
+  // Kiểm tra xem file đã chọn có phải là ảnh hay không
+  isImage(): boolean {
+    return this.selectedFile ? this.selectedFile.type.startsWith('image') : false;
+  }
+  selectMediaOption(option: 'text' | 'file'): void {
+    this.mediaOption = option;
+    // Nếu chọn text, reset file và preview
+    if (option === 'text') {
+      this.selectedFile = null;
+      this.mediaPreviewUrl = null;
+    }
   }
 }

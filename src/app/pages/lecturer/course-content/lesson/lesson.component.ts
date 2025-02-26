@@ -37,7 +37,7 @@ export class LessonComponent implements OnInit {
   isEditMode = false;   // true: cập nhật, false: tạo mới
 
   currentPage = 1;
-  pageSize = 2;
+  pageSize = 10;
   courseId!: number; // ID khóa học chứa bài học
   totalLessons = 0;
   isAssignmentModalVisible = false;
@@ -62,44 +62,43 @@ export class LessonComponent implements OnInit {
   loadLessons(): void {
     this.loading = true;
     this.client.course2(this.courseId, this.currentPage, this.pageSize).subscribe({
-        next: (res) => {
-            this.loading = false;
+      next: (res) => {
+        this.loading = false;
 
-            if (res?.succeeded && res.data) { // Kiểm tra `succeeded` trước khi lấy `data`
-                this.lessons = res.data.lessons || [];
-                this.totalLessons = res.data.totalCount || 0;
+        if (res?.succeeded && res.data) { // Kiểm tra `succeeded` trước khi lấy `data`
+          this.lessons = res.data.lessons || [];
+          this.totalLessons = res.data.totalCount || 0;
 
-                // Kiểm tra nếu currentPage vượt quá số trang có thể có
-                const maxPage = Math.max(Math.ceil(this.totalLessons / this.pageSize), 1);
-                if (this.currentPage > maxPage) {
-                    this.currentPage = maxPage;
-                    this.loadLessons();
-                }
-            } else {
-                this.lessons = [];
-                this.totalLessons = 0;
-                this.message.error(res?.errors?.join(", ") || "Lỗi khi tải danh sách bài học!");
-            }
-        },
-        error: (err) => {
-            console.error("API Error:", err);
-            this.loading = false;
-            this.message.error("Không thể kết nối đến API.");
-            this.lessons = [];
-            this.totalLessons = 0;
+          // Kiểm tra nếu currentPage vượt quá số trang có thể có
+          const maxPage = Math.max(Math.ceil(this.totalLessons / this.pageSize), 1);
+          if (this.currentPage > maxPage) {
+            this.currentPage = maxPage;
+            this.loadLessons();
+          }
+        } else {
+          this.lessons = [];
+          this.totalLessons = 0;
+          this.message.error(res?.errors?.join(", ") || "Lỗi khi tải danh sách bài học!");
         }
+      },
+      error: (err) => {
+        console.error("API Error:", err);
+        this.loading = false;
+        this.lessons = [];
+        this.totalLessons = 0;
+      }
     });
-}
-onPageIndexChange(page: number): void {
-  this.currentPage = page;
-  this.loadLessons();
-}
+  }
+  onPageIndexChange(page: number): void {
+    this.currentPage = page;
+    this.loadLessons();
+  }
 
-// Hàm xử lý thay đổi số lượng bản ghi trên mỗi trang
-onPageSizeChange(pageSize: number): void {
-  this.pageSize = pageSize;
-  this.loadLessons();
-}
+  // Hàm xử lý thay đổi số lượng bản ghi trên mỗi trang
+  onPageSizeChange(pageSize: number): void {
+    this.pageSize = pageSize;
+    this.loadLessons();
+  }
 
   showModal(isEdit: boolean, lesson?: any): void {
     this.isEditMode = isEdit;
@@ -108,7 +107,7 @@ onPageSizeChange(pageSize: number): void {
       this.lessonData = { ...lesson };
     } else {
       this.selectedLessonId = undefined;
-      this.lessonData = {title: '' };
+      this.lessonData = { title: '' };
     }
     this.isVisible = true;
   }
@@ -186,51 +185,51 @@ onPageSizeChange(pageSize: number): void {
           this.router.navigate([`/lecturer/courses-content/${this.courseId}/assignment`, lessonId]);
         } else {
           this.selectedLessonId = lessonId;
-          this.assignmentData = { title: '', description: '' }; 
+          this.assignmentData = { title: '', description: '' };
           this.isAssignmentModalVisible = true; // 🟢 Hiển thị modal tạo bài tập
         }
       },
-      (error) => { 
+      (error) => {
         // Kiểm tra nếu `error` có `errors` → API phản hồi hợp lệ nhưng không có bài tập
         if (error?.errors) {
           console.warn("⚠️ API trả về lỗi từ server:", error.errors);
           this.selectedLessonId = lessonId;
-          this.assignmentData = { title: '', description: '' }; 
+          this.assignmentData = { title: '', description: '' };
           this.isAssignmentModalVisible = true;
           return;
         }
-  
+
         // Kiểm tra lỗi HTTP thực sự (404, 500...)
         if (error.status === 404) {
           this.selectedLessonId = lessonId;
           this.isAssignmentModalVisible = true;
           return;
         }
-  
+
         // Trường hợp lỗi khác (mạng, server...)
         this.message.error("Lỗi khi kiểm tra bài tập!");
       }
     );
   }
-  
+
   handleAssignmentOk(): void {
     if (!this.assignmentData.title || !this.assignmentData.description) {
       this.message.warning("Vui lòng nhập đủ thông tin bài tập!");
       return;
     }
-  
+
     // Khởi tạo đúng kiểu CreateAssignmentRequest
     const newAssignment = new CreateAssignmentRequest();
     newAssignment.lessonId = this.selectedLessonId!;
     newAssignment.title = this.assignmentData.title;
     newAssignment.description = this.assignmentData.description;
-  
+
     // Gọi API tạo bài tập
     this.client.assignmentsPOST(newAssignment).subscribe(
       () => {
         this.message.success("Tạo bài tập thành công!");
         this.isAssignmentModalVisible = false;
-  
+
         // Chuyển hướng đến trang bài tập sau khi tạo thành công
         this.router.navigate([`/lecturer/courses-content/${this.courseId}/assignment`, this.selectedLessonId]);
       },
@@ -239,12 +238,10 @@ onPageSizeChange(pageSize: number): void {
       }
     );
   }
-  
-  
+
+
 
   handleAssignmentCancel(): void {
     this.isAssignmentModalVisible = false;
   }
-
-
 }
