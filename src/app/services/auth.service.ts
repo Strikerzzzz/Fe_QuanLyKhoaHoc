@@ -16,9 +16,18 @@ export class AuthService {
 
     private userNameSubject = new BehaviorSubject<string | null>(this.getUserName());
     public userName$ = this.userNameSubject.asObservable();
+    private showLoginPopupSubject = new BehaviorSubject<boolean>(false);
+    public showLoginPopup$ = this.showLoginPopupSubject.asObservable();
 
 
     constructor(private apiClient: Client) { }
+    showLoginPopup(): void {
+        this.showLoginPopupSubject.next(true);
+    }
+
+    hideLoginPopup(): void {
+        this.showLoginPopupSubject.next(false);
+    }
 
     getToken(): string | null {
         return localStorage.getItem('access_token');

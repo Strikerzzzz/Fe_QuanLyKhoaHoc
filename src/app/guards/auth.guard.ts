@@ -34,6 +34,7 @@ export class AuthGuard implements CanActivate {
         const requiredRole = route.data['role'];
         const isAdmin = this.authService.isAdmin();
         const isLecturer = this.authService.isLecturer();
+        console.log('Please');
         if (!requiredRole || (requiredRole === 'Admin' && isAdmin) || (requiredRole === 'Lecturer' && isLecturer)) {
             return true;
         }

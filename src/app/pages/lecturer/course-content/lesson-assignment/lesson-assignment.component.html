@@ -261,11 +261,12 @@
       </nz-form-control>
     </nz-form-item>
     <nz-form-item>
-      <nz-form-label [nzSpan]="6" nzFor="editDescription" nzRequired>
+      <nz-form-label [nzSpan]="6" nzFor="editRandomMultipleChoiceCount" nzRequired>
         Số lượng câu hỏi ngẫu nhiên
       </nz-form-label>
       <nz-form-control [nzSpan]="18">
-        <input nz-input type="number" [(ngModel)]="editAssignmentData.randomMultipleChoiceCount" name="editDescription" required />
+        <input nz-input type="number" [(ngModel)]="editAssignmentData.randomMultipleChoiceCount" name="editRandomMultipleChoiceCount"
+          required />
       </nz-form-control>
     </nz-form-item>
   </form>

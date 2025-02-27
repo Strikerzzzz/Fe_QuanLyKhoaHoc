@@ -2,17 +2,17 @@ import { Component, OnInit } from '@angular/core';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { Client } from '../../api-client';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { AuthService } from '../../../services/auth.service';
+import { LoginRequest } from '../../api-client';
 
 @Component({
   selector: 'app-navbar',
@@ -35,15 +35,19 @@ export class NavbarComponent implements OnInit {
 
   constructor(private fb: FormBuilder,
     private authService: AuthService,
-    private apiClient: Client,
-    private message: NzMessageService,
-    private router: Router) {
+    private message: NzMessageService,) {
     this.initializeForm();
   }
 
   ngOnInit(): void {
     this.authService.isLoggedIn$.subscribe((status) => this.isLoggedIn = status);
     this.authService.userName$.subscribe((name) => this.userName = name);
+    this.authService.showLoginPopup$.subscribe(show => {
+      if (show) {
+        this.openAuthPopup(false)
+      }
+    });
+
     this.loadUserRoles();
   }
 
@@ -67,8 +71,15 @@ export class NavbarComponent implements OnInit {
   openAuthPopup(isRegister: boolean): void {
     this.isRegisterMode = isRegister;
     this.isAuthPopupVisible = true;
-    this.authForm.reset();
-    // Reset form và bật/tắt validation cho trường "username"
+    if (!this.authForm) {
+      this.initializeForm();
+    } else {
+      this.authForm.reset();
+      Object.keys(this.authForm.controls).forEach(key => {
+        this.authForm.controls[key].setErrors(null);
+      });
+    }
+
     if (isRegister) {
       this.authForm.controls['username'].setValidators([Validators.required]);
       this.authForm.controls['confirmPassword'].setValidators([Validators.required, this.confirmPasswordValidator.bind(this)]);
@@ -78,11 +89,22 @@ export class NavbarComponent implements OnInit {
     }
     this.authForm.controls['username'].updateValueAndValidity();
     this.authForm.controls['confirmPassword'].updateValueAndValidity();
+
   }
   closeAuthPopup(): void {
     this.isAuthPopupVisible = false;
+    this.authService.hideLoginPopup();
     this.authForm.reset();
   }
+
+  switchToRegister() {
+    this.isRegisterMode = true;
+  }
+
+  switchToLogin() {
+    this.isRegisterMode = false;
+  }
+
   handleSubmit(): void {
     if (this.authForm.valid) {
       const formData = this.authForm.value;
@@ -103,7 +125,11 @@ export class NavbarComponent implements OnInit {
           }
         );
       } else {
-        this.authService.login(formData).subscribe(
+        const loginData = new LoginRequest({
+          email: formData.email,
+          password: formData.password
+        });
+        this.authService.login(loginData).subscribe(
           () => {
             this.message.info('Đăng nhập thành công');
             this.isAuthPopupVisible = false;
@@ -147,7 +173,7 @@ export class NavbarComponent implements OnInit {
     this.userName = '';
     this.isLoggedIn = false;
   }
-  
+
   togglePasswordVisibility(field: string): void {
     if (field === 'password') {
       this.passwordVisible = !this.passwordVisible;

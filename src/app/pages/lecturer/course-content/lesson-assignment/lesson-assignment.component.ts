@@ -74,15 +74,15 @@ export class LessonAssignmentComponent implements OnInit {
 
   rawText: string = `dạng 1
   Câu 1. Nội dung câu hỏi?
-  A. Đáp án A
-  *B. Đáp án B
+  *A. Đáp án A
+  B. Đáp án B
   C. Đáp án C
   D. Đáp án D
   
   Câu 2. Nội dung câu hỏi khác?
   A. Lựa chọn A
-  *B. Lựa chọn B
-  C. Lựa chọn C
+  B. Lựa chọn B
+  *C. Lựa chọn C
   D. Lựa chọn D
   
   dạng 2
@@ -573,7 +573,6 @@ export class LessonAssignmentComponent implements OnInit {
     }
     finalizeQuestion();
     this.parsedQuestions = questions;
-    console.log("Parsed Questions:", this.parsedQuestions);
   }
   importQuestions(): void {
     if (!this.parsedQuestions.length) {
