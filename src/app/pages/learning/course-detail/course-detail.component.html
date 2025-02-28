@@ -22,6 +22,9 @@
 
     </div>
     <div class="course-header">
+      <div class="course-info">
+        <img [src]="course.avatarUrl" alt="{{ course.title }}">
+      </div>
       <div class="course-banner">
         <h1>{{ course.title }}</h1>
         <div class="keyword-container" *ngIf="course.keywords">
@@ -33,9 +36,6 @@
         <div class="course-meta">
           <span>Độ khó: {{ course.difficulty || "Không xác định" }}</span>
         </div>
-      </div>
-      <div class="course-info">
-        <img [src]="course.avatarUrl" alt="{{ course.title }}">
       </div>
     </div>
 
