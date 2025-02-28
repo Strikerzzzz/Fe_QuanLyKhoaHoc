@@ -9,13 +9,13 @@
   </thead>
   <tbody>
     <tr *ngFor="let content of paginatedContents">
-      <td>{{ content.content }}</td>
+      <td style="white-space: pre-line;">{{ content.content }}</td>
       <td>{{ getMediaTypeLabel(content.mediaType) }}</td>
       <td>
         <ng-container *ngIf="content.mediaUrl">
           <a [href]="'http://localhost:8080' + content.mediaUrl" target="_blank">Xem file</a>
         </ng-container>
-      </td> 
+      </td>
       <td>
         <div class="action-buttons">
           <button style="margin-right: 8px;" nz-button nzType="default" (click)="showModal(true, content)">Sửa</button>
@@ -44,20 +44,20 @@
 
 <!-- Modal Thêm/Sửa nội dung bài học -->
 <nz-modal [(nzVisible)]="isVisible" [nzTitle]="isEditMode ? 'Sửa nội dung bài học' : 'Thêm nội dung bài học'"
-  (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
+  (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()" nzWidth='90%'>
   <ng-container *nzModalContent>
     <!-- Nội dung bài học -->
     <nz-form-item>
-      <nz-form-label [nzSpan]="6">Nội dung</nz-form-label>
-      <nz-form-control [nzSpan]="18">
-        <textarea nz-input [(ngModel)]="lessonContentData.content"></textarea>
+      <nz-form-label [nzSpan]="2">Nội dung</nz-form-label>
+      <nz-form-control [nzSpan]="20">
+        <textarea nz-input [(ngModel)]="lessonContentData.content" nzAutosize="{ minRows: 7, maxRows: 30 }"></textarea>
       </nz-form-control>
     </nz-form-item>
 
     <!-- Lựa chọn định dạng -->
     <nz-form-item>
-      <nz-form-label [nzSpan]="6">Định dạng</nz-form-label>
-      <nz-form-control [nzSpan]="18">
+      <nz-form-label [nzSpan]="2">Định dạng</nz-form-label>
+      <nz-form-control [nzSpan]="20">
         <nz-button-group>
           <button nz-button [nzType]="mediaOption === 'text' ? 'primary' : 'default'"
             (click)="selectMediaOption('text')">
@@ -73,8 +73,8 @@
 
     <!-- Phần tải file chỉ hiển thị khi chọn "Ảnh/Video" -->
     <nz-form-item *ngIf="mediaOption === 'file'">
-      <nz-form-label [nzSpan]="6">Tải file</nz-form-label>
-      <nz-form-control [nzSpan]="18">
+      <nz-form-label [nzSpan]="2">Tải file</nz-form-label>
+      <nz-form-control [nzSpan]="20">
         <div class="upload-container" (drop)="onFileDrop($event)" (dragover)="onDragOver($event)"
           (dragleave)="onDragLeave($event)" (click)="triggerFileInput()">
           <p *ngIf="!mediaPreviewUrl">

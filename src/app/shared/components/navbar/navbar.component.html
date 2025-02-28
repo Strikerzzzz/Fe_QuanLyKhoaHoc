@@ -30,7 +30,7 @@
 
   <!-- Popup Đăng nhập/Đăng ký -->
   <nz-modal [(nzVisible)]="isAuthPopupVisible" [nzTitle]="isRegisterMode ? 'Đăng ký tài khoản' : 'Đăng nhập tài khoản'"
-    (nzOnCancel)="closeAuthPopup()">
+    (nzOnCancel)="closeAuthPopup()" nzWidth="30%">
     <div *nzModalContent>
       <form nz-form [formGroup]="authForm" (ngSubmit)="handleSubmit()">
         <!-- Trường Username (Chỉ hiển thị khi Đăng ký) -->
