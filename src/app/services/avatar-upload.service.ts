@@ -1,24 +1,22 @@
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { Client, StringResult, AvatarUploadResponse, AvatarUploadResponseResult } from '../shared/api-client';
+import { Client, UploadResponse, UploadResponseResult } from '../shared/api-client';
 
 @Injectable({
     providedIn: 'root'
 })
-export class AvatarUploadService {
+export class UploadService {
     constructor(private client: Client) { }
 
     /**
-     * Lấy Presigned URL để upload avatar cho khóa học.
+     * Lấy Presigned URL để upload ảnh (avatar hoặc content).
      * @param courseId - ID của khóa học.
-     * @param fileName - Tên file avatar.
+     * @param fileName - Tên file.
      * @param contentType - MIME type của file.
+     * @param type - Loại ảnh: "avatar" hoặc "content".
      * @returns Observable<AvatarUploadResponse> chứa Presigned URL và objectKey.
      */
-    public getPresignedUrl(courseId: number, fileName: string, contentType: string): Observable<AvatarUploadResponse> {
-        if (courseId == null) {
-            throw new Error("Parameter 'courseId' is required.");
-        }
+    public getPresignedUrl( fileName: string, contentType: string, type: 'avatar' | 'content'): Observable<UploadResponse> {
         if (!fileName) {
             throw new Error("Parameter 'fileName' is required.");
         }
@@ -26,15 +24,15 @@ export class AvatarUploadService {
             throw new Error("Parameter 'contentType' is required.");
         }
 
-        return this.client.avatarPresignedUrl(courseId, fileName, contentType).pipe(
-            map((result: AvatarUploadResponseResult) => {
+        return this.client.presignedUrl( fileName, contentType, type).pipe(
+            map((result: UploadResponseResult) => {
                 if (!result.succeeded && result.errors) {
                     throw new Error("API trả về lỗi: " + result.errors.join(", "));
                 }
                 if (!result.data) {
                     throw new Error("API không trả về dữ liệu hợp lệ.");
                 }
-                return AvatarUploadResponse.fromJS(result.data);
+                return UploadResponse.fromJS(result.data);
             })
         );
     }
