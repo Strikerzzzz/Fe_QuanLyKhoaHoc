@@ -11,11 +11,13 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NzCarouselModule } from 'ng-zorro-antd/carousel';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 @Component({
   selector: 'app-learning',
   imports: [NzSpinModule, NzAlertModule, NzCardModule, CommonModule, NzGridModule, NzPageHeaderModule,
-    NzPaginationModule, NzInputModule, NzButtonModule, FormsModule
+    NzPaginationModule, NzInputModule, NzButtonModule, FormsModule, NzCarouselModule
   ],
   templateUrl: './learning.component.html',
   styleUrl: './learning.component.scss'
@@ -30,7 +32,18 @@ export class LearningComponent implements OnInit {
   pageSize: number = 20;
   searchOptions: string = '';
 
-  constructor(private client: Client, private router: Router) { }
+  images = [
+    '../../../../../assets/images/lg1.png',
+    '../../../../../assets/images/lg2.png',
+    '../../../../../assets/images/lg3.png',
+    '../../../../../assets/images/lg4.png',
+    '../../../../../assets/images/lg5.png',
+    '../../../../../assets/images/lg6.png',
+    '../../../../../assets/images/lg7.png',
+    '../../../../../assets/images/lg8.png',
+  ];
+
+  constructor(private client: Client, private router: Router, private message: NzMessageService) { }
   ngOnInit(): void {
     this.loadCourses();
   }
@@ -52,7 +65,7 @@ export class LearningComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Lỗi khi tải danh sách khóa học!';
+        this.message.error('Không tìm thấy dữ liệu!');
         console.error(err);
         this.loading = false;
       }

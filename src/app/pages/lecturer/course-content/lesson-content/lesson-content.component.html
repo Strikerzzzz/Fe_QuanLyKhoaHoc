@@ -1,16 +1,15 @@
 <nz-table #basicTable [nzData]="paginatedContents" [nzBordered]="true" [nzSize]="'middle'" [nzShowPagination]="false">
   <thead>
     <tr>
-      <th>Nội dung</th>
-      <th>Định dạng</th>
-      <th>File đính kèm</th>
-      <th>Thao tác</th>
+      <th nzWidth="74%">Nội dung</th>
+      <th nzWidth="15%">File đính kèm</th>
+      <th nzWidth="8%">Định dạng</th>
+      <th nzWidth="3%">Thao tác</th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let content of paginatedContents">
       <td style="white-space: pre-line;">{{ content.content }}</td>
-      <td>{{ getMediaTypeLabel(content.mediaType) }}</td>
       <td>
         <ng-container *ngIf="content.mediaUrl as url">
           <ng-container *ngIf="isImageUrl(url); else videoTemplate">
@@ -31,7 +30,7 @@
           </ng-template>
         </ng-container>
       </td>
-
+      <td>{{ getMediaTypeLabel(content.mediaType) }}</td>
       <td>
         <div class="action-buttons">
           <button style="margin-right: 8px;" nz-button nzType="default" (click)="showModal(true, content)">Sửa</button>

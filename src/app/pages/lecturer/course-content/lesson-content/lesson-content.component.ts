@@ -95,9 +95,10 @@ export class LessonContentComponent implements OnInit {
 
       if (this.lessonContentData.mediaType === 'text') {
         this.mediaOption = 'text';
+        this.mediaPreviewUrl = null;
       } else {
         this.mediaOption = 'file';
-        this.mediaPreviewUrl = this.lessonContentData.mediaUrl || null;
+        this.mediaPreviewUrl = null;
       }
     } else {
       this.lessonContentData = { content: '', mediaType: 'text', mediaUrl: '' };
@@ -148,6 +149,7 @@ export class LessonContentComponent implements OnInit {
         () => {
           this.message.success('Cập nhật nội dung thành công!');
           this.loadLessonContents();
+          this.resetTemporaryData();
         },
         err => {
           this.message.error('Lỗi khi cập nhật nội dung!');
@@ -164,6 +166,7 @@ export class LessonContentComponent implements OnInit {
         () => {
           this.message.success('Thêm nội dung thành công!');
           this.loadLessonContents();
+          this.resetTemporaryData();
         },
         err => {
           this.message.error('Lỗi khi thêm nội dung!');
@@ -283,6 +286,13 @@ export class LessonContentComponent implements OnInit {
       this.selectedFile = null;
       this.mediaPreviewUrl = null;
     }
+  }
+  resetTemporaryData(): void {
+    this.uploadProgress = 0;
+    this.selectedFile = null;
+    this.mediaPreviewUrl = null;
+    this.lessonContentData = { content: '', mediaType: 'text', mediaUrl: '' };
+    this.mediaOption = 'text';
   }
 
   uploadFile(): void {
