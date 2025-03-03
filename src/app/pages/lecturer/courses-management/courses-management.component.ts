@@ -1,6 +1,6 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
-import { Client, CreateCourseRequest, UpdateCourseRequest, UpdateAvatarRequest, AvatarUploadResponse } from '../../../shared/api-client';
+import { Client, CreateCourseRequest, UpdateCourseRequest, UpdateAvatarRequest, UploadResponse } from '../../../shared/api-client';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
@@ -12,12 +12,13 @@ import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { AvatarUploadService } from '../../../services/avatar-upload.service';
+import { UploadService } from '../../../services/avatar-upload.service';
 import { HttpClient, HttpEventType, HttpHeaders, HttpRequest } from '@angular/common/http';
+import { NzProgressModule } from 'ng-zorro-antd/progress';
 
 @Component({
   selector: 'app-courses-management',
-  imports: [RouterModule, NzTableModule, NzModalModule, NzFormModule, FormsModule, CommonModule,
+  imports: [RouterModule, NzTableModule, NzModalModule, NzFormModule, FormsModule, CommonModule, NzProgressModule,
     NzPopconfirmModule, NzPaginationModule, NzButtonModule, NzInputModule, NzSelectModule],
   templateUrl: './courses-management.component.html',
   styleUrl: './courses-management.component.scss'
@@ -73,7 +74,7 @@ export class CoursesManagementComponent {
     private router: Router,
     private modal: NzModalService,
     private http: HttpClient,
-    private avatarUploadService: AvatarUploadService
+    private avatarUploadService: UploadService
   ) { }
 
   ngOnInit(): void {
@@ -309,8 +310,8 @@ export class CoursesManagementComponent {
     const file = this.selectedAvatarFile;
 
     // Gọi API để lấy presignedUrl và objectKey qua AvatarUploadService
-    this.avatarUploadService.getPresignedUrl(courseId, file.name, file.type).subscribe({
-      next: (presignedResponse: AvatarUploadResponse) => {
+    this.avatarUploadService.getPresignedUrl(file.name, file.type, 'avatar').subscribe({
+      next: (presignedResponse: UploadResponse) => {
         if (!presignedResponse.presignedUrl || !presignedResponse.objectKey) {
           this.message.error("Dữ liệu Presigned URL không hợp lệ.");
           return;

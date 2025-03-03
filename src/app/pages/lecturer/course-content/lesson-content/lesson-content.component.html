@@ -1,21 +1,36 @@
 <nz-table #basicTable [nzData]="paginatedContents" [nzBordered]="true" [nzSize]="'middle'" [nzShowPagination]="false">
   <thead>
     <tr>
-      <th>Nội dung</th>
-      <th>Định dạng</th>
-      <th>File đính kèm</th>
-      <th>Thao tác</th>
+      <th nzWidth="74%">Nội dung</th>
+      <th nzWidth="15%">File đính kèm</th>
+      <th nzWidth="8%">Định dạng</th>
+      <th nzWidth="3%">Thao tác</th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let content of paginatedContents">
       <td style="white-space: pre-line;">{{ content.content }}</td>
-      <td>{{ getMediaTypeLabel(content.mediaType) }}</td>
       <td>
-        <ng-container *ngIf="content.mediaUrl">
-          <a [href]="'http://localhost:8080' + content.mediaUrl" target="_blank">Xem file</a>
+        <ng-container *ngIf="content.mediaUrl as url">
+          <ng-container *ngIf="isImageUrl(url); else videoTemplate">
+            <!-- Ảnh: Hiển thị thumbnail nhỏ -->
+            <a [href]="url" target="_blank">
+              <img [src]="url" width="150" height="150" style="object-fit: cover; border-radius: 4px;" />
+            </a>
+          </ng-container>
+
+          <ng-template #videoTemplate>
+            <ng-container *ngIf="isVideo(url)">
+              <!-- Video: Hiển thị ngay trong bảng -->
+              <video width="150" height="150" controls>
+                <source [src]="'http://localhost:8080' + url" type="video/mp4" />
+                Trình duyệt của bạn không hỗ trợ video.
+              </video>
+            </ng-container>
+          </ng-template>
         </ng-container>
       </td>
+      <td>{{ getMediaTypeLabel(content.mediaType) }}</td>
       <td>
         <div class="action-buttons">
           <button style="margin-right: 8px;" nz-button nzType="default" (click)="showModal(true, content)">Sửa</button>
@@ -89,6 +104,11 @@
           <input type="file" accept="image/*,video/*" (change)="onFileChange($event)" #fileInput
             style="display: none;" />
 
+        </div>
+        <div *ngIf="uploadProgress > 0">
+          <nz-progress [nzPercent]="uploadProgress" [nzStrokeWidth]="12" [nzStrokeColor]="'#1890ff'"
+            [nzShowInfo]="false">
+          </nz-progress>
         </div>
       </nz-form-control>
     </nz-form-item>

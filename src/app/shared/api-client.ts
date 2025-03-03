@@ -221,12 +221,12 @@ export interface IClient {
      */
     questionsDELETE(id: number): Observable<ObjectResult>;
     /**
-     * @param courseId (optional) 
      * @param fileName (optional) 
      * @param contentType (optional) 
+     * @param type (optional) 
      * @return OK
      */
-    avatarPresignedUrl(courseId: number | undefined, fileName: string | undefined, contentType: string | undefined): Observable<AvatarUploadResponseResult>;
+    presignedUrl(fileName: string | undefined, contentType: string | undefined, type: string | undefined): Observable<UploadResponseResult>;
     /**
      * @param file (optional) 
      * @return OK
@@ -3814,17 +3814,13 @@ export class Client implements IClient {
     }
 
     /**
-     * @param courseId (optional) 
      * @param fileName (optional) 
      * @param contentType (optional) 
+     * @param type (optional) 
      * @return OK
      */
-    avatarPresignedUrl(courseId: number | undefined, fileName: string | undefined, contentType: string | undefined): Observable<AvatarUploadResponseResult> {
-        let url_ = this.baseUrl + "/api/Upload/avatar-presigned-url?";
-        if (courseId === null)
-            throw new Error("The parameter 'courseId' cannot be null.");
-        else if (courseId !== undefined)
-            url_ += "courseId=" + encodeURIComponent("" + courseId) + "&";
+    presignedUrl(fileName: string | undefined, contentType: string | undefined, type: string | undefined): Observable<UploadResponseResult> {
+        let url_ = this.baseUrl + "/api/Upload/presigned-url?";
         if (fileName === null)
             throw new Error("The parameter 'fileName' cannot be null.");
         else if (fileName !== undefined)
@@ -3833,6 +3829,10 @@ export class Client implements IClient {
             throw new Error("The parameter 'contentType' cannot be null.");
         else if (contentType !== undefined)
             url_ += "contentType=" + encodeURIComponent("" + contentType) + "&";
+        if (type === null)
+            throw new Error("The parameter 'type' cannot be null.");
+        else if (type !== undefined)
+            url_ += "type=" + encodeURIComponent("" + type) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -3844,20 +3844,20 @@ export class Client implements IClient {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processAvatarPresignedUrl(response_);
+            return this.processPresignedUrl(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processAvatarPresignedUrl(response_ as any);
+                    return this.processPresignedUrl(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<AvatarUploadResponseResult>;
+                    return _observableThrow(e) as any as Observable<UploadResponseResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<AvatarUploadResponseResult>;
+                return _observableThrow(response_) as any as Observable<UploadResponseResult>;
         }));
     }
 
-    protected processAvatarPresignedUrl(response: HttpResponseBase): Observable<AvatarUploadResponseResult> {
+    protected processPresignedUrl(response: HttpResponseBase): Observable<UploadResponseResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -3868,7 +3868,7 @@ export class Client implements IClient {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = AvatarUploadResponseResult.fromJS(resultData200);
+            result200 = UploadResponseResult.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status === 400) {
@@ -5044,98 +5044,6 @@ export interface IAssignment {
     randomMultipleChoiceCount?: number;
     multipleChoiceQuestions?: MultipleChoiceQuestion[] | undefined;
     fillInBlankQuestions?: FillInBlankQuestion[] | undefined;
-}
-
-export class AvatarUploadResponse implements IAvatarUploadResponse {
-    presignedUrl?: string | undefined;
-    objectKey?: string | undefined;
-
-    constructor(data?: IAvatarUploadResponse) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.presignedUrl = _data["presignedUrl"];
-            this.objectKey = _data["objectKey"];
-        }
-    }
-
-    static fromJS(data: any): AvatarUploadResponse {
-        data = typeof data === 'object' ? data : {};
-        let result = new AvatarUploadResponse();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["presignedUrl"] = this.presignedUrl;
-        data["objectKey"] = this.objectKey;
-        return data;
-    }
-}
-
-export interface IAvatarUploadResponse {
-    presignedUrl?: string | undefined;
-    objectKey?: string | undefined;
-}
-
-export class AvatarUploadResponseResult implements IAvatarUploadResponseResult {
-    succeeded?: boolean;
-    errors?: string[] | undefined;
-    data?: AvatarUploadResponse;
-
-    constructor(data?: IAvatarUploadResponseResult) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.succeeded = _data["succeeded"];
-            if (Array.isArray(_data["errors"])) {
-                this.errors = [] as any;
-                for (let item of _data["errors"])
-                    this.errors!.push(item);
-            }
-            this.data = _data["data"] ? AvatarUploadResponse.fromJS(_data["data"]) : <any>undefined;
-        }
-    }
-
-    static fromJS(data: any): AvatarUploadResponseResult {
-        data = typeof data === 'object' ? data : {};
-        let result = new AvatarUploadResponseResult();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["succeeded"] = this.succeeded;
-        if (Array.isArray(this.errors)) {
-            data["errors"] = [];
-            for (let item of this.errors)
-                data["errors"].push(item);
-        }
-        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
-        return data;
-    }
-}
-
-export interface IAvatarUploadResponseResult {
-    succeeded?: boolean;
-    errors?: string[] | undefined;
-    data?: AvatarUploadResponse;
 }
 
 export class ConfirmEmailRequest implements IConfirmEmailRequest {
@@ -7829,6 +7737,98 @@ export class UpdateLessonRequest implements IUpdateLessonRequest {
 
 export interface IUpdateLessonRequest {
     title?: string | undefined;
+}
+
+export class UploadResponse implements IUploadResponse {
+    presignedUrl?: string | undefined;
+    objectKey?: string | undefined;
+
+    constructor(data?: IUploadResponse) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.presignedUrl = _data["presignedUrl"];
+            this.objectKey = _data["objectKey"];
+        }
+    }
+
+    static fromJS(data: any): UploadResponse {
+        data = typeof data === 'object' ? data : {};
+        let result = new UploadResponse();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["presignedUrl"] = this.presignedUrl;
+        data["objectKey"] = this.objectKey;
+        return data;
+    }
+}
+
+export interface IUploadResponse {
+    presignedUrl?: string | undefined;
+    objectKey?: string | undefined;
+}
+
+export class UploadResponseResult implements IUploadResponseResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: UploadResponse;
+
+    constructor(data?: IUploadResponseResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            this.data = _data["data"] ? UploadResponse.fromJS(_data["data"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): UploadResponseResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new UploadResponseResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IUploadResponseResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: UploadResponse;
 }
 
 export class User implements IUser {

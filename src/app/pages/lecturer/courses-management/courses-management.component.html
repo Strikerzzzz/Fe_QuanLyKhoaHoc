@@ -84,7 +84,9 @@
       </div>
     </div>
     <div *ngIf="avatarUploadProgress > 0">
-      Tiến trình upload: {{ avatarUploadProgress }}%
+      <nz-progress [nzPercent]="avatarUploadProgress" [nzStrokeWidth]="12" [nzStrokeColor]="'#1890ff'"
+        [nzShowInfo]="false">
+      </nz-progress>
     </div>
   </ng-container>
 </nz-modal>

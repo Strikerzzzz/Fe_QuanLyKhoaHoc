@@ -2,7 +2,7 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Client, ContentDtoIEnumerableResult, CreateLessonContentRequest, FileParameter, UpdateLessonContentRequest } from '../../../../shared/api-client';
+import { Client, ContentDtoIEnumerableResult, CreateLessonContentRequest, FileParameter, UpdateLessonContentRequest, UploadResponse } from '../../../../shared/api-client';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -13,6 +13,9 @@ import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
+import { UploadService } from '../../../../services/avatar-upload.service';
+import { HttpClient, HttpEventType, HttpHeaders, HttpRequest } from '@angular/common/http';
+import { NzProgressModule } from 'ng-zorro-antd/progress';
 
 @Component({
   selector: 'app-lesson-content',
@@ -28,7 +31,8 @@ import { NzRadioModule } from 'ng-zorro-antd/radio';
     NzInputModule,
     RouterModule,
     NzSelectModule,
-    NzRadioModule
+    NzRadioModule,
+    NzProgressModule
   ],
   templateUrl: './lesson-content.component.html',
   styleUrl: './lesson-content.component.scss'
@@ -42,6 +46,7 @@ export class LessonContentComponent implements OnInit {
   isEditMode = false;
   currentPage = 1;
   pageSize = 5;
+  uploadProgress = 0;
   lessonId!: number;
   mediaPreviewUrl: string | null = null;
   selectedFile: File | null = null;
@@ -49,7 +54,9 @@ export class LessonContentComponent implements OnInit {
   constructor(
     private message: NzMessageService,
     private route: ActivatedRoute,
-    private client: Client
+    private client: Client,
+    private http: HttpClient,
+    private fileUploadService: UploadService
   ) { }
 
   ngOnInit(): void {
@@ -88,9 +95,10 @@ export class LessonContentComponent implements OnInit {
 
       if (this.lessonContentData.mediaType === 'text') {
         this.mediaOption = 'text';
+        this.mediaPreviewUrl = null;
       } else {
         this.mediaOption = 'file';
-        this.mediaPreviewUrl = this.lessonContentData.mediaUrl || null;
+        this.mediaPreviewUrl = null;
       }
     } else {
       this.lessonContentData = { content: '', mediaType: 'text', mediaUrl: '' };
@@ -141,6 +149,7 @@ export class LessonContentComponent implements OnInit {
         () => {
           this.message.success('Cập nhật nội dung thành công!');
           this.loadLessonContents();
+          this.resetTemporaryData();
         },
         err => {
           this.message.error('Lỗi khi cập nhật nội dung!');
@@ -157,6 +166,7 @@ export class LessonContentComponent implements OnInit {
         () => {
           this.message.success('Thêm nội dung thành công!');
           this.loadLessonContents();
+          this.resetTemporaryData();
         },
         err => {
           this.message.error('Lỗi khi thêm nội dung!');
@@ -260,6 +270,15 @@ export class LessonContentComponent implements OnInit {
   isImage(): boolean {
     return this.selectedFile ? this.selectedFile.type.startsWith('image') : false;
   }
+
+  isImageUrl(url: string): boolean {
+    return url.match(/\.(jpeg|jpg|png|gif|webp)$/i) !== null;
+  }
+
+  isVideo(url: string): boolean {
+    return url.match(/\.(mp4|webm|ogg)$/i) !== null;
+  }
+
   selectMediaOption(option: 'text' | 'file'): void {
     this.mediaOption = option;
     // Nếu chọn text, reset file và preview
@@ -268,31 +287,81 @@ export class LessonContentComponent implements OnInit {
       this.mediaPreviewUrl = null;
     }
   }
+  resetTemporaryData(): void {
+    this.uploadProgress = 0;
+    this.selectedFile = null;
+    this.mediaPreviewUrl = null;
+    this.lessonContentData = { content: '', mediaType: 'text', mediaUrl: '' };
+    this.mediaOption = 'text';
+  }
 
   uploadFile(): void {
     if (!this.selectedFile) {
-      this.message.error('Vui lòng chọn file trước khi tải lên!');
+      this.message.error("Không có file nào được chọn.");
       return;
     }
+    const file = this.selectedFile;
+    const fileType = file.type;
 
-    const fileParam = {
-      data: this.selectedFile,
-      fileName: this.selectedFile.name
-    };
+    if (fileType.startsWith("image/")) {
+      // Nếu là ảnh, lấy Presigned URL từ Backend
+      this.fileUploadService.getPresignedUrl(file.name, file.type, "content").subscribe({
+        next: (presignedResponse: UploadResponse) => {
+          if (!presignedResponse.presignedUrl || !presignedResponse.objectKey) {
+            this.message.error("Dữ liệu Presigned URL không hợp lệ.");
+            return;
+          }
 
-    this.client.upload(fileParam).subscribe(
-      res => {
-        if (res.succeeded && res.data?.url) {
-          this.handleUploadSuccess(res.data.url);
-        } else {
+          const objectKey = presignedResponse.objectKey;
+          const headers = new HttpHeaders({ "Content-Type": file.type });
+
+          const req = new HttpRequest("PUT", presignedResponse.presignedUrl, file, {
+            reportProgress: true,
+            headers: headers,
+          });
+
+          this.http.request(req).subscribe({
+            next: (event) => {
+              if (event.type === HttpEventType.UploadProgress && event.total) {
+                this.uploadProgress = Math.round((100 * event.loaded) / event.total);
+              } else if (event.type === HttpEventType.Response) {
+                this.handleUploadSuccess(objectKey);
+              }
+            },
+            error: (err) => {
+              this.message.error("Lỗi upload file lên S3!");
+              console.error(err);
+            },
+          });
+        },
+        error: (err) => {
+          this.message.error("Lỗi lấy Presigned URL: " + err.errors);
+          console.error(err);
+        },
+      });
+    } else if (fileType.startsWith("video/")) {
+      const fileParam = {
+        data: this.selectedFile,
+        fileName: this.selectedFile.name
+      };
+
+      this.client.upload(fileParam).subscribe(
+        res => {
+          if (res.succeeded && res.data?.url) {
+            this.handleUploadSuccess(res.data.url);
+          } else {
+            this.message.error('Lỗi khi tải file lên!');
+          }
+        },
+        err => {
           this.message.error('Lỗi khi tải file lên!');
+          console.error(err);
         }
-      },
-      err => {
-        this.message.error('Lỗi khi tải file lên!');
-        console.error(err);
-      }
-    );
+      );
+    } else {
+      this.message.error("Loại file không được hỗ trợ.");
+    }
+
   }
 
 }
