@@ -10,6 +10,8 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { AuthService } from '../../../services/auth.service';
 import { ReactiveFormsModule } from '@angular/forms';
+import { CreateProgressRequest } from '../../../shared/api-client';
+
 @Component({
   selector: 'app-course-detail',
   imports: [NzPageHeaderModule, NzSpinModule, NzAlertModule, CommonModule,
@@ -28,6 +30,7 @@ export class CourseDetailComponent implements OnInit {
   error = '';
 
   isLoggedIn: boolean = false;
+  hasProgress: boolean = false;
 
   constructor(private router: Router, private route: ActivatedRoute, private client: Client, private authService: AuthService) { }
 
@@ -39,14 +42,49 @@ export class CourseDetailComponent implements OnInit {
     });
     this.authService.isLoggedIn$.subscribe(status => {
       this.isLoggedIn = status;
+      if (this.isLoggedIn) {
+        this.checkProgress();
+      }
+    });
+  }
+  checkProgress(): void {
+    this.client.myProgress(this.courseId).subscribe({
+      next: (result) => {
+        this.hasProgress = result ? true : false;
+      },
+      error: () => {
+        this.hasProgress = false;
+      }
     });
   }
 
-  goToStudy(): void {
-    if (this.courseId) {
-      this.router.navigate(['/learning', this.courseId, 'study']);
-    }
+  registerProgress(): void {
+    const request = new CreateProgressRequest({ courseId: this.courseId });
+  
+    this.client.create(request).subscribe({
+      next: (response) => {
+        console.log('Đăng ký tiến độ học tập thành công', response);
+        this.hasProgress = true;
+      },
+      error: (err) => {
+        console.error('Lỗi khi đăng ký tiến độ học tập:', err);
+      },
+    });
   }
+  
+  
+
+  goToStudy(): void {
+    if (!this.course || !this.course.courseId || !this.lessons || this.lessons.length === 0) {
+      console.error("Lỗi: Không thể vào học vì dữ liệu chưa đủ!");
+      return;
+    }
+  
+    const firstLessonId = this.lessons[0].lessonId; // Lấy bài học đầu tiên
+    this.router.navigate(['/learning', this.course.courseId, 'study', firstLessonId]);
+  }
+  
+  
   openLoginPopup() {
     setTimeout(() => this.authService.showLoginPopup(), 100);
   }
@@ -78,6 +116,7 @@ export class CourseDetailComponent implements OnInit {
 
   selectLesson(lesson: any) {
     this.selectedLesson = lesson;
+    this.router.navigate(['/learning', this.courseId, 'study', lesson.lessonId]);
   }
 
   scrollToSection(sectionId: string) {

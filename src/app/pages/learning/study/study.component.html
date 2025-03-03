@@ -1,1 +1,99 @@
-<p>study works!</p>
+<nz-layout>
+    <nz-sider class="menu-sidebar" nzCollapsible nzWidth="256px" nzBreakpoint="md" [(nzCollapsed)]="isCollapsed"
+        [nzTrigger]="null" nzTheme="light">
+        <ul nz-menu nzTheme="light" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+            <li nz-submenu nzOpen nzTitle="Danh sách bài học" nzIcon="book">
+                <ul>
+                    <li *ngFor="let lesson of lessons" nz-menu-item (click)="selectLesson(lesson)">
+                        <div class="lesson-item">
+                            <span class="lesson-title">{{ lesson.title }}</span>
+                            <nz-icon nzType="check-circle" [nzTheme]="'outline'" 
+                                [ngClass]="{'completed-icon': lessonProgress[lesson.lessonId] === 100, 
+                                            'pending-icon': lessonProgress[lesson.lessonId] !== 100}">
+                            </nz-icon>
+                        </div>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </nz-sider>
+
+    <!-- Layout chính -->
+    <nz-layout>
+        <!-- Header -->
+        <nz-header class="app-header">
+            <span class="header-trigger" (click)="isCollapsed = !isCollapsed">
+                <nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" class="trigger" nzTheme="outline"></nz-icon>
+            </span>
+            <h2 class="header-title">Trang Học Tập</h2>
+        </nz-header>
+
+        <!-- Nội dung chính -->
+        <nz-content class="app-content">
+            <div class="content-wrapper">
+                <div *ngIf="selectedLesson">
+                    <!-- ✅ Nội dung bài học -->
+                    <div class="lesson-container">
+                        <h3>{{ selectedLesson.title }}</h3>
+                        <div *ngFor="let item of lessonContent">
+                            <ng-container [ngSwitch]="item.mediaType">
+                                <p *ngSwitchCase="'text'" style="white-space: pre-line;" class="lesson-text">{{ item.content }}</p>
+                                <img *ngSwitchCase="'image'" [src]="item.mediaUrl" alt="Hình ảnh bài học" width="500">
+                                <video *ngSwitchCase="'video'" [src]="item.mediaUrl" width="500" controls></video>
+                                <p *ngSwitchDefault>Loại nội dung không hỗ trợ.</p>
+                            </ng-container>
+                        </div>
+                    </div>
+
+                    <!-- ✅ Bài tập & Câu hỏi -->
+                    <div class="exercise-container">
+                        <div class="assignment-container" *ngIf="assignment; else noAssignment">
+                            <h1>📌 BÀI TẬP</h1>
+                            <h2>Tên bài tập: {{ assignment.title }}</h2>
+                            <p><strong>Mô tả:</strong> {{ assignment.description }}</p>
+                        </div>
+
+                        <!-- Nếu không có bài tập -->
+                        <ng-template #noAssignment>
+                            <p>Không có bài tập nào được tìm thấy.</p>
+                        </ng-template>
+
+                        <div class="questions" *ngIf="questions.length > 0">
+                            <h4>Câu hỏi</h4>
+                            <div *ngFor="let question of questions" [ngSwitch]="question.type" class="question-card">
+                                <!-- Câu hỏi trắc nghiệm -->
+                                <div *ngSwitchCase="1">
+                                    <p><strong>{{ question.text }}</strong></p>
+                                    <ul>
+                                        <li *ngFor="let answer of question.answers">
+                                            <label>
+                                              <input type="radio" [name]="'question_' + question.id" [value]="answer.id" 
+                                                [(ngModel)]="question.selectedAnswer" (change)="onAnswerSelect(question.id, answer.id)">
+                                              <span>{{ answer.text }}</span>
+                                            </label>
+                                          </li>
+                                          
+                                    </ul>
+                                </div>
+
+                                <!-- Câu hỏi điền từ -->
+                                <div *ngSwitchCase="2" class="fill-in-the-blank">
+                                    <p><strong>{{ question.text.replace('_', '__') }}</strong></p>
+                                    <input type="text" [(ngModel)]="question.userAnswer" placeholder="Nhập câu trả lời">
+                                </div>
+                            </div>
+
+                            <!-- Nút nộp bài -->
+                            <button class="submit-button" (click)="submitAssignment()">Nộp bài</button>
+                        </div>
+
+                        <!-- Hiển thị thông báo nếu không có câu hỏi -->
+                        <p *ngIf="questions.length === 0">Không có câu hỏi nào cho bài tập này.</p>  
+                    </div>
+
+                    
+                </div>
+            </div>
+        </nz-content>
+    </nz-layout>
+</nz-layout>

@@ -13,13 +13,18 @@
         <p><strong>Thông tin khóa học</strong></p>
         <p>Số bài học: {{ lessons.length || 0 }}</p>
       </div>
-      <button nz-button nzType="primary" *ngIf="isLoggedIn; else loginBtn" (click)="goToStudy()">
+      <!-- Nếu đã đăng nhập -->
+      <button nz-button nzType="primary" *ngIf="isLoggedIn && hasProgress" (click)="goToStudy()">
         Vào học
       </button>
-      <ng-template #loginBtn>
-        <button nz-button nzType="primary" (click)="openLoginPopup()">Đăng nhập để tiếp tục</button>
-      </ng-template>
+      <button nz-button nzType="primary" *ngIf="isLoggedIn && !hasProgress" (click)="registerProgress()">
+        Đăng ký để bắt đầu học
+      </button>
 
+      <!-- Nếu chưa đăng nhập -->
+      <button nz-button nzType="primary" *ngIf="!isLoggedIn" (click)="openLoginPopup()">
+        Đăng nhập để tiếp tục
+      </button>
     </div>
     <div class="course-header">
       <div class="course-info">
@@ -52,8 +57,8 @@
     <div id="noiDung" class="lesson-container">
       <h3>📚 Danh sách bài học</h3>
       <nz-list *ngIf="lessons.length > 0" [nzBordered]="true" class="lesson-list">
-        <nz-list-item *ngFor="let lesson of lessons; let i = index" (click)="selectLesson(lesson)"
-          [class.selected]="selectedLesson?.lessonId === lesson.lessonId">
+        <nz-list-item *ngFor="let lesson of lessons; let i = index"  [class.disabled]="!hasProgress"  (click)="hasProgress ? selectLesson(lesson) : null"
+          >
           <nz-list-item-meta [nzAvatar]="lessonIcon" [nzTitle]="'Bài ' + (i + 1) + ': ' + lesson.title">
           </nz-list-item-meta>
         </nz-list-item>
