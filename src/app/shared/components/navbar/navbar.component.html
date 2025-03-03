@@ -19,7 +19,16 @@
   <div class="navbar-right">
     <ng-container *ngIf="isLoggedIn; else guestLinks">
       <span>Xin chào, {{ userName }}</span>
-      <button nz-button nzType="default" (click)="logout()">Đăng xuất</button>
+      <a nz-dropdown [nzDropdownMenu]="menu" class="user-dropdown">
+        <nz-avatar nzIcon="user"></nz-avatar>
+      </a>
+      <nz-dropdown-menu #menu="nzDropdownMenu" nzPlacement="bottomRight">
+        <ul nz-menu class="user-menu">
+          <li nz-menu-item >Quản lý tài khoản</li>
+          <li nz-menu-divider></li>
+          <li nz-menu-item class="logout-btn" (click)="logout()">Đăng xuất</li>
+        </ul>
+      </nz-dropdown-menu>
     </ng-container>
 
     <ng-template #guestLinks>

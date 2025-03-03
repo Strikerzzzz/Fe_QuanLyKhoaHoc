@@ -13,11 +13,15 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { AuthService } from '../../../services/auth.service';
 import { LoginRequest } from '../../api-client';
+import { NzAvatarModule } from 'ng-zorro-antd/avatar';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { NzMenuModule } from 'ng-zorro-antd/menu';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [NzLayoutModule, NzButtonModule, NzInputModule, NzModalModule, NzFormModule, ReactiveFormsModule, CommonModule, RouterModule, NzIconModule],
+  imports: [NzLayoutModule, NzButtonModule, NzInputModule, NzModalModule, NzAvatarModule, NzDropDownModule, NzMenuModule,
+    NzFormModule, ReactiveFormsModule, CommonModule, RouterModule, NzIconModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
@@ -30,7 +34,7 @@ export class NavbarComponent implements OnInit {
   userName: string | null = null;
   passwordVisible: boolean = false;
   confirmPasswordVisible: boolean = false;
-
+  isDropdownOpen = false;
   private jwtHelper = new JwtHelperService();
 
   constructor(private fb: FormBuilder,
@@ -172,6 +176,7 @@ export class NavbarComponent implements OnInit {
     this.roles = [];
     this.userName = '';
     this.isLoggedIn = false;
+    this.isDropdownOpen = false;
   }
 
   togglePasswordVisibility(field: string): void {
