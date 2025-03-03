@@ -6,5 +6,5 @@ import { StudyComponent } from './study/study.component';
 export const LEARNING_ROUTES: Routes = [
   { path: '', component: LearningComponent },
   { path: ':courseId', component: CourseDetailComponent },
-  { path: ':courseId/study', component: StudyComponent }
+  { path: ':courseId/study/:lessonId', component: StudyComponent }
 ];

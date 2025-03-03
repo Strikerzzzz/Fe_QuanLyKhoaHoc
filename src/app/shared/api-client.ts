@@ -196,7 +196,7 @@ export interface IClient {
     /**
      * @return OK
      */
-    course3(courseId: number): Observable<LessonLearnDtoListResult>;
+    lessonLearn(courseId: number): Observable<LessonLearnDtoListResult>;
     /**
      * @return OK
      */
@@ -3364,8 +3364,8 @@ export class Client implements IClient {
     /**
      * @return OK
      */
-    course3(courseId: number): Observable<LessonLearnDtoListResult> {
-        let url_ = this.baseUrl + "/api/Progress/course/{courseId}";
+    lessonLearn(courseId: number): Observable<LessonLearnDtoListResult> {
+        let url_ = this.baseUrl + "/api/Progress/lesson-learn/{courseId}";
         if (courseId === undefined || courseId === null)
             throw new Error("The parameter 'courseId' must be defined.");
         url_ = url_.replace("{courseId}", encodeURIComponent("" + courseId));
@@ -3380,11 +3380,11 @@ export class Client implements IClient {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processCourse3(response_);
+            return this.processLessonLearn(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processCourse3(response_ as any);
+                    return this.processLessonLearn(response_ as any);
                 } catch (e) {
                     return _observableThrow(e) as any as Observable<LessonLearnDtoListResult>;
                 }
@@ -3393,7 +3393,7 @@ export class Client implements IClient {
         }));
     }
 
-    protected processCourse3(response: HttpResponseBase): Observable<LessonLearnDtoListResult> {
+    protected processLessonLearn(response: HttpResponseBase): Observable<LessonLearnDtoListResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
