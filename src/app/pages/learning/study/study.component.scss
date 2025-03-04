@@ -309,3 +309,42 @@ nz-submenu {
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
+
+.exam-btn {
+  background: linear-gradient(135deg, #1890ff, #40a9ff);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  margin: 15px auto; /* Căn giữa theo chiều ngang */
+  width: fit-content; /* Chiều rộng tự động theo nội dung */
+  min-width: 160px;
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 3px 8px rgba(24, 144, 255, 0.3);
+}
+
+.exam-btn:hover {
+  background: linear-gradient(135deg, #40a9ff, #1890ff);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(24, 144, 255, 0.4);
+}
+
+.exam-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(24, 144, 255, 0.3);
+}
+
+.exam-btn::before {
+  content: "📝";
+  font-size: 16px;
+}
+
+

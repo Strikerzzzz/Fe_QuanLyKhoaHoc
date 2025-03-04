@@ -135,7 +135,7 @@ export class StudyComponent implements OnInit {
     clearInterval(this.timer);
     this.timer = setInterval(() => {
       this.timeSpent += 1;
-      if (this.hasScrolledToBottom && this.timeSpent >= 30) {
+      if (this.hasScrolledToBottom && this.timeSpent >= 15) {
         this.completeLesson(this.selectedLesson.lessonId);
       }
     }, 1000);
@@ -284,4 +284,13 @@ export class StudyComponent implements OnInit {
       }
     });
   }
+
+  get isAllLessonsCompleted(): boolean {
+    return this.lessons.length > 0 && this.lessons.every(lesson => this.lessonProgress[lesson.lessonId] === 100);
+  }
+  goToExam(): void {
+    this.router.navigate(['learning', this.courseId, 'exam']);
+
+  }
+  
 }

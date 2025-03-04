@@ -1,0 +1,46 @@
+<!-- ✅ Bài tập & Câu hỏi -->
+<div class="exercise-container">
+    <div class="assignment-container" *ngIf="exam; else noExam">
+        <h1>📌 BÀI KIỂM TRA</h1>
+        <h2>Tên bài kiểm tra: {{ exam.title }}</h2>
+        <p><strong>Mô tả:</strong> {{ exam.description }}</p>
+    </div>
+
+    <!-- Nếu không có bài tập -->
+    <ng-template #noExam>
+        <p>Không có bài kiểm tra nào được tìm thấy.</p>
+    </ng-template>
+
+    <div class="questions" *ngIf="questions.length > 0">
+        <h4>Câu hỏi</h4>
+        <div *ngFor="let question of questions" [ngSwitch]="question.type" class="question-card">
+            <!-- Câu hỏi trắc nghiệm -->
+            <div *ngSwitchCase="1">
+                <p><strong>{{ question.text }}</strong></p>
+                <ul>
+                    <li *ngFor="let answer of question.answers">
+                        <label>
+                            <input type="radio" [name]="'question_' + question.id" [value]="answer.id"
+                                [(ngModel)]="question.selectedAnswer" (change)="onAnswerSelect(question.id, answer.id)">
+                            <span>{{ answer.text }}</span>
+                        </label>
+                    </li>
+
+                </ul>
+            </div>
+
+            <!-- Câu hỏi điền từ -->
+            <div *ngSwitchCase="2" class="fill-in-the-blank">
+                <p><strong>{{ question.text.replace('_', '__') }}</strong></p>
+                <input type="text" [(ngModel)]="question.userAnswer" placeholder="Nhập câu trả lời">
+            </div>
+        </div>
+
+        <!-- Nút nộp bài -->
+        <button class="submit-button" (click)="submitAssignment()">Nộp bài</button>
+       
+    </div>
+
+    <!-- Hiển thị thông báo nếu không có câu hỏi -->
+    <p *ngIf="questions.length === 0">Không có câu hỏi nào cho bài kiểm tra này.</p>
+</div>

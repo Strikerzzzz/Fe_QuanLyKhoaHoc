@@ -16,6 +16,9 @@
                 </ul>
             </li>
         </ul>
+        <button *ngIf="isAllLessonsCompleted" (click)="goToExam()" class="exam-btn">
+            Làm bài kiểm tra
+          </button>
     </nz-sider>
 
     <!-- Layout chính -->
