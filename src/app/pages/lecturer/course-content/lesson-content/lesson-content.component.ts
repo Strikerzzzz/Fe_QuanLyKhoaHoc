@@ -16,6 +16,7 @@ import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { UploadService } from '../../../../services/avatar-upload.service';
 import { HttpClient, HttpEventType, HttpHeaders, HttpRequest } from '@angular/common/http';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
+import { VideoPlayerComponent } from "../../../video-player/video-player.component";
 
 @Component({
   selector: 'app-lesson-content',
@@ -32,7 +33,8 @@ import { NzProgressModule } from 'ng-zorro-antd/progress';
     RouterModule,
     NzSelectModule,
     NzRadioModule,
-    NzProgressModule
+    NzProgressModule,
+    VideoPlayerComponent
   ],
   templateUrl: './lesson-content.component.html',
   styleUrl: './lesson-content.component.scss'
@@ -276,7 +278,14 @@ export class LessonContentComponent implements OnInit {
   }
 
   isVideo(url: string): boolean {
-    return url.match(/\.(mp4|webm|ogg)$/i) !== null;
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.m3u8'];
+    try {
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname.toLowerCase();
+      return videoExtensions.some(ext => pathname.endsWith(ext));
+    } catch (e) {
+      return false;
+    }
   }
 
   selectMediaOption(option: 'text' | 'file'): void {
