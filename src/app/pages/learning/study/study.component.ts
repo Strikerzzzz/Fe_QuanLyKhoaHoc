@@ -7,10 +7,11 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { SubmitAssignmentRequest } from '../../../shared/api-client';
 import { FormsModule } from '@angular/forms';
+import { VideoPlayerComponent } from "../../video-player/video-player.component";
 
 @Component({
   selector: 'app-study',
-  imports: [CommonModule, NzMenuModule, NzIconModule, NzLayoutModule, FormsModule],
+  imports: [CommonModule, NzMenuModule, NzIconModule, NzLayoutModule, FormsModule, VideoPlayerComponent],
   templateUrl: './study.component.html',
   styleUrl: './study.component.scss'
 })

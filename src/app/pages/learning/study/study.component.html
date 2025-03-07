@@ -7,8 +7,7 @@
                     <li *ngFor="let lesson of lessons" nz-menu-item (click)="selectLesson(lesson)">
                         <div class="lesson-item">
                             <span class="lesson-title">{{ lesson.title }}</span>
-                            <nz-icon nzType="check-circle" [nzTheme]="'outline'" 
-                                [ngClass]="{'completed-icon': lessonProgress[lesson.lessonId] === 100, 
+                            <nz-icon nzType="check-circle" [nzTheme]="'outline'" [ngClass]="{'completed-icon': lessonProgress[lesson.lessonId] === 100, 
                                             'pending-icon': lessonProgress[lesson.lessonId] !== 100}">
                             </nz-icon>
                         </div>
@@ -18,7 +17,7 @@
         </ul>
         <button *ngIf="isAllLessonsCompleted" (click)="goToExam()" class="exam-btn">
             Làm bài kiểm tra
-          </button>
+        </button>
     </nz-sider>
 
     <!-- Layout chính -->
@@ -26,7 +25,8 @@
         <!-- Header -->
         <nz-header class="app-header">
             <span class="header-trigger" (click)="isCollapsed = !isCollapsed">
-                <nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" class="trigger" nzTheme="outline"></nz-icon>
+                <nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" class="trigger"
+                    nzTheme="outline"></nz-icon>
             </span>
             <h2 class="header-title">Trang Học Tập</h2>
         </nz-header>
@@ -40,9 +40,12 @@
                         <h3>{{ selectedLesson.title }}</h3>
                         <div *ngFor="let item of lessonContent">
                             <ng-container [ngSwitch]="item.mediaType">
-                                <p *ngSwitchCase="'text'" style="white-space: pre-line;" class="lesson-text">{{ item.content }}</p>
+                                <p *ngSwitchCase="'text'" style="white-space: pre-line;" class="lesson-text">{{
+                                    item.content }}</p>
                                 <img *ngSwitchCase="'image'" [src]="item.mediaUrl" alt="Hình ảnh bài học" width="500">
-                                <video *ngSwitchCase="'video'" [src]="item.mediaUrl" width="500" controls></video>
+                                <app-video-player *ngSwitchCase="'video'" [src]="item.mediaUrl || ''" [width]="'1000'"
+                                    [height]="'500'" [controls]="true">
+                                </app-video-player>
                                 <p *ngSwitchDefault>Loại nội dung không hỗ trợ.</p>
                             </ng-container>
                         </div>
@@ -70,12 +73,13 @@
                                     <ul>
                                         <li *ngFor="let answer of question.answers">
                                             <label>
-                                              <input type="radio" [name]="'question_' + question.id" [value]="answer.id" 
-                                                [(ngModel)]="question.selectedAnswer" (change)="onAnswerSelect(question.id, answer.id)">
-                                              <span>{{ answer.text }}</span>
+                                                <input type="radio" [name]="'question_' + question.id"
+                                                    [value]="answer.id" [(ngModel)]="question.selectedAnswer"
+                                                    (change)="onAnswerSelect(question.id, answer.id)">
+                                                <span>{{ answer.text }}</span>
                                             </label>
-                                          </li>
-                                          
+                                        </li>
+
                                     </ul>
                                 </div>
 
@@ -91,10 +95,10 @@
                         </div>
 
                         <!-- Hiển thị thông báo nếu không có câu hỏi -->
-                        <p *ngIf="questions.length === 0">Không có câu hỏi nào cho bài tập này.</p>  
+                        <p *ngIf="questions.length === 0">Không có câu hỏi nào cho bài tập này.</p>
                     </div>
 
-                    
+
                 </div>
             </div>
         </nz-content>
