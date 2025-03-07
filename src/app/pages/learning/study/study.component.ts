@@ -109,12 +109,12 @@ export class StudyComponent implements OnInit {
       next: (result: any) => {
         this.lessonContent = Array.isArray(result?.data) && result.data.length > 0
           ? result.data.map((item: any) => ({
-            lessonContentId: item.lessonContentId,
-            lessonId: item.lessonId,
-            mediaType: item.mediaType,
-            mediaUrl: item.mediaUrl ? `http://localhost:8080${item.mediaUrl}` : '',
-            content: item.content
-          }))
+              lessonContentId: item.lessonContentId,
+              lessonId: item.lessonId,
+              mediaType: item.mediaType,
+              mediaUrl: item.mediaUrl,
+              content: item.content
+            }))
           : [{ mediaType: 'text', content: 'Nội dung bài học không có sẵn.' }];
       },
       error: () => {
@@ -122,6 +122,7 @@ export class StudyComponent implements OnInit {
       }
     });
   }
+  
 
   @HostListener('window:scroll', [])
   onScroll(): void {

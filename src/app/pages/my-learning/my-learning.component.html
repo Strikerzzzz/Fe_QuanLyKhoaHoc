@@ -1,1 +1,49 @@
-<p>my-learning works!</p>
+<div class="course-container">
+  <div class="search-container">
+    <nz-input-group nzSuffix>
+      <input type="text" nz-input placeholder="Tìm kiếm..." [(ngModel)]="searchOptions" />
+      <button nz-button nzType="primary" (click)="searchCourses()">Tìm kiếm</button>
+    </nz-input-group>
+  </div>
+
+  <nz-page-header nzTitle="Khóa học bạn đang học"></nz-page-header>
+
+  <div *ngIf="loading" class="loading-container">
+    <nz-spin></nz-spin>
+  </div>
+
+  <div *ngIf="error" class="error-container">
+    <nz-alert nzType="error" [nzMessage]="error"></nz-alert>
+  </div>
+
+  <nz-row *ngIf="!loading && !error" [nzGutter]="[24, 32]" class="courses-row">
+    <nz-col *ngFor="let course of filteredCourses | slice:(currentPage - 1) * pageSize:(currentPage * pageSize)"
+      [nzSpan]="6" [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+      <nz-card class="course-card" [nzHoverable]="true" [nzCover]="coverTemplate"
+        (click)="goToCourseDetail(course.courseId)">
+        <ng-template #coverTemplate>
+          <img [src]="course.avatarUrl" alt="{{ course.title }}" class="course-image" />
+        </ng-template>
+        <nz-card-meta [nzTitle]="course.title"></nz-card-meta>
+        <div class="course-details">
+          <p class="course-price">
+            {{ course.price === null || course.price === 0 ? 'Miễn Phí' : (course.price |
+            currency:'VND':'symbol':'1.0-0':'vi-VN') }}
+          </p>
+          <p class="course-difficulty">
+            <strong>Độ khó:</strong> {{ course.difficulty || 'Không xác định' }}
+          </p>
+        </div>
+        <nz-progress [nzPercent]="course.progress" [nzStrokeWidth]="6" [nzShowInfo]="true">
+        </nz-progress>
+
+      </nz-card>
+    </nz-col>
+  </nz-row>
+
+  <div class="action-pagination">
+    <nz-pagination [nzPageIndex]="currentPage" [nzPageSize]="pageSize" [nzTotal]="totalItems"
+      (nzPageIndexChange)="onPageIndexChange($event)" (nzPageSizeChange)="onPageSizeChange($event)">
+    </nz-pagination>
+  </div>
+</div>
