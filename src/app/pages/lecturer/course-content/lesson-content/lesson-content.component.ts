@@ -17,6 +17,7 @@ import { UploadService } from '../../../../services/avatar-upload.service';
 import { HttpClient, HttpEventType, HttpHeaders, HttpRequest } from '@angular/common/http';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { VideoPlayerComponent } from "../../../video-player/video-player.component";
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 
 @Component({
   selector: 'app-lesson-content',
@@ -34,7 +35,8 @@ import { VideoPlayerComponent } from "../../../video-player/video-player.compone
     NzSelectModule,
     NzRadioModule,
     NzProgressModule,
-    VideoPlayerComponent
+    VideoPlayerComponent,
+    NzSpinModule
   ],
   templateUrl: './lesson-content.component.html',
   styleUrl: './lesson-content.component.scss'
@@ -52,6 +54,7 @@ export class LessonContentComponent implements OnInit {
   lessonId!: number;
   mediaPreviewUrl: string | null = null;
   selectedFile: File | null = null;
+  isUploading = false;
 
   constructor(
     private message: NzMessageService,
@@ -353,7 +356,7 @@ export class LessonContentComponent implements OnInit {
         data: this.selectedFile,
         fileName: this.selectedFile.name
       };
-
+      this.isUploading = true;
       this.client.upload(fileParam).subscribe(
         res => {
           if (res.succeeded && res.data?.url) {
@@ -361,9 +364,11 @@ export class LessonContentComponent implements OnInit {
           } else {
             this.message.error('Lỗi khi tải file lên!');
           }
+          this.isUploading = false;
         },
         err => {
           this.message.error('Lỗi khi tải file lên!');
+          this.isUploading = false;
           console.error(err);
         }
       );

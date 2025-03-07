@@ -107,6 +107,9 @@
             [nzShowInfo]="false">
           </nz-progress>
         </div>
+        <nz-spin *ngIf="isUploading" nzTip="Đang tải lên...">
+          <div class="overlay"></div>
+        </nz-spin>
       </nz-form-control>
     </nz-form-item>
   </ng-container>
