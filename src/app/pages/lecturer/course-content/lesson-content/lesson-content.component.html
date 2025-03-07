@@ -21,11 +21,8 @@
 
           <ng-template #videoTemplate>
             <ng-container *ngIf="isVideo(url)">
-              <!-- Video: Hiển thị ngay trong bảng -->
-              <video width="150" height="150" controls>
-                <source [src]="'http://localhost:8080' + url" type="video/mp4" />
-                Trình duyệt của bạn không hỗ trợ video.
-              </video>
+              <app-video-player [src]="url" [width]="'250'" [height]="'250'" [controls]="true">
+              </app-video-player>
             </ng-container>
           </ng-template>
         </ng-container>
@@ -110,6 +107,9 @@
             [nzShowInfo]="false">
           </nz-progress>
         </div>
+        <nz-spin *ngIf="isUploading" nzTip="Đang tải lên...">
+          <div class="overlay"></div>
+        </nz-spin>
       </nz-form-control>
     </nz-form-item>
   </ng-container>
