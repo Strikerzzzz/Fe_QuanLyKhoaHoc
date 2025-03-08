@@ -54,6 +54,10 @@ export interface IClient {
     /**
      * @return OK
      */
+    scoreLineChart(assignmentId: number): Observable<LineChartDtoIEnumerableResult>;
+    /**
+     * @return OK
+     */
     coursesGET(id: number): Observable<ObjectResult>;
     /**
      * @param body (optional) 
@@ -170,9 +174,10 @@ export interface IClient {
      * @param page (optional) 
      * @param pageSize (optional) 
      * @param search (optional) 
+     * @param sortBy (optional) 
      * @return OK
      */
-    progress(courseId: number | undefined, page: number | undefined, pageSize: number | undefined, search: string | undefined): Observable<ProgressPagedResultResult>;
+    progress(courseId: number | undefined, page: number | undefined, pageSize: number | undefined, search: string | undefined, sortBy: boolean | undefined): Observable<ProgressPagedResultResult>;
     /**
      * @param courseId (optional) 
      * @return OK
@@ -197,6 +202,11 @@ export interface IClient {
      * @return OK
      */
     lessonLearn(courseId: number): Observable<LessonLearnDtoListResult>;
+    /**
+     * @param courseId (optional) 
+     * @return OK
+     */
+    piechart(courseId: number | undefined): Observable<PieChartResultDtoResult>;
     /**
      * @return OK
      */
@@ -919,6 +929,88 @@ export class Client implements IClient {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result200 = ObjectIEnumerableResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ObjectResult.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result401 = ObjectResult.fromJS(resultData401);
+            return throwException("Unauthorized", status, _responseText, _headers, result401);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ObjectResult.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
+            }));
+        } else if (status === 403) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result403: any = null;
+            let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result403 = ObjectResult.fromJS(resultData403);
+            return throwException("Forbidden", status, _responseText, _headers, result403);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    scoreLineChart(assignmentId: number): Observable<LineChartDtoIEnumerableResult> {
+        let url_ = this.baseUrl + "/api/Assignments/{assignmentId}/score-line-chart";
+        if (assignmentId === undefined || assignmentId === null)
+            throw new Error("The parameter 'assignmentId' must be defined.");
+        url_ = url_.replace("{assignmentId}", encodeURIComponent("" + assignmentId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processScoreLineChart(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processScoreLineChart(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<LineChartDtoIEnumerableResult>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<LineChartDtoIEnumerableResult>;
+        }));
+    }
+
+    protected processScoreLineChart(response: HttpResponseBase): Observable<LineChartDtoIEnumerableResult> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = LineChartDtoIEnumerableResult.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status === 404) {
@@ -2934,9 +3026,10 @@ export class Client implements IClient {
      * @param page (optional) 
      * @param pageSize (optional) 
      * @param search (optional) 
+     * @param sortBy (optional) 
      * @return OK
      */
-    progress(courseId: number | undefined, page: number | undefined, pageSize: number | undefined, search: string | undefined): Observable<ProgressPagedResultResult> {
+    progress(courseId: number | undefined, page: number | undefined, pageSize: number | undefined, search: string | undefined, sortBy: boolean | undefined): Observable<ProgressPagedResultResult> {
         let url_ = this.baseUrl + "/api/Progress/progress?";
         if (courseId === null)
             throw new Error("The parameter 'courseId' cannot be null.");
@@ -2954,6 +3047,10 @@ export class Client implements IClient {
             throw new Error("The parameter 'search' cannot be null.");
         else if (search !== undefined)
             url_ += "search=" + encodeURIComponent("" + search) + "&";
+        if (sortBy === null)
+            throw new Error("The parameter 'sortBy' cannot be null.");
+        else if (sortBy !== undefined)
+            url_ += "sortBy=" + encodeURIComponent("" + sortBy) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -3435,6 +3532,84 @@ export class Client implements IClient {
                 result403 = resultData403 !== undefined ? resultData403 : <any>null;
     
             return throwException("Forbidden", status, _responseText, _headers, result403);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param courseId (optional) 
+     * @return OK
+     */
+    piechart(courseId: number | undefined): Observable<PieChartResultDtoResult> {
+        let url_ = this.baseUrl + "/api/Progress/progress/piechart?";
+        if (courseId === null)
+            throw new Error("The parameter 'courseId' cannot be null.");
+        else if (courseId !== undefined)
+            url_ += "courseId=" + encodeURIComponent("" + courseId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processPiechart(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processPiechart(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<PieChartResultDtoResult>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<PieChartResultDtoResult>;
+        }));
+    }
+
+    protected processPiechart(response: HttpResponseBase): Observable<PieChartResultDtoResult> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = PieChartResultDtoResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result401 = ObjectResult.fromJS(resultData401);
+            return throwException("Unauthorized", status, _responseText, _headers, result401);
+            }));
+        } else if (status === 403) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result403: any = null;
+            let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result403 = resultData403 !== undefined ? resultData403 : <any>null;
+    
+            return throwException("Forbidden", status, _responseText, _headers, result403);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ObjectResult.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -6282,6 +6457,106 @@ export interface ILessonPagedResultResult {
     data?: LessonPagedResult;
 }
 
+export class LineChartDto implements ILineChartDto {
+    title?: string | undefined;
+    value?: number;
+
+    constructor(data?: ILineChartDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.title = _data["title"];
+            this.value = _data["value"];
+        }
+    }
+
+    static fromJS(data: any): LineChartDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new LineChartDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["title"] = this.title;
+        data["value"] = this.value;
+        return data;
+    }
+}
+
+export interface ILineChartDto {
+    title?: string | undefined;
+    value?: number;
+}
+
+export class LineChartDtoIEnumerableResult implements ILineChartDtoIEnumerableResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: LineChartDto[] | undefined;
+
+    constructor(data?: ILineChartDtoIEnumerableResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            if (Array.isArray(_data["data"])) {
+                this.data = [] as any;
+                for (let item of _data["data"])
+                    this.data!.push(LineChartDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): LineChartDtoIEnumerableResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new LineChartDtoIEnumerableResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        if (Array.isArray(this.data)) {
+            data["data"] = [];
+            for (let item of this.data)
+                data["data"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface ILineChartDtoIEnumerableResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: LineChartDto[] | undefined;
+}
+
 export class LoginRequest implements ILoginRequest {
     email?: string | undefined;
     password?: string | undefined;
@@ -6566,10 +6841,120 @@ export interface IObjectResult {
     data?: any | undefined;
 }
 
+export class PieChartResultDto implements IPieChartResultDto {
+    labels?: string[] | undefined;
+    values?: number[] | undefined;
+
+    constructor(data?: IPieChartResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["labels"])) {
+                this.labels = [] as any;
+                for (let item of _data["labels"])
+                    this.labels!.push(item);
+            }
+            if (Array.isArray(_data["values"])) {
+                this.values = [] as any;
+                for (let item of _data["values"])
+                    this.values!.push(item);
+            }
+        }
+    }
+
+    static fromJS(data: any): PieChartResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new PieChartResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.labels)) {
+            data["labels"] = [];
+            for (let item of this.labels)
+                data["labels"].push(item);
+        }
+        if (Array.isArray(this.values)) {
+            data["values"] = [];
+            for (let item of this.values)
+                data["values"].push(item);
+        }
+        return data;
+    }
+}
+
+export interface IPieChartResultDto {
+    labels?: string[] | undefined;
+    values?: number[] | undefined;
+}
+
+export class PieChartResultDtoResult implements IPieChartResultDtoResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: PieChartResultDto;
+
+    constructor(data?: IPieChartResultDtoResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            this.data = _data["data"] ? PieChartResultDto.fromJS(_data["data"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): PieChartResultDtoResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new PieChartResultDtoResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IPieChartResultDtoResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: PieChartResultDto;
+}
+
 export class ProgressDto implements IProgressDto {
     progressId?: number;
     studentId?: string | undefined;
     studentName?: string | undefined;
+    studentUserName?: string | undefined;
+    studentEmail?: string | undefined;
     completionRate?: number;
     isCompleted?: boolean;
     updatedAt?: Date;
@@ -6588,6 +6973,8 @@ export class ProgressDto implements IProgressDto {
             this.progressId = _data["progressId"];
             this.studentId = _data["studentId"];
             this.studentName = _data["studentName"];
+            this.studentUserName = _data["studentUserName"];
+            this.studentEmail = _data["studentEmail"];
             this.completionRate = _data["completionRate"];
             this.isCompleted = _data["isCompleted"];
             this.updatedAt = _data["updatedAt"] ? new Date(_data["updatedAt"].toString()) : <any>undefined;
@@ -6606,6 +6993,8 @@ export class ProgressDto implements IProgressDto {
         data["progressId"] = this.progressId;
         data["studentId"] = this.studentId;
         data["studentName"] = this.studentName;
+        data["studentUserName"] = this.studentUserName;
+        data["studentEmail"] = this.studentEmail;
         data["completionRate"] = this.completionRate;
         data["isCompleted"] = this.isCompleted;
         data["updatedAt"] = this.updatedAt ? this.updatedAt.toISOString() : <any>undefined;
@@ -6617,6 +7006,8 @@ export interface IProgressDto {
     progressId?: number;
     studentId?: string | undefined;
     studentName?: string | undefined;
+    studentUserName?: string | undefined;
+    studentEmail?: string | undefined;
     completionRate?: number;
     isCompleted?: boolean;
     updatedAt?: Date;

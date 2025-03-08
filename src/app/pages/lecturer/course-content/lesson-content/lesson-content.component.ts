@@ -16,7 +16,7 @@ import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { UploadService } from '../../../../services/avatar-upload.service';
 import { HttpClient, HttpEventType, HttpHeaders, HttpRequest } from '@angular/common/http';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
-import { VideoPlayerComponent } from "../../../video-player/video-player.component";
+import { VideoPlayerComponent } from "../../../../shared/components/video-player/video-player.component";
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 
 @Component({

@@ -22,7 +22,12 @@
     <ul nz-menu nzTheme="light" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
       <li nz-submenu nzOpen nzTitle="Thống kê" nzIcon="dashboard">
         <ul>
-
+          <li nz-menu-item nzMatchRouter>
+            <a [routerLink]="['progress']" routerLinkActive="active">Tiến độ học viên</a>
+          </li>
+          <li nz-menu-item nzMatchRouter>
+            <a [routerLink]="['results']" routerLinkActive="active">Kết quả học tập</a>
+          </li>
         </ul>
       </li>
     </ul>

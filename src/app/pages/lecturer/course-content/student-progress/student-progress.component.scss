@@ -1,0 +1,99 @@
+.chart-container {
+  height: 400px;
+  width: 100%;
+}
+
+// Styling cho card chứa biểu đồ
+.progress-card {
+  margin: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background: #fff;
+
+  .chart-container {
+    height: 300px;
+    width: 100%;
+  }
+
+  nz-statistic {
+    text-align: center;
+    padding: 20px 0;
+  }
+}
+
+// Styling cho phần điều khiển bảng
+.table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px;
+
+  .search-input {
+    width: 300px;
+    border-radius: 4px;
+  }
+
+  .sort-button {
+    margin-left: 10px;
+    border-radius: 4px;
+    transition: all 0.3s;
+
+    &:hover {
+      background-color: #1890ff;
+      color: white;
+    }
+  }
+}
+
+// Styling cho bảng
+.progress-table {
+  margin: 0 20px 20px 20px;
+
+  th {
+    background-color: #fafafa;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  td {
+    text-align: center;
+    vertical-align: middle;
+
+    nz-progress {
+      margin: 0 auto;
+      width: 100px; // Điều chỉnh chiều rộng của progress bar
+    }
+  }
+
+  tr {
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+  }
+}
+
+// Styling cho phần phân trang
+.action-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 20px 20px 20px;
+
+  .action-pagination {
+    nz-pagination {
+      .ant-pagination-item {
+        border-radius: 4px;
+      }
+
+      .ant-pagination-item-active {
+        background-color: #1890ff;
+        border-color: #1890ff;
+
+        a {
+          color: white;
+        }
+      }
+    }
+  }
+}
