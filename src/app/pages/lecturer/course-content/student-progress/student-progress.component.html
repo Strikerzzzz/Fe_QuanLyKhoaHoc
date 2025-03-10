@@ -1,0 +1,46 @@
+<nz-card nzTitle="Tiến độ khóa học" [nzBordered]="false" class="progress-card">
+  <nz-spin [nzSpinning]="loading">
+    <div echarts [options]="pieChartOptions" class="chart-container"></div>
+    <nz-divider></nz-divider>
+    <nz-statistic [nzValue]="getTotalValue()" nzTitle="Tổng số tiến trình"></nz-statistic>
+  </nz-spin>
+</nz-card>
+
+<div class="table-controls">
+  <input nz-input placeholder="Tìm kiếm học viên" [(ngModel)]="search" (ngModelChange)="onSearch($event)"
+    class="search-input" />
+  <button nz-button nzType="default" (click)="toggleSort()" class="sort-button">
+    Sắp xếp {{ sortBy ? 'Cao → Thấp' : 'Thấp → Cao' }}
+  </button>
+</div>
+
+<nz-table #basicTable [nzData]="progresses" [nzBordered]="true" [nzSize]="'middle'" [nzLoading]="loading"
+  class="progress-table" nzShowPagination="false">
+  <thead>
+    <tr>
+      <th nzWidth=" 25%">Họ tên</th>
+      <th nzWidth="20%">Tên đăng nhập</th>
+      <th nzWidth="25%">Email</th>
+      <th nzWidth="15%">Tỷ lệ hoàn thành</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let progress of progresses">
+      <td>{{ progress.studentName || 'N/A' }}</td>
+      <td>{{ progress.studentUserName || 'N/A' }}</td>
+      <td>{{ progress.studentEmail || 'N/A' }}</td>
+      <td>
+        <nz-progress [nzPercent]="progress.completionRate" [nzShowInfo]="true"
+          [nzStrokeColor]="getProgressColor(progress.completionRate)"></nz-progress>
+      </td>
+    </tr>
+  </tbody>
+</nz-table>
+
+<div class="action-row">
+  <div class="action-pagination">
+    <nz-pagination [(nzPageIndex)]="currentPage" [nzTotal]="totalProgresses" [nzPageSize]="pageSize"
+      (nzPageIndexChange)="onPageIndexChange($event)" (nzPageSizeChange)="onPageSizeChange($event)">
+    </nz-pagination>
+  </div>
+</div>

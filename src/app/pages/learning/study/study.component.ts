@@ -7,7 +7,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { SubmitAssignmentRequest } from '../../../shared/api-client';
 import { FormsModule } from '@angular/forms';
-import { VideoPlayerComponent } from "../../video-player/video-player.component";
+import { VideoPlayerComponent } from "../../../shared/components/video-player/video-player.component";
 
 @Component({
   selector: 'app-study',

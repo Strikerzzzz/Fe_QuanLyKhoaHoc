@@ -6,6 +6,9 @@ import { LessonComponent } from "./course-content/lesson/lesson.component";
 import { ExamComponent } from "./course-content/exam/exam.component";
 import { LessonAssignmentComponent } from "./course-content/lesson-assignment/lesson-assignment.component";
 import { LessonContentComponent } from "./course-content/lesson-content/lesson-content.component";
+import { StudentProgressComponent } from "./course-content/student-progress/student-progress.component";
+import { StudentResultsComponent } from "./course-content/student-results/student-results.component";
+
 export const LECTURER_ROUTES: Route[] = [
     {
         path: "",
@@ -21,7 +24,9 @@ export const LECTURER_ROUTES: Route[] = [
                     { path: "lesson", component: LessonComponent },
                     { path: "exam", component: ExamComponent },
                     { path: "assignment/:lessonId", component: LessonAssignmentComponent },
-                    { path: "content/:lessonId", component: LessonContentComponent }
+                    { path: "content/:lessonId", component: LessonContentComponent },
+                    { path: "progress", component: StudentProgressComponent },
+                    { path: "results", component: StudentResultsComponent }
                 ]
             }
         ]
