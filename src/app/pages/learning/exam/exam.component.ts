@@ -84,7 +84,10 @@ export class ExamComponent implements OnInit {
     submitRequest.score = Math.round((correctAnswers / totalQuestions) * 100);
 
     this.client.submit2(this.exam.examId, submitRequest).subscribe({
-      next: () => alert(`Nộp bài thành công! Điểm của bạn: ${submitRequest.score}`),
+      next: () => {
+        alert(`Nộp bài thành công! Điểm của bạn: ${submitRequest.score}`);
+        this.router.navigate([`/my-learning/statistics/${this.courseId}`]);
+      },
       error: () => alert("Lỗi khi nộp bài, vui lòng thử lại.")
     });
   }

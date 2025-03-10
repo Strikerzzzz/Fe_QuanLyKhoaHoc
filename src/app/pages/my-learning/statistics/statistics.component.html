@@ -1,0 +1,78 @@
+<div class="container">
+    <div class="course-container">
+        <!-- Sidebar cố định bên phải -->
+        <div class="sidebar">
+            <div class="course-price">
+                <span *ngIf="course.price && course.price !== 0; else freePrice">
+                    {{ course.price | currency: 'VND':'symbol':'1.0-0':'vi-VN' }}
+                </span>
+                <ng-template #freePrice>Miễn phí</ng-template>
+            </div>
+            <div class="course-info-side">
+                <p><strong>Thông tin khóa học</strong></p>
+                <p>Số bài học: {{ lessons.length || 0 }}</p>
+            </div>
+            <button nz-button nzType="primary" (click)="goToStudy()">
+                Vào học
+            </button>
+        </div>
+        <div class="course-header">
+            <div class="course-info">
+                <img [src]="course.avatarUrl" alt="{{ course.title }}">
+            </div>
+            <div class="course-banner">
+                <h1>{{ course.title }}</h1>
+                <div class="keyword-container" *ngIf="course.keywords">
+                    <span class="keyword-pill" *ngFor="let keyword of keywordList">
+                        {{ keyword }}
+                    </span>
+                </div>
+
+                <div class="course-meta">
+                    <span>Độ khó: {{ course.difficulty || "Không xác định" }}</span>
+                </div>
+                <nz-progress [nzPercent]="course.progress || 0" [nzStrokeWidth]="6" [nzShowInfo]="true">
+                </nz-progress>
+            </div>
+        </div>
+
+        <div class="lesson-container">
+            <h3>📚 Danh sách bài học</h3>
+            <nz-list *ngIf="lessons.length > 0" [nzBordered]="true" class="lesson-list">
+                <nz-list-item *ngFor="let lesson of lessons; let i = index" class="lesson-row" (click)="selectLesson(lesson)">
+
+                    <!-- Cột 1: Tên bài học -->
+                    <div class="lesson-title">
+                        <nz-list-item-meta [nzAvatar]="lessonIcon" [nzTitle]="'Bài ' + (i + 1) + ': ' + lesson.title">
+                        </nz-list-item-meta>
+                    </div>
+
+                    <!-- Cột 2: Trạng thái hoàn thành & Điểm số -->
+                    <div class="lesson-status">
+                        <span class="completed-status" [class.completed]="lesson.isCompleted">
+                            {{ lesson.isCompleted ? '✅ Hoàn thành' : '❌ Chưa hoàn thành' }}
+                        </span>
+                        <span class="lesson-score">
+                                🏆 {{ lesson.assignmentScore !== null ? lesson.assignmentScore : '--' }}
+                        </span>
+                    </div>
+
+                </nz-list-item>
+            </nz-list>
+
+            <p *ngIf="lessons.length === 0" class="no-lessons">❌ Chưa có bài học nào!</p>
+        </div>
+
+        <ng-template #lessonIcon>
+            <i nz-icon nzType="book" nzTheme="outline"></i>
+        </ng-template>
+
+        <!-- Hiển thị bài kiểm tra cuối khóa -->
+        <div *ngIf="testName" class="test-info">
+            <h3>📝 Bài kiểm tra cuối khóa: {{ testName }}</h3>
+            <p *ngIf="testScore !== null">🏆 Điểm số của bạn: <strong>{{ testScore }}/100</strong></p>
+            <p *ngIf="testScore === null">🔔 Bạn chưa làm bài kiểm tra này.</p>
+        </div>
+
+    </div>
+</div>

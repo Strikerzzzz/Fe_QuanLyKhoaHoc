@@ -81,11 +81,7 @@ export class StudyComponent implements OnInit {
           this.lessons.forEach(lesson => {
             this.lessonProgress[lesson.lessonId] = lesson.completed ? 100 : 0;
           });
-
-          console.log('Tiến trình bài học:', this.lessonProgress);
-        } else {
-          console.warn("Không có dữ liệu bài học.");
-        }
+        } 
       },
       error: (err) => {
         console.error('Lỗi khi lấy tiến trình bài học:', err);
@@ -97,9 +93,10 @@ export class StudyComponent implements OnInit {
     this.lessonId = lesson.lessonId;
     this.router.navigate(['/learning', this.courseId, 'study', lesson.lessonId]);
     this.selectedLesson = lesson;
+    this.assignment = null;
+    this.questions = [];
     this.loadLessonContent(lesson.lessonId);
     this.loadAssignment(lesson.lessonId);
-    this.loadQuestions(lesson.lessonId);
     this.hasScrolledToBottom = false;
     this.timeSpent = 0;
     this.startTimer();
@@ -171,6 +168,8 @@ export class StudyComponent implements OnInit {
         this.assignment = result?.data || null;
         if (this.assignment) {
           this.loadQuestions(this.assignment.assignmentId);
+        }else {
+          this.questions = [];
         }
       },
       error: () => console.error('Lỗi khi tải bài tập')
@@ -181,7 +180,7 @@ export class StudyComponent implements OnInit {
     if (!assignmentId) {
       return;
     }
-
+    console.log("🔍 Đang tải câu hỏi cho Assignment ID:", assignmentId);
     this.client.questions(assignmentId).subscribe({
       next: (result: any) => {
 
@@ -268,6 +267,7 @@ export class StudyComponent implements OnInit {
 
     // ✅ Tạo instance của SubmitAssignmentRequest và gán giá trị
   const submitRequest = new SubmitAssignmentRequest();
+ // const requestWithLessonId = Object.assign({}, submitRequest, { lessonId: this.lessonId });
   submitRequest.score = Math.round((correctAnswers / totalQuestions) * 100);
 
   console.log("Gửi dữ liệu nộp bài:", submitRequest);
@@ -275,16 +275,20 @@ export class StudyComponent implements OnInit {
   console.log(`Số câu đúng: ${correctAnswers}`);
   console.log(`Điểm số: ${Math.round((correctAnswers / totalQuestions) * 100)}`);
   
-    this.client.submit(this.assignment.assignmentId, submitRequest).subscribe({
-      next: (result) => {
-        console.log("Nộp bài thành công:", result);
-        alert(`Nộp bài thành công! Điểm của bạn: ${submitRequest.score}`);
-      },
-      error: (err) => {
-        console.error("Lỗi khi nộp bài:", err);
-        alert("Lỗi khi nộp bài, vui lòng thử lại.");
-      }
-    });
+  this.client.submit(this.assignment.assignmentId, submitRequest).subscribe({
+    next: (response: any) => {
+      this.router.navigate([
+        '/learning', this.courseId, 'study', this.lessonId, 'assignmentResult'
+      ], { queryParams: { 
+        score: submitRequest.score,
+        courseId: this.courseId,  // Giữ nguyên courseId khi chuyển trang
+        lessonId: this.lessonId   // Giữ nguyên lessonId
+         } });
+    },  
+    error: (err) => {
+      alert("Lỗi khi nộp bài, vui lòng thử lại.");
+    }
+  });
   }
 
   get isAllLessonsCompleted(): boolean {

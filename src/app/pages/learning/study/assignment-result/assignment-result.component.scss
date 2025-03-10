@@ -1,0 +1,197 @@
+:host {
+  display: flex;
+  height: 100vh;
+}
+
+.menu-sidebar {
+  background: #ffffff;
+  color: rgb(0, 0, 0);
+}
+
+.lesson-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px;
+  min-height: 48px; 
+  overflow: visible;
+}
+
+.completed-icon {
+  color: #1890ff;
+}
+
+.pending-icon {
+  color: #d9d9d9; 
+}
+
+.lesson-title {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1;
+  white-space: normal;
+  word-wrap: break-word; 
+  word-break: break-word; 
+  padding-right: 8px; 
+}
+
+nz-icon {
+  font-size: 18px;
+  opacity: 1; 
+}
+nz-submenu {
+  padding-left: 0 !important;
+}
+.app-header {
+  background: #fff;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #e8e8e8;
+  height: 64px;
+}
+
+.header-trigger {
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  flex-grow: 1;
+}
+
+.app-content {
+  padding: 24px;
+  background: #f0f2f5;
+  overflow-y: auto;
+}
+
+.lesson-container, 
+.exercise-container {
+  max-width: 100%;  
+  width: 100%;  
+  margin: 20px auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.exercise-container {
+  text-align: center;
+}
+.exam-btn {
+  background: linear-gradient(135deg, #1890ff, #40a9ff);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  margin: 15px auto; /* Căn giữa theo chiều ngang */
+  width: fit-content; /* Chiều rộng tự động theo nội dung */
+  min-width: 160px;
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 3px 8px rgba(24, 144, 255, 0.3);
+}
+
+.exam-btn:hover {
+  background: linear-gradient(135deg, #40a9ff, #1890ff);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(24, 144, 255, 0.4);
+}
+
+.exam-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 5px rgba(24, 144, 255, 0.3);
+}
+
+.exam-btn::before {
+  content: "📝";
+  font-size: 16px;
+}
+.app-content {
+  padding: 24px;
+  background: #f0f2f5; /* Màu nền nhẹ nhàng */
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 64px); /* Trừ đi chiều cao của header */
+}
+
+/* Container hiển thị nội dung chính */
+.result-container {
+  background: #ffffff;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.result-container h1 {
+  font-size: 24px;
+  color: #1890ff;
+  margin-bottom: 16px;
+}
+
+.result-container p {
+  font-size: 18px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+/* Nhóm nút điều hướng */
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.button-group button {
+  background: #1890ff;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+.button-group button:hover {
+  background: #40a9ff;
+}
+
+.button-group button:disabled {
+  background: #d9d9d9;
+  cursor: not-allowed;
+}
+
+/* Hiệu ứng fadeIn */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+

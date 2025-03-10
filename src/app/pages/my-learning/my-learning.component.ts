@@ -105,8 +105,8 @@ export class MyLearningComponent implements OnInit {
     this.currentPage = 1; // Reset về trang đầu tiên sau khi tìm kiếm
   }
 
-  goToCourseDetail(id: number): void {
-    this.router.navigate(['/learning', id]);
+  goToCourseDetail(courseId: number): void {
+    this.router.navigate(['/my-learning/statistics', courseId]);
   }
 
   onPageIndexChange(page: number): void {

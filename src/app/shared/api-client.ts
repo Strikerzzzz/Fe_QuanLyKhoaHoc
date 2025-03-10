@@ -46,7 +46,7 @@ export interface IClient {
     /**
      * @return OK
      */
-    result(assignmentId: number): Observable<ObjectResult>;
+    learningProgress(courseId: number): Observable<LearnProgressDtoListResult>;
     /**
      * @return OK
      */
@@ -122,7 +122,7 @@ export interface IClient {
     /**
      * @return OK
      */
-    result2(examId: number): Observable<StringResult>;
+    result(courseId: number): Observable<StringResult>;
     /**
      * @return OK
      */
@@ -803,11 +803,11 @@ export class Client implements IClient {
     /**
      * @return OK
      */
-    result(assignmentId: number): Observable<ObjectResult> {
-        let url_ = this.baseUrl + "/api/Assignments/{assignmentId}/result";
-        if (assignmentId === undefined || assignmentId === null)
-            throw new Error("The parameter 'assignmentId' must be defined.");
-        url_ = url_.replace("{assignmentId}", encodeURIComponent("" + assignmentId));
+    learningProgress(courseId: number): Observable<LearnProgressDtoListResult> {
+        let url_ = this.baseUrl + "/api/Assignments/learning-progress/{courseId}";
+        if (courseId === undefined || courseId === null)
+            throw new Error("The parameter 'courseId' must be defined.");
+        url_ = url_.replace("{courseId}", encodeURIComponent("" + courseId));
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -819,20 +819,20 @@ export class Client implements IClient {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processResult(response_);
+            return this.processLearningProgress(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processResult(response_ as any);
+                    return this.processLearningProgress(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<ObjectResult>;
+                    return _observableThrow(e) as any as Observable<LearnProgressDtoListResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<ObjectResult>;
+                return _observableThrow(response_) as any as Observable<LearnProgressDtoListResult>;
         }));
     }
 
-    protected processResult(response: HttpResponseBase): Observable<ObjectResult> {
+    protected processLearningProgress(response: HttpResponseBase): Observable<LearnProgressDtoListResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -843,7 +843,7 @@ export class Client implements IClient {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ObjectResult.fromJS(resultData200);
+            result200 = LearnProgressDtoListResult.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status === 404) {
@@ -2116,11 +2116,11 @@ export class Client implements IClient {
     /**
      * @return OK
      */
-    result2(examId: number): Observable<StringResult> {
-        let url_ = this.baseUrl + "/api/Exams/{examId}/result";
-        if (examId === undefined || examId === null)
-            throw new Error("The parameter 'examId' must be defined.");
-        url_ = url_.replace("{examId}", encodeURIComponent("" + examId));
+    result(courseId: number): Observable<StringResult> {
+        let url_ = this.baseUrl + "/api/Exams/{courseId}/result";
+        if (courseId === undefined || courseId === null)
+            throw new Error("The parameter 'courseId' must be defined.");
+        url_ = url_.replace("{courseId}", encodeURIComponent("" + courseId));
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -2132,11 +2132,11 @@ export class Client implements IClient {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processResult2(response_);
+            return this.processResult(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processResult2(response_ as any);
+                    return this.processResult(response_ as any);
                 } catch (e) {
                     return _observableThrow(e) as any as Observable<StringResult>;
                 }
@@ -2145,7 +2145,7 @@ export class Client implements IClient {
         }));
     }
 
-    protected processResult2(response: HttpResponseBase): Observable<StringResult> {
+    protected processResult(response: HttpResponseBase): Observable<StringResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -5916,6 +5916,114 @@ export interface IFillInBlankQuestion {
     examId?: number | undefined;
     exam?: Exam;
     correctAnswer: string;
+}
+
+export class LearnProgressDto implements ILearnProgressDto {
+    lessonId?: number;
+    title?: string | undefined;
+    isCompleted?: boolean;
+    assignmentScore?: number | undefined;
+
+    constructor(data?: ILearnProgressDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.lessonId = _data["lessonId"];
+            this.title = _data["title"];
+            this.isCompleted = _data["isCompleted"];
+            this.assignmentScore = _data["assignmentScore"];
+        }
+    }
+
+    static fromJS(data: any): LearnProgressDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new LearnProgressDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["lessonId"] = this.lessonId;
+        data["title"] = this.title;
+        data["isCompleted"] = this.isCompleted;
+        data["assignmentScore"] = this.assignmentScore;
+        return data;
+    }
+}
+
+export interface ILearnProgressDto {
+    lessonId?: number;
+    title?: string | undefined;
+    isCompleted?: boolean;
+    assignmentScore?: number | undefined;
+}
+
+export class LearnProgressDtoListResult implements ILearnProgressDtoListResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: LearnProgressDto[] | undefined;
+
+    constructor(data?: ILearnProgressDtoListResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            if (Array.isArray(_data["data"])) {
+                this.data = [] as any;
+                for (let item of _data["data"])
+                    this.data!.push(LearnProgressDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): LearnProgressDtoListResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new LearnProgressDtoListResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        if (Array.isArray(this.data)) {
+            data["data"] = [];
+            for (let item of this.data)
+                data["data"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface ILearnProgressDtoListResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: LearnProgressDto[] | undefined;
 }
 
 export class Lesson implements ILesson {

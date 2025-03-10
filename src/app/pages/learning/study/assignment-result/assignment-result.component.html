@@ -1,0 +1,47 @@
+<nz-layout>
+    <nz-sider class="menu-sidebar" nzCollapsible nzWidth="256px" nzBreakpoint="md" [(nzCollapsed)]="isCollapsed"
+        [nzTrigger]="null" nzTheme="light">
+        <ul nz-menu nzTheme="light" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+            <li nz-submenu nzOpen nzTitle="Danh sách bài học" nzIcon="book">
+                <ul>
+                    <li *ngFor="let lesson of lessons || []" nz-menu-item (click)="selectLesson(lesson)">
+                        <div class="lesson-item">
+                            <span class="lesson-title">{{ lesson.title }}</span>
+                            <nz-icon nzType="check-circle" [nzTheme]="'outline'" [ngClass]="{'completed-icon': lessonProgress[lesson.lessonId] === 100, 
+                                            'pending-icon': lessonProgress[lesson.lessonId] !== 100}">
+                            </nz-icon>
+                        </div>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <button *ngIf="isAllLessonsCompleted" (click)="goToExam()" class="exam-btn">
+            Làm bài kiểm tra
+        </button>
+    </nz-sider>
+
+    <!-- Layout chính -->
+    <nz-layout>
+        <!-- Header -->
+        <nz-header class="app-header">
+            <span class="header-trigger" (click)="isCollapsed = !isCollapsed">
+                <nz-icon [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'" class="trigger"
+                    nzTheme="outline"></nz-icon>
+            </span>
+            <h2 class="header-title">Trang Học Tập</h2>
+        </nz-header>
+
+        <!-- Nội dung chính -->
+        <nz-content class="app-content">
+            <div class="result-container">
+                <h1>Kết quả bài tập</h1>
+                <p>Điểm của bạn: <strong>{{ score }}</strong></p>
+              
+                <div class="button-group">
+                  <button (click)="goToPreviousLesson()" [disabled]="lessonId <= 1">Bài trước</button>
+                  <button (click)="goToNextLesson()">Bài tiếp theo</button>
+                </div>
+              </div>
+        </nz-content>
+    </nz-layout>
+</nz-layout>
