@@ -1,1 +1,35 @@
-<p>student-results works!</p>
+<div echarts [options]="chartOptions" class="chart-container">
+</div>
+<button class="button-exam" nz-button nzType="primary" (click)="viewExam(examId)">
+    Xem chi tiết kết quả bài kiểm tra
+</button>
+<div class="assignments-container">
+    <h2>Danh sách bài tập</h2>
+
+    <nz-table #basicTable [nzBordered]="true" [nzData]="assignments" [nzSize]="'middle'" [nzLoading]="loading"
+        [nzShowPagination]="true">
+        <thead>
+            <tr>
+                <th nzWidth="30%">Tên bài tập</th>
+                <th nzWidth="40%">Mô tả</th>
+                <th nzWidth="15%">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let assignment of assignments">
+                <td>{{ assignment.title }}</td>
+                <td>{{ assignment.description }}</td>
+                <td>
+                    <button nz-button nzType="primary" nzSize="small"
+                        (click)="viewAssignment(assignment.assignmentId,assignment.title)">
+                        Xem chi tiết
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </nz-table>
+
+    <div *ngIf="assignments.length === 0 && !loading" class="no-assignments">
+        Không có bài tập nào.
+    </div>
+</div>

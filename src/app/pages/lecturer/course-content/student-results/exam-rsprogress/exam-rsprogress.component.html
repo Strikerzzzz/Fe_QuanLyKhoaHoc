@@ -1,0 +1,44 @@
+<div echarts [options]="chartOptions" class="chart-container"></div>
+
+    <nz-card>
+        <nz-space nzAlign="center" class="action-bar">
+            <!-- Ô tìm kiếm -->
+            <nz-input-group nzCompact class="search-box">
+                <input nz-input [(ngModel)]="studentName" placeholder="Tìm sinh viên theo tên, username, email" />
+                <button nz-button nzType="primary" (click)="search()">Tìm kiếm</button>
+            </nz-input-group>
+
+            <!-- Nút sắp xếp -->
+            <button nz-button nzType="default" (click)="changeSortOrder()">
+                Sắp xếp theo điểm ({{ sortByScore ? 'Giảm dần' : 'Tăng dần' }})
+            </button>
+        </nz-space>
+
+        <!-- Bảng dữ liệu -->
+        <nz-table #basicTable [nzData]="examResults" [nzBordered]="true" [nzLoading]="loading"
+            [nzShowPagination]="false">
+            <thead>
+                <tr>
+                    <th nzWidth="25%">Tên sinh viên</th>
+                    <th nzWidth="20%">Username</th>
+                    <th nzWidth="20%">Email</th>
+                    <th nzWidth="15%">Điểm</th>
+                    <th nzWidth="20%">Thời gian nộp</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let result of examResults">
+                    <td>{{ result.studentName }}</td>
+                    <td>{{ result.userName }}</td>
+                    <td>{{ result.email }}</td>
+                    <td>{{ result.score }}</td>
+                    <td>{{ result.submissionTime | date:'dd/MM/yyyy HH:mm' }}</td>
+                </tr>
+            </tbody>
+        </nz-table>
+
+        <!-- Phân trang -->
+        <nz-pagination [nzPageIndex]="page" [nzPageSize]="pageSize" [nzTotal]="totalCount"
+            (nzPageIndexChange)="changePage($event)">
+        </nz-pagination>
+    </nz-card>

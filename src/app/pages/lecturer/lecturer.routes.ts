@@ -8,6 +8,8 @@ import { LessonAssignmentComponent } from "./course-content/lesson-assignment/le
 import { LessonContentComponent } from "./course-content/lesson-content/lesson-content.component";
 import { StudentProgressComponent } from "./course-content/student-progress/student-progress.component";
 import { StudentResultsComponent } from "./course-content/student-results/student-results.component";
+import { AssignmentRsprogresComponent } from "./course-content/student-results/assignment-rsprogres/assignment-rsprogres.component";
+import { ExamRsprogressComponent } from "./course-content/student-results/exam-rsprogress/exam-rsprogress.component";
 
 export const LECTURER_ROUTES: Route[] = [
     {
@@ -26,7 +28,9 @@ export const LECTURER_ROUTES: Route[] = [
                     { path: "assignment/:lessonId", component: LessonAssignmentComponent },
                     { path: "content/:lessonId", component: LessonContentComponent },
                     { path: "progress", component: StudentProgressComponent },
-                    { path: "results", component: StudentResultsComponent }
+                    { path: "results", component: StudentResultsComponent },
+                    { path: "results/assignment/:assignmentId", component: AssignmentRsprogresComponent },
+                    { path: "results/exam/:examId", component: ExamRsprogressComponent }
                 ]
             }
         ]

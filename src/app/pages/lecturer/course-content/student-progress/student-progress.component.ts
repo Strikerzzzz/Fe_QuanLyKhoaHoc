@@ -62,8 +62,7 @@ export class StudentProgressComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private client: Client,
-    private message: NzMessageService,
-    private router: Router,
+    private message: NzMessageService
   ) { }
 
   ngOnInit(): void {

@@ -1,57 +1,66 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { EChartsOption } from 'echarts';
-import { Client, ObjectIEnumerableResult } from '../../../../shared/api-client';
-import { CommonModule } from '@angular/common';
+import { AssignmentResultDto, Client } from '../../../../../shared/api-client';
 import { NgxEchartsModule } from 'ngx-echarts';
-import { ActivatedRoute, Router } from '@angular/router';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzSpaceModule } from 'ng-zorro-antd/space';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { CommonModule } from '@angular/common';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { FormsModule } from '@angular/forms';
+
 
 @Component({
-  selector: 'app-student-results',
-  imports: [CommonModule, NgxEchartsModule, NzTableModule, NzButtonModule],
-  templateUrl: './student-results.component.html',
-  styleUrl: './student-results.component.scss'
+  selector: 'app-assignment-rsprogres',
+  imports: [NgxEchartsModule,
+    NzCardModule,
+    NzSpaceModule,
+    NzPaginationModule,
+    NzInputModule,
+    NzTableModule,
+    FormsModule,
+    NzInputModule,
+    NzButtonComponent,
+    CommonModule],
+  templateUrl: './assignment-rsprogres.component.html',
+  styleUrl: './assignment-rsprogres.component.scss'
 })
-export class StudentResultsComponent implements OnInit {
-  @Input() courseId!: number;
+export class AssignmentRsprogresComponent implements OnInit {
+  @Input() assignmentId!: number;
   chartOptions: EChartsOption = {};
-  assignments: any[] = [];
-  examId!: number;
-  loading: boolean = false;
+  assignmentTitle: string | any = "";
+  assignmentResults: AssignmentResultDto[] = [];
+  totalCount: number = 0;
+
+  loading = false;
+  page = 1;
+  pageSize = 10;
+  studentName: string | undefined;
+  sortByScore: boolean | undefined = undefined;
 
   constructor(private route: ActivatedRoute,
-    private router: Router,
-    private examService: Client) { }
+    private client: Client,
+    private message: NzMessageService) { }
 
   ngOnInit(): void {
-    this.route.parent?.paramMap.subscribe(params => {
-      this.courseId = Number(params.get('courseId'));
-      if (this.courseId) {
-        this.loadExamId();
+    this.route.paramMap.subscribe(params => {
+      this.assignmentId = Number(params.get('assignmentId'));
+      if (this.assignmentId) {
         this.loadChartData();
-        this.loadAssignments();
+        this.loadResults();
       }
     });
-  }
 
-  loadExamId(): void {
-    this.examService.course(this.courseId).subscribe(
-      (res) => {
-        if (res?.data?.examId) {
-          this.examId = res.data.examId;
-        } else {
-          console.warn("Không tìm thấy examId.");
-        }
-      },
-      (error) => {
-        console.error("Lỗi khi lấy examId:", error);
-      }
-    );
+    this.route.queryParamMap.subscribe(params => {
+      this.assignmentTitle = params.get('title');
+    });
   }
-
   loadChartData(): void {
-    this.examService.scoreLineExam(this.courseId).subscribe(
+    this.client.scoreLineChart(this.assignmentId).subscribe(
       (data) => {
         if (!data?.data || data.data.length === 0) {
           console.warn("Không có dữ liệu để hiển thị biểu đồ.");
@@ -74,7 +83,7 @@ export class StudentResultsComponent implements OnInit {
 
         this.chartOptions = {
           title: {
-            text: "Biểu đồ phân bố điểm số bài kiểm tra",
+            text: "Biểu đồ phân bố điểm số bài tập    " + this.assignmentTitle,
             left: "center",
             textStyle: {
               fontSize: 18,
@@ -124,37 +133,34 @@ export class StudentResultsComponent implements OnInit {
       }
     );
   }
-  loadAssignments(): void {
+  loadResults(): void {
     this.loading = true;
-    this.examService.listBy(this.courseId).subscribe(
-      (result: ObjectIEnumerableResult) => {
-        if (result && result.data) {
-          this.assignments = result.data;
-        } else {
-          this.assignments = [];
+    this.client.results(this.assignmentId, this.page, this.pageSize, this.studentName, this.sortByScore)
+      .subscribe({
+        next: (response) => {
+          this.assignmentResults = response.data?.results ?? [];
+          this.totalCount = response.data?.totalCount ?? 0;
+          this.loading = false;
+        },
+        error: (err) => {
+          console.error(err);
+          this.loading = false;
         }
-        this.loading = false;
-      },
-      (error) => {
-        console.error("Lỗi khi tải bài tập:", error);
-        this.assignments = [];
-        this.loading = false;
-      }
-    );
-  }
-  viewAssignment(assignmentId: number, assignmentTitle: string) {
-    this.router.navigate(
-      [`/lecturer/courses-content/${this.courseId}/results/assignment`, assignmentId],
-      { queryParams: { title: assignmentTitle } }
-    );
+      });
   }
 
+  search(): void {
+    this.page = 1;
+    this.loadResults();
+  }
 
-  viewExam(examId: number) {
-    if (!examId) {
-      console.warn("examId chưa được tải.");
-      return;
-    }
-    this.router.navigate([`/lecturer/courses-content/${this.courseId}/results/exam`, examId]);
+  changeSortOrder(): void {
+    this.sortByScore = !this.sortByScore;
+    this.search();
+}
+
+  changePage(page: number): void {
+    this.page = page;
+    this.loadResults();
   }
 }

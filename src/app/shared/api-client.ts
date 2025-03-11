@@ -48,13 +48,21 @@ export interface IClient {
      */
     learningProgress(courseId: number): Observable<LearnProgressDtoListResult>;
     /**
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @param studentName (optional) 
+     * @param sortByScore (optional) 
      * @return OK
      */
-    results(assignmentId: number): Observable<ObjectIEnumerableResult>;
+    results(assignmentId: number, page: number | undefined, pageSize: number | undefined, studentName: string | undefined, sortByScore: boolean | undefined): Observable<AssignmentResultPagedResultResult>;
     /**
      * @return OK
      */
     scoreLineChart(assignmentId: number): Observable<LineChartDtoIEnumerableResult>;
+    /**
+     * @return OK
+     */
+    listBy(courseId: number): Observable<ObjectIEnumerableResult>;
     /**
      * @return OK
      */
@@ -128,9 +136,17 @@ export interface IClient {
      */
     result(courseId: number): Observable<StringResult>;
     /**
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @param studentName (optional) 
+     * @param sortByScore (optional) 
      * @return OK
      */
-    results2(examId: number): Observable<ObjectIEnumerableResult>;
+    results2(examId: number, page: number | undefined, pageSize: number | undefined, studentName: string | undefined, sortByScore: boolean | undefined): Observable<ExamResultPagedResultResult>;
+    /**
+     * @return OK
+     */
+    scoreLineExam(courseId: number): Observable<LineChartDtoIEnumerableResult>;
     /**
      * @return OK
      */
@@ -886,13 +902,33 @@ export class Client implements IClient {
     }
 
     /**
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @param studentName (optional) 
+     * @param sortByScore (optional) 
      * @return OK
      */
-    results(assignmentId: number): Observable<ObjectIEnumerableResult> {
-        let url_ = this.baseUrl + "/api/Assignments/{assignmentId}/results";
+    results(assignmentId: number, page: number | undefined, pageSize: number | undefined, studentName: string | undefined, sortByScore: boolean | undefined): Observable<AssignmentResultPagedResultResult> {
+        let url_ = this.baseUrl + "/api/Assignments/{assignmentId}/results?";
         if (assignmentId === undefined || assignmentId === null)
             throw new Error("The parameter 'assignmentId' must be defined.");
         url_ = url_.replace("{assignmentId}", encodeURIComponent("" + assignmentId));
+        if (page === null)
+            throw new Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (studentName === null)
+            throw new Error("The parameter 'studentName' cannot be null.");
+        else if (studentName !== undefined)
+            url_ += "studentName=" + encodeURIComponent("" + studentName) + "&";
+        if (sortByScore === null)
+            throw new Error("The parameter 'sortByScore' cannot be null.");
+        else if (sortByScore !== undefined)
+            url_ += "sortByScore=" + encodeURIComponent("" + sortByScore) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -910,14 +946,14 @@ export class Client implements IClient {
                 try {
                     return this.processResults(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<ObjectIEnumerableResult>;
+                    return _observableThrow(e) as any as Observable<AssignmentResultPagedResultResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<ObjectIEnumerableResult>;
+                return _observableThrow(response_) as any as Observable<AssignmentResultPagedResultResult>;
         }));
     }
 
-    protected processResults(response: HttpResponseBase): Observable<ObjectIEnumerableResult> {
+    protected processResults(response: HttpResponseBase): Observable<AssignmentResultPagedResultResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -928,7 +964,7 @@ export class Client implements IClient {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ObjectIEnumerableResult.fromJS(resultData200);
+            result200 = AssignmentResultPagedResultResult.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status === 404) {
@@ -1040,6 +1076,81 @@ export class Client implements IClient {
             let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result403 = ObjectResult.fromJS(resultData403);
             return throwException("Forbidden", status, _responseText, _headers, result403);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    listBy(courseId: number): Observable<ObjectIEnumerableResult> {
+        let url_ = this.baseUrl + "/api/Assignments/list-by/{courseId}";
+        if (courseId === undefined || courseId === null)
+            throw new Error("The parameter 'courseId' must be defined.");
+        url_ = url_.replace("{courseId}", encodeURIComponent("" + courseId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processListBy(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processListBy(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<ObjectIEnumerableResult>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<ObjectIEnumerableResult>;
+        }));
+    }
+
+    protected processListBy(response: HttpResponseBase): Observable<ObjectIEnumerableResult> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ObjectIEnumerableResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ObjectResult.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result401 = ObjectResult.fromJS(resultData401);
+            return throwException("Unauthorized", status, _responseText, _headers, result401);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ObjectResult.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2281,13 +2392,33 @@ export class Client implements IClient {
     }
 
     /**
+     * @param page (optional) 
+     * @param pageSize (optional) 
+     * @param studentName (optional) 
+     * @param sortByScore (optional) 
      * @return OK
      */
-    results2(examId: number): Observable<ObjectIEnumerableResult> {
-        let url_ = this.baseUrl + "/api/Exams/{examId}/results";
+    results2(examId: number, page: number | undefined, pageSize: number | undefined, studentName: string | undefined, sortByScore: boolean | undefined): Observable<ExamResultPagedResultResult> {
+        let url_ = this.baseUrl + "/api/Exams/{examId}/results?";
         if (examId === undefined || examId === null)
             throw new Error("The parameter 'examId' must be defined.");
         url_ = url_.replace("{examId}", encodeURIComponent("" + examId));
+        if (page === null)
+            throw new Error("The parameter 'page' cannot be null.");
+        else if (page !== undefined)
+            url_ += "page=" + encodeURIComponent("" + page) + "&";
+        if (pageSize === null)
+            throw new Error("The parameter 'pageSize' cannot be null.");
+        else if (pageSize !== undefined)
+            url_ += "pageSize=" + encodeURIComponent("" + pageSize) + "&";
+        if (studentName === null)
+            throw new Error("The parameter 'studentName' cannot be null.");
+        else if (studentName !== undefined)
+            url_ += "studentName=" + encodeURIComponent("" + studentName) + "&";
+        if (sortByScore === null)
+            throw new Error("The parameter 'sortByScore' cannot be null.");
+        else if (sortByScore !== undefined)
+            url_ += "sortByScore=" + encodeURIComponent("" + sortByScore) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_ : any = {
@@ -2305,14 +2436,14 @@ export class Client implements IClient {
                 try {
                     return this.processResults2(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<ObjectIEnumerableResult>;
+                    return _observableThrow(e) as any as Observable<ExamResultPagedResultResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<ObjectIEnumerableResult>;
+                return _observableThrow(response_) as any as Observable<ExamResultPagedResultResult>;
         }));
     }
 
-    protected processResults2(response: HttpResponseBase): Observable<ObjectIEnumerableResult> {
+    protected processResults2(response: HttpResponseBase): Observable<ExamResultPagedResultResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -2323,7 +2454,7 @@ export class Client implements IClient {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = ObjectIEnumerableResult.fromJS(resultData200);
+            result200 = ExamResultPagedResultResult.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status === 404) {
@@ -2353,6 +2484,88 @@ export class Client implements IClient {
             let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result403 = ObjectResult.fromJS(resultData403);
             return throwException("Forbidden", status, _responseText, _headers, result403);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @return OK
+     */
+    scoreLineExam(courseId: number): Observable<LineChartDtoIEnumerableResult> {
+        let url_ = this.baseUrl + "/api/Exams/chart/{courseId}/score-line-exam";
+        if (courseId === undefined || courseId === null)
+            throw new Error("The parameter 'courseId' must be defined.");
+        url_ = url_.replace("{courseId}", encodeURIComponent("" + courseId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processScoreLineExam(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processScoreLineExam(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<LineChartDtoIEnumerableResult>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<LineChartDtoIEnumerableResult>;
+        }));
+    }
+
+    protected processScoreLineExam(response: HttpResponseBase): Observable<LineChartDtoIEnumerableResult> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = LineChartDtoIEnumerableResult.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ObjectResult.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 401) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result401: any = null;
+            let resultData401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result401 = ObjectResult.fromJS(resultData401);
+            return throwException("Unauthorized", status, _responseText, _headers, result401);
+            }));
+        } else if (status === 403) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result403: any = null;
+            let resultData403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result403 = ObjectResult.fromJS(resultData403);
+            return throwException("Forbidden", status, _responseText, _headers, result403);
+            }));
+        } else if (status === 500) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result500: any = null;
+            let resultData500 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result500 = ObjectResult.fromJS(resultData500);
+            return throwException("Internal Server Error", status, _responseText, _headers, result500);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -5221,6 +5434,162 @@ export interface IAssignment {
     fillInBlankQuestions?: FillInBlankQuestion[] | undefined;
 }
 
+export class AssignmentResultDto implements IAssignmentResultDto {
+    resultId?: number;
+    studentName?: string | undefined;
+    userName?: string | undefined;
+    email?: string | undefined;
+    score?: number;
+    submissionTime?: Date | undefined;
+
+    constructor(data?: IAssignmentResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.resultId = _data["resultId"];
+            this.studentName = _data["studentName"];
+            this.userName = _data["userName"];
+            this.email = _data["email"];
+            this.score = _data["score"];
+            this.submissionTime = _data["submissionTime"] ? new Date(_data["submissionTime"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): AssignmentResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AssignmentResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["resultId"] = this.resultId;
+        data["studentName"] = this.studentName;
+        data["userName"] = this.userName;
+        data["email"] = this.email;
+        data["score"] = this.score;
+        data["submissionTime"] = this.submissionTime ? this.submissionTime.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IAssignmentResultDto {
+    resultId?: number;
+    studentName?: string | undefined;
+    userName?: string | undefined;
+    email?: string | undefined;
+    score?: number;
+    submissionTime?: Date | undefined;
+}
+
+export class AssignmentResultPagedResult implements IAssignmentResultPagedResult {
+    results?: AssignmentResultDto[] | undefined;
+    totalCount?: number;
+
+    constructor(data?: IAssignmentResultPagedResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["results"])) {
+                this.results = [] as any;
+                for (let item of _data["results"])
+                    this.results!.push(AssignmentResultDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): AssignmentResultPagedResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new AssignmentResultPagedResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.results)) {
+            data["results"] = [];
+            for (let item of this.results)
+                data["results"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+}
+
+export interface IAssignmentResultPagedResult {
+    results?: AssignmentResultDto[] | undefined;
+    totalCount?: number;
+}
+
+export class AssignmentResultPagedResultResult implements IAssignmentResultPagedResultResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: AssignmentResultPagedResult;
+
+    constructor(data?: IAssignmentResultPagedResultResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            this.data = _data["data"] ? AssignmentResultPagedResult.fromJS(_data["data"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): AssignmentResultPagedResultResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new AssignmentResultPagedResultResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IAssignmentResultPagedResultResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: AssignmentResultPagedResult;
+}
+
 export class ConfirmEmailRequest implements IConfirmEmailRequest {
     email?: string | undefined;
     token?: string | undefined;
@@ -6023,6 +6392,162 @@ export interface IExam {
     randomMultipleChoiceCount?: number;
     multipleChoiceQuestions?: MultipleChoiceQuestion[] | undefined;
     fillInBlankQuestions?: FillInBlankQuestion[] | undefined;
+}
+
+export class ExamResultDto implements IExamResultDto {
+    resultId?: number;
+    studentName?: string | undefined;
+    userName?: string | undefined;
+    email?: string | undefined;
+    score?: number;
+    submissionTime?: Date | undefined;
+
+    constructor(data?: IExamResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.resultId = _data["resultId"];
+            this.studentName = _data["studentName"];
+            this.userName = _data["userName"];
+            this.email = _data["email"];
+            this.score = _data["score"];
+            this.submissionTime = _data["submissionTime"] ? new Date(_data["submissionTime"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): ExamResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ExamResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["resultId"] = this.resultId;
+        data["studentName"] = this.studentName;
+        data["userName"] = this.userName;
+        data["email"] = this.email;
+        data["score"] = this.score;
+        data["submissionTime"] = this.submissionTime ? this.submissionTime.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IExamResultDto {
+    resultId?: number;
+    studentName?: string | undefined;
+    userName?: string | undefined;
+    email?: string | undefined;
+    score?: number;
+    submissionTime?: Date | undefined;
+}
+
+export class ExamResultPagedResult implements IExamResultPagedResult {
+    results?: ExamResultDto[] | undefined;
+    totalCount?: number;
+
+    constructor(data?: IExamResultPagedResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["results"])) {
+                this.results = [] as any;
+                for (let item of _data["results"])
+                    this.results!.push(ExamResultDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): ExamResultPagedResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new ExamResultPagedResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.results)) {
+            data["results"] = [];
+            for (let item of this.results)
+                data["results"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+}
+
+export interface IExamResultPagedResult {
+    results?: ExamResultDto[] | undefined;
+    totalCount?: number;
+}
+
+export class ExamResultPagedResultResult implements IExamResultPagedResultResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: ExamResultPagedResult;
+
+    constructor(data?: IExamResultPagedResultResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            this.data = _data["data"] ? ExamResultPagedResult.fromJS(_data["data"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): ExamResultPagedResultResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new ExamResultPagedResultResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IExamResultPagedResultResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: ExamResultPagedResult;
 }
 
 export class FillInBlankQuestion implements IFillInBlankQuestion {
