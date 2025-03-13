@@ -1,1 +1,8 @@
-<p>system-stats works!</p>
+<div class="chart-wrapper">
+    <nz-select [(ngModel)]="selectedPeriod" (ngModelChange)="onPeriodChange()" nzPlaceHolder="Chọn khoảng thời gian">
+        <nz-option *ngFor="let p of periods" [nzValue]="p.value" [nzLabel]="p.label"></nz-option>
+    </nz-select>
+
+
+    <div echarts [options]="chartOptions" class="chart-container"></div>
+</div>

@@ -3,13 +3,20 @@
     <nz-sider class="menu-sidebar" nzCollapsible nzWidth="256px" nzBreakpoint="md" [(nzCollapsed)]="isCollapsed"
         [nzTrigger]="null" nzTheme="light">
         <ul nz-menu nzTheme="light" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
-            <li nz-submenu nzOpen nzTitle="Hệ thống" nzIcon="dashboard">
+            <li nz-submenu nzOpen nzTitle="Quản lý hệ thống" nzIcon="dashboard">
                 <ul>
                     <li nz-menu-item nzMatchRouter>
                         <a routerLink="/admin/user-management" routerLinkActive="active">Quản lý người dùng</a>
                     </li>
+
+                </ul>
+            </li>
+        </ul>
+        <ul nz-menu nzTheme="light" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
+            <li nz-submenu nzOpen nzTitle="Theo dõi hệ thống" nzIcon="dashboard">
+                <ul>
                     <li nz-menu-item nzMatchRouter>
-                        <a routerLink="/admin/system-stats" routerLinkActive="active">Thống kê hệ thống</a>
+                        <a routerLink="/admin/system-stats" routerLinkActive="active">Thống kê đăng ký mới</a>
                     </li>
                 </ul>
             </li>
