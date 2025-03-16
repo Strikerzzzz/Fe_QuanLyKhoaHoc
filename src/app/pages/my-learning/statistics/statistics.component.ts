@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Client } from '../../../shared/api-client';
 import { NzPageHeaderModule } from 'ng-zorro-antd/page-header';
@@ -23,7 +23,8 @@ import { LessonLearnDtoListResult } from '../../../shared/api-client';
   templateUrl: './statistics.component.html',
   styleUrl: './statistics.component.scss'
 })
-export class StatisticsComponent implements OnInit {
+export class StatisticsComponent implements OnInit, AfterViewChecked {
+  @ViewChild('certificateCanvas', { static: false }) certificateCanvas!: ElementRef<HTMLCanvasElement>;
   course: any;
   courseId: number = 0;
   lessons: any[] = [];
@@ -35,6 +36,8 @@ export class StatisticsComponent implements OnInit {
   testName: string | null = null;
   testScore: number | null = null;
 
+  private isPatternDrawn = false; // Biến để tránh vẽ lại nhiều lần
+
   constructor(private router: Router, private route: ActivatedRoute, private client: Client, private authService: AuthService) { }
 
   ngOnInit(): void {
@@ -45,7 +48,51 @@ export class StatisticsComponent implements OnInit {
       this.loadExam(this.courseId);
     });
   }
+  ngAfterViewInit(): void {
+    //this.drawGuillochePattern(); // Vẽ hoa văn sau khi view được khởi tạo
+  }
+  ngAfterViewChecked(): void {
+    if (this.isAllLessonsCompleted() && this.certificateCanvas && !this.isPatternDrawn) {
+      this.drawGuillochePattern();
+      this.isPatternDrawn = true; // Đánh dấu đã vẽ
+    }
+  }
+  // Hàm vẽ hoa văn Guilloche
+  private drawGuillochePattern(): void {
+    if (!this.certificateCanvas) return;
 
+    const canvas = this.certificateCanvas.nativeElement;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) return;
+
+    const centerX = canvas.width / 2; // Trung tâm theo chiều ngang
+    const centerY = canvas.height / 2; // Trung tâm theo chiều dọc
+    const maxRadius = Math.sqrt(canvas.width * canvas.width + canvas.height * canvas.height) / 2; // Bán kính vừa đủ để chạm viền ngoài cùng của canvas
+    const step = 10; // Góc bước xoay (độ)
+
+    ctx.strokeStyle = '#daae20'; // Màu vàng nhạt (giữ nguyên)
+    ctx.lineWidth = 0.5;
+    ctx.globalAlpha = 0.7; // Độ trong suốt (giữ nguyên)
+
+    for (let angle = 0; angle < 360; angle += step) {
+      ctx.beginPath();
+      for (let i = 0; i <= 360; i += 5) {
+        const rad = (i * Math.PI) / 180;
+        // Điều chỉnh bán kính để các đường cong vừa chạm viền ngoài
+        const r = maxRadius * (0.5 + 0.5 * Math.sin(5 * rad)); // Bắt đầu từ 50% bán kính, mở rộng ra ngoài
+        const x = centerX + r * Math.cos(rad + (angle * Math.PI) / 180);
+        const y = centerY + r * Math.sin(rad + (angle * Math.PI) / 180);
+
+        // Chỉ vẽ nếu bán kính đủ lớn (loại bỏ phần trung tâm)
+        if (r > maxRadius * 0.4) { // Bắt đầu vẽ từ 50% bán kính trở ra ngoài
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+      }
+      ctx.stroke();
+    }
+  }
   goToStudy(): void {
     if (!this.course || !this.course.courseId || !this.lessons || this.lessons.length === 0) {
       return;
@@ -132,4 +179,11 @@ export class StatisticsComponent implements OnInit {
     return this.course?.keywords ? this.course.keywords.split(/,\s*/) : [];
   }
 
+  // Trong StatisticsComponent class
+  isAllLessonsCompleted(): boolean {
+    if (!this.lessons || this.lessons.length === 0) {
+      return false;
+    }
+    return this.lessons.every(lesson => lesson.isCompleted);
+  }
 }

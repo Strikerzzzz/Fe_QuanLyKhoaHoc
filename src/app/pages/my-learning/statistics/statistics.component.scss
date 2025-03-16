@@ -2,16 +2,24 @@
     display: flex;
     gap: 10px;
     position: relative;
-    max-width: 75%;
+    width: calc(100% - 25%); /* Để lại không gian cho sidebar (22% + margin) */
+    max-width: 1200px; /* Giới hạn tối đa */
     margin: 0 20px;
 }
 
 .course-container {
-    max-width: 1200px;
+    max-width: 90%;
+    width: 1200px;
     margin: 0 auto;
     padding: 20px;
 }
-
+.lesson-container,
+.test-info,
+.certificate-wrapper {
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+}
 /* Sidebar cố định bên phải */
 .sidebar {
     position: fixed;
@@ -86,6 +94,8 @@
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
+    max-width: 100%;
+    overflow-x: auto; /* Cho phép cuộn ngang nếu từ khóa quá nhiều */
 }
 
 .keyword-pill {
@@ -150,35 +160,33 @@
     justify-content: space-between;
     padding: 12px 15px;
     border-bottom: 1px solid #ddd;
+    max-width: 100%; /* Không vượt quá container */
+    overflow: hidden;
 }
-
-/* Cột 1: Bài học chiếm nhiều diện tích hơn */
 .lesson-title {
     flex: 2;
     text-align: left;
 }
-
-/* Cột 2: Trạng thái hoàn thành + điểm số */
 .lesson-status {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: flex-end;
     font-weight: bold;
-    gap: 10px; /* Giữ khoảng cách giữa trạng thái hoàn thành và điểm */
-    min-width: 150px; /* Giữ kích thước cố định */
+    gap: 10px; 
+    min-width: 150px; 
 }
 
 .completed-status {
     white-space: nowrap;
-    width: 120px; /* Cố định chiều rộng để không bị lệch */
+    width: 120px;
     text-align: center;
     margin-right: 10px;
 }
 
 .lesson-score {
     white-space: nowrap;
-    width: 50px; /* Đảm bảo ô điểm luôn có độ rộng cố định */
+    width: 50px;
     text-align: center;
     font-weight: normal;
 }
@@ -195,13 +203,8 @@
     background: #fff;
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
     text-align: center;
     margin-top: 25px;
-    transition: transform 0.3s ease-in-out;
-}
-.test-info:hover {
-    transform: translateY(-5px);
 }
 
 .test-info h3 {
@@ -249,4 +252,150 @@
 }
 .test-info {
     animation: fadeIn 0.5s ease-in-out;
+}
+.certificate-wrapper {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 25px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.certificate-wrapper-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.certificate-wrapper-text {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 20px;
+    text-align: center;
+}
+.certificate-container {
+    position: relative;
+    width: 90%;
+    height: 600px;
+    background: white;
+    border: 20px solid #1890ff ;
+    padding: 20px; 
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    margin: 0 auto;
+    font-family: "Times New Roman", Times, serif;
+}
+.certificate-container::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border: 1px solid #eed0a9; 
+    pointer-events: none;
+    z-index: 1;
+}
+
+.certificate-container canvas {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: calc(100% - 20px);
+    height: calc(100% - 20px);
+    opacity: 0.3;
+    z-index: 0;
+}
+
+.certificate-logo {
+    position: absolute;
+    top: -30px;
+    right: 30px;
+    width: 20%;
+    height: 40%;
+    background: #1890ff;
+    clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 4;
+}
+
+.certificate-logo img {
+    width: 80px;
+    height: 80px;
+}
+
+.certificate-title1 {
+    font-size: 42px; 
+    color: #f5222d;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: 10%;
+    text-align: left; 
+    width: 100%;
+    margin-left: 25%;
+}
+
+.certificate-title {
+    color: #000;
+    font-size: 22px; 
+    text-align: left;
+    text-transform: uppercase;
+    font-weight: normal;
+    width: 100%;
+    margin-left: 25%;
+    letter-spacing: 2px; /* Tạo khoảng cách giữa các chữ cái */
+}
+
+.certificate-recipient {
+    font-size: 30px;
+    color: #000;
+    margin: 50px 0;
+    width: 100%;
+    margin-left: 25%;
+    text-align: left;
+}
+
+.certificate-reason {
+    font-size: 20px;
+    color: black;
+    text-align: left; 
+    font-weight: normal;
+    width: 100%;
+    margin-left: 25%;
+}
+
+
+.certificate-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+    margin-top: 15%;
+    margin-left: 25%;
+}
+
+.certificate-signature {
+    font-size: 14px;
+    color: black;
+    text-align: left;
+}
+
+.certificate-date {
+    font-size: 14px;
+    color: black;
+    text-align: right;
 }
