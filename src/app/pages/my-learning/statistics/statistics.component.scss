@@ -282,10 +282,9 @@
     width: 90%;
     height: 600px;
     background: white;
-    border: 20px solid #1890ff ;
+    border: 20px solid #5c80be ;
     padding: 20px; 
     text-align: center;
-    font-family: 'Arial', sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -319,21 +318,34 @@
 
 .certificate-logo {
     position: absolute;
-    top: -30px;
+    top: 30px;
     right: 30px;
     width: 20%;
-    height: 40%;
-    background: #1890ff;
-    clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+    height: 20%; 
+    background: radial-gradient(circle, #4a6ca8, #3a5f9e); 
+    border-radius: 50%; 
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+    border: 3px solid #daa520; 
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 4;
 }
 
+/* Tạo hiệu ứng răng cưa nhẹ cho con dấu */
+.certificate-logo::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 2px dashed #daa520; 
+    box-sizing: border-box;
+}
+
 .certificate-logo img {
-    width: 80px;
-    height: 80px;
+    width: 90%;
+    height: 40%;
 }
 
 .certificate-title1 {
@@ -379,23 +391,58 @@
 
 .certificate-footer {
     display: flex;
-    justify-content: space-between;
+    height: 40%;
     align-items: center;
-    width: 100%;
+    width: 100%;  /* Giảm độ rộng để tránh tràn */
     position: relative;
     z-index: 2;
-    margin-top: 15%;
     margin-left: 25%;
 }
-
-.certificate-signature {
-    font-size: 14px;
-    color: black;
-    text-align: left;
+.certificate-stamp {
+    width: 200px; /* Giảm kích thước dấu mộc nếu quá lớn */
+    height: auto;
+    opacity: 0.8;
+    margin-left: -10px; /* Đẩy dấu mộc sát hơn */
+    margin-left: 30%;
 }
 
-.certificate-date {
-    font-size: 14px;
-    color: black;
-    text-align: right;
+.download-certificate-btn {
+    display: block;
+    width: 200px; /* Tăng độ rộng */
+    padding: 12px 20px; /* Tăng padding cho to hơn */
+    font-size: 16px; /* Cỡ chữ lớn hơn */
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    border: none;
+    border-radius: 8px; /* Bo góc nhẹ */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Tạo hiệu ứng nổi */
+    margin: 20px auto 0 auto; /* Căn giữa */
+    text-align: center;
 }
+
+.download-certificate-btn:hover {
+    background: linear-gradient(135deg, #2575fc, #6a11cb);
+    transform: translateY(-2px);
+}
+.certificate-sign {
+    font-weight: bold;
+    height: 200px;
+    margin: auto;
+    width: 30%;
+}
+.certificate-sign img {
+    width: 100%;
+    height: 100%;
+}
+.certificate-email {
+    position: absolute;
+    bottom: 20px;
+    left: 100px;
+    font-size: 10px;
+    color: #ccc;
+    font-family: 'Roboto', sans-serif;
+  }
+  

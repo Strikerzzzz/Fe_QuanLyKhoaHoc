@@ -1,3 +1,5 @@
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@400;700&family=Roboto&display=swap" rel="stylesheet">
+
 <div class="container">
     <div class="course-container">
         <!-- Sidebar cố định bên phải -->
@@ -77,23 +79,27 @@
         <div class="certificate-wrapper" *ngIf="isAllLessonsCompleted()">
             <h2 class="certificate-wrapper-title">Chứng nhận hoàn thành khoá học</h2>
             <p class="certificate-wrapper-text">Bạn đã nhận được giấy chứng nhận hoàn thành khóa học sau khi hoàn thành 100% nội dung khóa học.</p>
-            <div class="certificate-container">
+            <div #certificateContainer class="certificate-container">
                 <canvas #certificateCanvas width="750" height="563"></canvas>
                 <div class="certificate-logo">
                     <img src="../../../../assets/images/logo.png" alt="Logo" />
                 </div>
                 <div class="certificate-title1">GIẤY CHỨNG NHẬN</div>
                 <div class="certificate-title">CERTIFICATE OF COMPLETION</div>
-                <div class="certificate-recipient">lthoa.dhti15a10hn.uneti.edu.vn</div>
-                <div class="certificate-reason">Đã hoàn thành khoá học "lập trình net"</div>
+                <div class="certificate-recipient">{{ studentName }}</div>
+                <div class="certificate-reason">Đã hoàn thành khoá học "{{ course?.title }}"</div>
                 <div class="certificate-footer">
-                    <div class="certificate-signature">Hà Nội, 15/03/2025</div>
-                    <div class="certificate-date"></div>
+                    <div class="certificate-signature">{{ currentDate }}</div>
+                    <div class="certificate-sign">
+                        <img src="../../../../assets/images/chu_ky.png" alt="Chữ ký" />
+                    </div>
                 </div>
+                <div class="certificate-email">{{ studentEmail }}</div>
             </div>
-            <button nz-button nzType="primary"style="margin-top: 20px; display: block; margin-left: auto; margin-right: auto;">
+            <button nz-button nzType="primary" class="download-certificate-btn" (click)="downloadCertificate()">
                 Tải xuống chứng chỉ
             </button>
+            
         </div>
     </div>
 </div>
