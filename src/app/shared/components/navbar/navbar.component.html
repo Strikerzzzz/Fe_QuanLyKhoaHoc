@@ -24,7 +24,9 @@
       </a>
       <nz-dropdown-menu #menu="nzDropdownMenu" nzPlacement="bottomRight">
         <ul nz-menu class="user-menu">
-          <li nz-menu-item >Quản lý tài khoản</li>
+          <li nz-menu-item>
+            <a [routerLink]="['/profile']">Quản lý tài khoản</a>
+          </li>
           <li nz-menu-divider></li>
           <li nz-menu-item class="logout-btn" (click)="logout()">Đăng xuất</li>
         </ul>
