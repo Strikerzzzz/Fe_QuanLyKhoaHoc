@@ -1,78 +1,97 @@
-<div class="home">
-  <!-- Thanh tìm kiếm -->
-  <div class="search-container">
-    <input type="text" placeholder="Nhập nội dung tìm kiếm..." />
-    <button>Tìm kiếm</button>
+<section class="hero">
+  <div class="hero-left">
+    <h1>Học miễn phí - Kiến thức trong tầm tay!</h1>
+    <p class="intro">Khám phá thế giới tri thức với những khóa học mở, nơi bạn có thể chinh phục ước mơ và phát triển
+      bản thân mỗi ngày.</p>
+    <ul class="benefits">
+      <li>Khám phá con đường học tập phù hợp với bạn</li>
+      <li>Hành trình tri thức không giới hạn</li>
+      <li>Phát triển bản thân với tốc độ của riêng bạn</li>
+      <li>Truyền cảm hứng cho những mục tiêu lớn lao</li>
+    </ul>
+    <button class="cta-btn" (click)="goToLearning()">Bắt đầu ngay</button>
   </div>
-
-  <!-- Danh sách khóa học -->
-  <div class="courses">
-    <h2>Danh sách các khóa học nổi bật</h2>
-    <div class="course-navigation">
-      <!-- Nút Prev -->
-      <button class="btn-prev" (click)="prev()" [disabled]="currentIndex === 0">
-        &#9664;
-      </button>
-
-      <!-- Hiển thị các khóa học -->
-      <div class="course-grid">
-        <div class="course-card" *ngFor="let course of courses.slice(currentIndex, currentIndex + itemsPerPage)">
-          <div class="course-image">
-            <img [src]="course.image" alt="Hình ảnh khóa học" />
-          </div>
-          <div class="course-details">
-            <h3>{{ course.title }}</h3>
-            <p>{{ course.description }}</p>
-            <div class="rating">Đánh giá: {{ course.rating }}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Nút Next -->
-      <button class="btn-next" (click)="next()" [disabled]="currentIndex + itemsPerPage >= courses.length">
-        &#9654;
-      </button>
+  <div class="hero-right">
+    <div class="image-box">
+      <img src="../../../assets/images/hinhanh2.jpg" alt="Hình ảnh" />
     </div>
   </div>
+</section>
 
-  <div class="intro">
-    <div class="text">
-      <h2>Giới thiệu về khóa học</h2>
-      <p>
-        Chào mừng đến với ứng dụng học tập trực tuyến đột phá, nơi bạn có thể dễ dàng quản lý các khóa học, tiến độ học
-        tập và bài kiểm tra chỉ trong vài cú click.
-        Khóa học này sẽ giúp bạn hiểu rõ về lập trình và cách ứng dụng trong doanh nghiệp. Bạn sẽ học từ cơ bản đến nâng
-        cao, có cơ hội thực hành qua các dự án thực tế.
+<section class="why-choose-us" #whyChooseUs>
+  <h2 [ngClass]="{'visible': isTitleVisible}">Tại sao học cùng chúng tôi?</h2>
+  <div class="benefits-grid">
+    <div class="benefit-card" [ngClass]="{'visible': isVisible[0]}">
+      <span class="icon">📚</span>
+      <h3>Hoàn toàn miễn phí</h3>
+      <p>Không mất phí, chỉ cần đăng ký để bắt đầu hành trình học tập của bạn ngay hôm nay.</p>
+      <p class="sub-text">Tiết kiệm chi phí và học tập không giới hạn!</p>
+    </div>
+    <div class="benefit-card" [ngClass]="{'visible': isVisible[1]}">
+      <span class="icon">⏰</span>
+      <h3>Tự do học tập</h3>
+      <p>Truy cập bất kỳ lúc nào, tự quản lý thời gian theo lịch trình của bạn.</p>
+      <p class="sub-text">Học mọi lúc, mọi nơi theo ý muốn!</p>
+    </div>
+    <div class="benefit-card" [ngClass]="{'visible': isVisible[2]}">
+      <span class="icon">🏆</span>
+      <h3>Nội dung chất lượng</h3>
+      <p>Được biên soạn kỹ lưỡng để đảm bảo bạn tự học hiệu quả và đạt kết quả tốt nhất.</p>
+      <p class="sub-text">Đội ngũ chuyên gia hỗ trợ nội dung hàng đầu!</p>
+    </div>
+    <div class="benefit-card" [ngClass]="{'visible': isVisible[3]}">
+      <span class="icon">🌟</span>
+      <h3>Đa dạng chủ đề</h3>
+      <p>Phù hợp với nhiều nhu cầu khác nhau, từ cơ bản đến nâng cao.</p>
+      <p class="sub-text">Khám phá hàng trăm khóa học phù hợp với bạn!</p>
+    </div>
+  </div>
+</section>
+<!-- Phần 3: Featured Courses -->
+<section class="featured-courses">
+  <h2 class="section-title">Các khóa học nổi bật</h2>
+  <nz-row [nzGutter]="[24,]" class="courses-row">
+    <nz-col *ngFor="let course of courses" [nzSpan]="6" [nzXs]="24" [nzSm]="12" [nzMd]="8" [nzLg]="6">
+      <nz-card class="course-card" [nzHoverable]="true" [nzCover]="coverTemplate" (click)="goToCourseDetail(course.courseId)">
+        <ng-template #coverTemplate>
+          <img [src]="course.avatarUrl || 'https://via.placeholder.com/150'" alt="{{ course.title }}" class="course-image" />
+        </ng-template>
+        <nz-card-meta [nzTitle]="course.title"></nz-card-meta>
+        <div class="course-details">
+          <p class="course-price">
+            {{ course.price === null || course.price === 0 ? 'Miễn Phí' : (course.price | currency:'VND':'symbol':'1.0-0':'vi-VN') }}
+          </p>
+          <p class="course-difficulty">
+            <strong>Độ khó:</strong> {{ course.difficulty || 'Không xác định' }}
+          </p>
+        </div>
+      </nz-card>
+    </nz-col>
+  </nz-row>
+</section>
+
+<!-- Section 4: Thống Kê Hành Trình Tri Thức -->
+<section class="knowledge-stats" #statsSection>
+  <div class="stats-container">
+    <div class="stats-left">
+      <h2 class="section-title">Thống Kê Hành Trình Tri Thức</h2>
+      <p class="section-subtitle">
+        Nền tảng học miễn phí của chúng tôi đã giúp hàng nghìn người chinh phục tri thức, với hơn 500 khóa học đa dạng, 150,000 lượt học, 50,000 chứng chỉ hoàn thành.
       </p>
     </div>
-    <div class="image">
-      <img src="assets/images/hinhanh2.jpg" alt="Hình ảnh học tập">
-    </div>
-  </div>
-
-  <div class="image-slider">
-    <div class="images" #imageContainer>
-      <img *ngFor="let image of images" [src]="image" alt="Hình ảnh" />
-    </div>
-  </div>
-
-  <div class="reviews">
-    <h2>Đánh giá của học viên</h2>
-    <div class="review-cards">
-      <div class="review-card" *ngFor="let review of paginatedReviews">
-        <p class="content">{{ review.content }}</p>
-        <div class="footer">
-          <span class="student-name">{{ review.studentName }}</span>
-          <img [src]="review.logo" alt="Logo" class="logo" />
-        </div>
+    <div class="stats-right">
+      <div class="stat">
+        <span class="stat-number" data-target="150000">0</span>
+        <p class="stat-label">Lượt học</p>
+      </div>
+      <div class="stat">
+        <span class="stat-number" data-target="50000">0</span>
+        <p class="stat-label">Chứng chỉ hoàn thành</p>
+      </div>
+      <div class="stat">
+        <span class="stat-number" data-target="50">0</span>
+        <p class="stat-label">Khoá học</p>
       </div>
     </div>
-    <div class="pagination">
-      <button (click)="prevPage()" [disabled]="currentPage === 1">Trước</button>
-      <span>Trang {{ currentPage }} / {{ reviews.length / itemsPerPage | number: '1.0-0' }}</span>
-      <button (click)="nextPage()" [disabled]="currentPage * itemsPerPage >= reviews.length">Tiếp theo</button>
-    </div>
   </div>
-
-
-</div>
+</section>

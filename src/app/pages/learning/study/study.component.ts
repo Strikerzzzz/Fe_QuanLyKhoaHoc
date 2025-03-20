@@ -134,7 +134,7 @@ export class StudyComponent implements OnInit {
     clearInterval(this.timer);
     this.timer = setInterval(() => {
       this.timeSpent += 1;
-      if (this.hasScrolledToBottom && this.timeSpent >= 15) {
+      if (this.hasScrolledToBottom && this.timeSpent >= 10) {
         this.completeLesson(this.selectedLesson.lessonId);
       }
     }, 1000);

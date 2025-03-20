@@ -1,255 +1,556 @@
-.home {
-  font-family: Arial, sans-serif;
-  padding: 20px;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-  .search-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 30px;
+body {
+  background-color: #fff;
+  color: #333;
+  /* Đổi màu chữ mặc định để hiển thị trên nền sáng */
+  line-height: 1.5;
+  overflow-x: hidden;
+}
 
-    input[type='text'] {
-      padding: 8px;
-      width: 300px;
-      margin-right: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-    }
+/* Hero Section */
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 50px 5%;
+  min-height: 600px;
+  background: linear-gradient(135deg, #3f2b96, #a8c0ff);
+  position: relative;
+}
 
-    button {
-      padding: 8px 16px;
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+.hero-left {
+  flex: 1;
+  padding-right: 20px;
+  margin-left: 50px;
+}
 
-      &:hover {
-        background-color: #0056b3;
-      }
-    }
+.hero-left h1 {
+  font-size: 3em;
+  color: #fff;
+  margin-bottom: 20px;
+  font-weight: bold;
+  line-height: 1.2;
+  animation: slideInLeft 1s ease-out forwards;
+}
+
+.hero-left p.intro {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.3em;
+  color: #fff;
+  margin-bottom: 30px;
+  animation: slideInLeft 1s ease-out 0.3s forwards;
+  opacity: 0;
+}
+
+.hero-left ul.benefits {
+  list-style: none;
+  margin-bottom: 30px;
+}
+
+.hero-left ul.benefits li {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.2em;
+  color: #fff;
+  margin-bottom: 15px;
+  animation: slideInLeft 1s ease-out 0.6s forwards;
+  opacity: 0;
+  padding-left: 20px;
+}
+
+.hero-left ul.benefits li:before {
+  content: "✓ ";
+  color: #1677ff;
+  margin-left: -20px;
+}
+
+.hero-left .cta-btn {
+  background: linear-gradient(to right, #ffcc00, #ff8800);
+  color: #fff;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 25px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1.1em;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, background 0.3s ease;
+  animation: slideInLeft 1s ease-out 0.9s forwards;
+  opacity: 0;
+}
+
+.hero-left .cta-btn:hover {
+  background: #e64a19;
+  transform: scale(1.05);
+}
+
+.hero-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.hero-right .image-box {
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
+  animation: slideInRight 1s ease-out forwards;
+}
+
+.hero-right .image-box img {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  transition: transform 0.3s ease;
+}
+
+.hero-right .image-box img:hover {
+  transform: scale(1.05);
+}
+
+/* Hiệu ứng animation cho phần 1 */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-50px);
+    opacity: 0;
   }
 
-  .courses {
-    text-align: center;
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
 
-    h2 {
-      margin-bottom: 20px;
-    }
-
-    .course-navigation {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-
-      .btn-prev,
-      .btn-next {
-        padding: 8px 16px;
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-
-        &:disabled {
-          background-color: #ddd;
-          cursor: not-allowed;
-        }
-
-        &:hover:not(:disabled) {
-          background-color: #0056b3;
-        }
-      }
-
-      .course-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-
-        .course-card {
-          background: #fff;
-          border-radius: 10px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-          padding: 20px;
-          text-align: center;
-          transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-
-        .course-card:hover {
-          transform: scale(1.1);
-          z-index: 2;
-          opacity: 1;
-        }
-
-        .course-card {
-          opacity: 1;
-        }
-
-        .course-card:not(:hover) {
-          transform: scale(0.9);
-          opacity: 0.7;
-        }
-
-        .course-image img {
-          width: 100%;
-          border-radius: 10px;
-          margin-bottom: 10px;
-        }
-
-        .course-details {
-          h3 {
-            font-size: 18px;
-            margin-bottom: 5px;
-          }
-
-          p {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 10px;
-          }
-
-          .rating {
-            font-weight: bold;
-          }
-        }
-      }
-    }
+@keyframes slideInRight {
+  from {
+    transform: translateX(50px);
+    opacity: 0;
   }
 
-  .intro {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 40px 20px;
+  to {
+    transform: translateX(0);
+    opacity: 1;
   }
+}
 
-  .intro .text {
-    flex: 1;
-    text-align: center;
-    padding-right: 20px;
-  }
-
-  .intro .image {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-  }
-
-  .intro .image img {
-    width: 80%;
-    max-width: 400px;
-    height: auto;
-  }
-
-  .intro .text h2 {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 15px;
-  }
-
-  .intro .text p {
-    font-size: 16px;
-    color: #666;
-  }
-
-  .image-slider {
-    display: flex;
-    overflow: hidden;
-    width: 100%;
-    position: relative;
-  }
-
-  .image-slider .images {
-    display: flex;
-    animation: slide 15s linear infinite;
-  }
-
-  .image-slider .images img {
-    width: 200px;
-    margin-right: 20px;
-    object-fit: cover;
-  }
-
-  @keyframes slide {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-100%);
-    }
-  }
-
-  .reviews {
-    text-align: center;
+/* Responsive cho phần 1 */
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
     padding: 20px;
-  
-    .review-cards {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-  
-    .review-card {
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-      text-align: left;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-  
-    .review-card:hover {
-      transform: scale(1.05);
-      z-index: 2;
-    }
-  
-    .content {
-      font-size: 16px;
-      color: #666;
-      margin-bottom: 10px;
-    }
-  
-    .footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-  
-    .student-name {
-      font-weight: bold;
-    }
-  
-    .logo {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-    }
-  
-    .pagination {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-    }
-  
-    .pagination button {
-      padding: 8px 16px;
-      background-color: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-  
-    .pagination button:disabled {
-      background-color: #ddd;
-      cursor: not-allowed;
-    }
-  
-    .pagination span {
-      font-size: 16px;
-    }
+    text-align: center;
   }
-  
+
+  .hero-left,
+  .hero-right {
+    width: 100%;
+  }
+
+  .hero-left {
+    margin-left: 0;
+  }
+
+  .hero-left h1 {
+    font-size: 2em;
+  }
+
+  .hero-left p.intro {
+    font-size: 1.1em;
+  }
+
+  .hero-left ul.benefits li {
+    font-size: 1.1em;
+  }
+
+  .hero-right .image-box {
+    margin-top: 20px;
+    max-width: 350px;
+  }
+}
+
+/* Phần 2: Why Choose Us */
+.why-choose-us {
+  padding: 70px 5%;
+  background-color: #f5f5f5;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 600px;
+}
+
+.why-choose-us h2 {
+  font-size: 2.5em;
+  color: #1a2a44;
+  margin-bottom: 40px;
+  opacity: 0;
+  transform: translateY(-50px);
+}
+
+.why-choose-us h2.visible {
+  animation: bounceDown 0.8s ease-out forwards;
+}
+
+.benefits-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.benefit-card {
+  background: linear-gradient(135deg, #ffffff 70%, #f0f4f8 100%);
+  padding: 30px 20px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.05);
+  flex: 1;
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-50px);
+}
+
+.benefit-card.visible {
+  animation: bounceDown 0.8s ease-out forwards;
+}
+
+.benefit-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2), 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.benefit-card .icon {
+  font-size: 2.5em;
+  color: #1677ff;
+  margin-bottom: 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.benefit-card h3 {
+  font-size: 1.5em;
+  color: #1677ff;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.benefit-card p {
+  font-family: 'Roboto', sans-serif;
+  font-size: 1em;
+  color: #666;
+  margin-bottom: 10px;
+  flex-grow: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.benefit-card .sub-text {
+  font-size: 0.9em;
+  color: #888;
+  margin-bottom: 15px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Hiệu ứng nhảy từ trên xuống */
+@keyframes bounceDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translateY(10px);
+  }
+
+  80% {
+    transform: translateY(-5px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive cho phần 2 */
+@media (max-width: 768px) {
+  .why-choose-us h2 {
+    font-size: 2em;
+  }
+
+  .benefits-grid {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .benefit-card {
+    padding: 20px 15px;
+    min-height: 250px;
+  }
+
+  .benefit-card .icon {
+    font-size: 2em;
+  }
+
+  .benefit-card h3 {
+    font-size: 1.3em;
+  }
+
+  .benefit-card p {
+    font-size: 0.9em;
+  }
+
+  .benefit-card .sub-text {
+    font-size: 0.8em;
+  }
+}
+
+/* Phần 3: Featured Courses */
+.featured-courses {
+  padding: 50px 5%;
+  background: linear-gradient(135deg, #3f2b96, #a8c0ff);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 600px;
+  padding: 70px;
+}
+
+.featured-courses h2 {
+  font-size: 2.5em;
+  color: #fff;
+  font-weight: bold;
+  margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  margin-bottom: 40px;
+}
+
+.courses-row {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.course-card {
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  border-radius: 15px;
+}
+
+.course-image {
+  width: 100%;
+  height: 150px;
+  /* Chiều cao hình ảnh nhỏ gọn */
+  object-fit: cover;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.course-price {
+  font-size: 15px;
+  font-weight: bold;
+  color: #1890ff;
+}
+
+/* Khi xuất hiện trong viewport */
+.featured-courses.visible h2 {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.featured-courses.visible .courses-row {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.featured-courses.visible .course-card {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Hiệu ứng delay từng card */
+.course-card:nth-child(1) {
+  transition-delay: 0.2s;
+}
+
+.course-card:nth-child(2) {
+  transition-delay: 0.3s;
+}
+
+.course-card:nth-child(3) {
+  transition-delay: 0.4s;
+}
+
+.course-card:nth-child(4) {
+  transition-delay: 0.5s;
+}
+
+/* Phần 4: Knowledge Stats */
+.knowledge-stats {
+  display: flex;
+  align-items: center; /* Căn giữa theo chiều dọc */
+  justify-content: center; /* Căn giữa theo chiều ngang */
+  padding: 70px 5%;
+  background: #f5f5f5;
+  text-align: center;
+  position: relative;
+  min-height: 500px;
+}
+
+
+.stats-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.stats-left {
+  flex: 1;
+  text-align: left;
+  padding-right: 40px;
+  min-width: 300px;
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+.section-title {
+  font-size: 2.5em;
+  color: #1a2a44;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.section-subtitle {
+  font-size: 1.1em;
+  color: #666;
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.stats-left .cta-btn {
+  background: #1677ff;
+  color: #fff;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 5px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.stats-left .cta-btn:hover {
+  background: #0056d2;
+}
+
+.stats-right {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 30px;
+  min-width: 300px;
+}
+
+.stat {
+  flex: 1 1 30%;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+
+/* Hiệu ứng khi xuất hiện */
+.knowledge-stats.visible .stats-left,
+.knowledge-stats.visible .stat {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Delay cho từng phần tử */
+.stats-left {
+  transition-delay: 0.2s;
+}
+
+.stat:nth-child(1) {
+  transition-delay: 0.4s;
+}
+
+.stat:nth-child(2) {
+  transition-delay: 0.6s;
+}
+
+.stat:nth-child(3) {
+  transition-delay: 0.8s;
+}
+
+.stat-number {
+  font-size: 2.5em;
+  color: #1a2a44;
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.stat-label {
+  font-size: 1em;
+  color: #666;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stats-container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stats-left {
+    padding-right: 0;
+    margin-bottom: 30px;
+  }
+
+  .section-title {
+    font-size: 2em;
+  }
+
+  .section-subtitle {
+    font-size: 1em;
+  }
+
+  .stats-right {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .stat {
+    flex: 1 1 100%;
+  }
+
+  .stat-number {
+    font-size: 2em;
+  }
 }
