@@ -3,35 +3,45 @@
   <nz-sider class="menu-sidebar" nzCollapsible nzWidth="256px" nzBreakpoint="md" [(nzCollapsed)]="isCollapsed"
     [nzTrigger]="null" nzTheme="light">
     <ul nz-menu nzTheme="light" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
-      <li nz-submenu nzOpen nzTitle="Nội dung" nzIcon="setting">
-        <ul>
-          <li nz-menu-item nzMatchRouter>
-            <a [routerLink]="['lesson']" routerLinkActive="active">Bài học</a>
-          </li>
-          <li nz-menu-item nzMatchRouter>
-            <a *ngIf="!examExists" (click)="openCreateExamModal()">
-              Kiểm tra
-            </a>
-            <a *ngIf="examExists" [routerLink]="['exam']" routerLinkActive="active">
-              Kiểm tra
-            </a>
-          </li>
-        </ul>
-      </li>
+        <li nz-submenu nzOpen nzTitle="Nội dung" nzIcon="book">
+            <ul>
+                <li nz-menu-item nzMatchRouter>
+                    <a [routerLink]="['lesson']" routerLinkActive="active">
+                        <i nz-icon nzType="read"></i> Bài học
+                    </a>
+                </li>
+                <li nz-menu-item nzMatchRouter>
+                    <ng-container *ngIf="!examExists; else examLink">
+                        <a (click)="openCreateExamModal()">
+                            <i nz-icon nzType="file-add"></i> Kiểm tra
+                        </a>
+                    </ng-container>
+                    <ng-template #examLink>
+                        <a [routerLink]="['exam']" routerLinkActive="active">
+                            <i nz-icon nzType="solution"></i> Kiểm tra
+                        </a>
+                    </ng-template>
+                </li>
+            </ul>
+        </li>
+
+        <li nz-submenu nzOpen nzTitle="Thống kê" nzIcon="bar-chart">
+            <ul>
+                <li nz-menu-item nzMatchRouter>
+                    <a [routerLink]="['progress']" routerLinkActive="active">
+                        <i nz-icon nzType="area-chart"></i> Tiến độ học viên
+                    </a>
+                </li>
+                <li nz-menu-item nzMatchRouter>
+                    <a [routerLink]="['results']" routerLinkActive="active">
+                        <i nz-icon nzType="profile"></i> Kết quả học tập
+                    </a>
+                </li>
+            </ul>
+        </li>
     </ul>
-    <ul nz-menu nzTheme="light" nzMode="inline" [nzInlineCollapsed]="isCollapsed">
-      <li nz-submenu nzOpen nzTitle="Thống kê" nzIcon="dashboard">
-        <ul>
-          <li nz-menu-item nzMatchRouter>
-            <a [routerLink]="['progress']" routerLinkActive="active">Tiến độ học viên</a>
-          </li>
-          <li nz-menu-item nzMatchRouter>
-            <a [routerLink]="['results']" routerLinkActive="active">Kết quả học tập</a>
-          </li>
-        </ul>
-      </li>
-    </ul>
-  </nz-sider>
+</nz-sider>
+
 
   <nz-layout>
     <nz-header class="app-header">

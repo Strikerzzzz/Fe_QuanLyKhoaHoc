@@ -16,9 +16,9 @@ export class SystemStatsComponent implements OnInit {
   chartOptions: any;
   selectedPeriod: string = 'days';
   periods = [
-    { value: 'days', label: 'Ngày' },
-    { value: 'months', label: 'Tháng' },
-    { value: 'years', label: 'Năm' }
+    { value: 'days', label: 'Ngày - 10 ngày gần nhất' },
+    { value: 'months', label: 'Tháng - 12 tháng gần nhất' },
+    { value: 'years', label: 'Năm - 5 năm gần nhất' }
   ];
   constructor(private userService: Client) { }
 

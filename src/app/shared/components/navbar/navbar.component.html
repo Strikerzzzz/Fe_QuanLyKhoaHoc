@@ -6,14 +6,31 @@
       </a>
     </div>
     <div class="menu">
-      <a routerLink="/home">Trang chủ</a>
-      <a [routerLink]="['/learning']">Học tập</a>
-
-      <a *ngIf="hasRole('User')" [routerLink]="['/my-learning']">Đang học</a>
-      <a *ngIf="hasRole('Admin')" [routerLink]="['/admin']">Quản lý</a>
-      <a *ngIf="hasRole('Lecturer')" [routerLink]="['/lecturer']">Giảng viên</a>
-
+      <a routerLink="/home">
+        <i nz-icon nzType="home"></i> Trang chủ
+      </a>
+      <nz-divider nzType="vertical"></nz-divider>
+    
+      <a routerLink="/learning">
+        <i nz-icon nzType="read"></i> Học tập
+      </a>
+      <nz-divider nzType="vertical"></nz-divider>
+    
+      <a *ngIf="hasRole('User')" routerLink="/my-learning">
+        <i nz-icon nzType="book"></i> Đang học
+      </a>
+      <nz-divider *ngIf="hasRole('User')" nzType="vertical"></nz-divider>
+    
+      <a *ngIf="hasRole('Admin')" routerLink="/admin">
+        <i nz-icon nzType="setting"></i> Quản lý
+      </a>
+      <nz-divider *ngIf="hasRole('Admin')" nzType="vertical"></nz-divider>
+    
+      <a *ngIf="hasRole('Lecturer')" routerLink="/lecturer">
+        <i nz-icon nzType="team"></i> Giảng viên
+      </a>
     </div>
+    
   </div>
 
   <div class="navbar-right">

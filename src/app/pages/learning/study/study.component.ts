@@ -81,7 +81,7 @@ export class StudyComponent implements OnInit {
           this.lessons.forEach(lesson => {
             this.lessonProgress[lesson.lessonId] = lesson.completed ? 100 : 0;
           });
-        } 
+        }
       },
       error: (err) => {
         console.error('Lỗi khi lấy tiến trình bài học:', err);
@@ -107,12 +107,12 @@ export class StudyComponent implements OnInit {
       next: (result: any) => {
         this.lessonContent = Array.isArray(result?.data) && result.data.length > 0
           ? result.data.map((item: any) => ({
-              lessonContentId: item.lessonContentId,
-              lessonId: item.lessonId,
-              mediaType: item.mediaType,
-              mediaUrl: item.mediaUrl,
-              content: item.content
-            }))
+            lessonContentId: item.lessonContentId,
+            lessonId: item.lessonId,
+            mediaType: item.mediaType,
+            mediaUrl: item.mediaUrl,
+            content: item.content
+          }))
           : [{ mediaType: 'text', content: 'Nội dung bài học không có sẵn.' }];
       },
       error: () => {
@@ -120,7 +120,7 @@ export class StudyComponent implements OnInit {
       }
     });
   }
-  
+
 
   @HostListener('window:scroll', [])
   onScroll(): void {
@@ -134,7 +134,7 @@ export class StudyComponent implements OnInit {
     clearInterval(this.timer);
     this.timer = setInterval(() => {
       this.timeSpent += 1;
-      if (this.hasScrolledToBottom && this.timeSpent >= 10) {
+      if (this.hasScrolledToBottom && this.timeSpent >= 2) {
         this.completeLesson(this.selectedLesson.lessonId);
       }
     }, 1000);
@@ -155,7 +155,7 @@ export class StudyComponent implements OnInit {
     clearInterval(this.timer);
   }
   private updateCourseProgress(): void {
-    this.loadLessonProgress(); 
+    this.loadLessonProgress();
   }
 
   get isTestAvailable(): boolean {
@@ -168,7 +168,7 @@ export class StudyComponent implements OnInit {
         this.assignment = result?.data || null;
         if (this.assignment) {
           this.loadQuestions(this.assignment.assignmentId);
-        }else {
+        } else {
           this.questions = [];
         }
       },
@@ -246,49 +246,51 @@ export class StudyComponent implements OnInit {
 
     this.questions.forEach((question, index) => {
       console.log(`Câu hỏi ${index + 1}:`, question);
-      
+
       if (question.type === 1) {
         console.log(`- Đáp án đúng: ${question.correctAnswerIndex}`);
         console.log(`- Đáp án đã chọn: ${question.selectedAnswer}`);
-    
+
         if (question.selectedAnswer === question.correctAnswerIndex) {
           correctAnswers++;
         }
       } else if (question.type === 2) {
         console.log(`- Đáp án đúng: ${question.correctAnswer}`);
         console.log(`- Đáp án nhập vào: ${question.userAnswer}`);
-    
+
         if ((question.userAnswer ?? '').trim().toLowerCase() === (question.correctAnswer ?? '').trim().toLowerCase()) {
           correctAnswers++;
         }
       }
     });
-    
+
 
     // ✅ Tạo instance của SubmitAssignmentRequest và gán giá trị
-  const submitRequest = new SubmitAssignmentRequest();
- // const requestWithLessonId = Object.assign({}, submitRequest, { lessonId: this.lessonId });
-  submitRequest.score = Math.round((correctAnswers / totalQuestions) * 100);
+    const submitRequest = new SubmitAssignmentRequest();
+    // const requestWithLessonId = Object.assign({}, submitRequest, { lessonId: this.lessonId });
+    submitRequest.score = Math.round((correctAnswers / totalQuestions) * 100);
 
-  console.log("Gửi dữ liệu nộp bài:", submitRequest);
-  console.log(`Tổng số câu hỏi: ${totalQuestions}`);
-  console.log(`Số câu đúng: ${correctAnswers}`);
-  console.log(`Điểm số: ${Math.round((correctAnswers / totalQuestions) * 100)}`);
-  
-  this.client.submit(this.assignment.assignmentId, submitRequest).subscribe({
-    next: (response: any) => {
-      this.router.navigate([
-        '/learning', this.courseId, 'study', this.lessonId, 'assignmentResult'
-      ], { queryParams: { 
-        score: submitRequest.score,
-        courseId: this.courseId,  // Giữ nguyên courseId khi chuyển trang
-        lessonId: this.lessonId   // Giữ nguyên lessonId
-         } });
-    },  
-    error: (err) => {
-      alert("Lỗi khi nộp bài, vui lòng thử lại.");
-    }
-  });
+    console.log("Gửi dữ liệu nộp bài:", submitRequest);
+    console.log(`Tổng số câu hỏi: ${totalQuestions}`);
+    console.log(`Số câu đúng: ${correctAnswers}`);
+    console.log(`Điểm số: ${Math.round((correctAnswers / totalQuestions) * 100)}`);
+
+    this.client.submit(this.assignment.assignmentId, submitRequest).subscribe({
+      next: (response: any) => {
+        this.router.navigate([
+          '/learning', this.courseId, 'study', this.lessonId, 'assignmentResult'
+        ], {
+          queryParams: {
+            score: submitRequest.score,
+            courseId: this.courseId,  // Giữ nguyên courseId khi chuyển trang
+            lessonId: this.lessonId   // Giữ nguyên lessonId
+          }
+        });
+      },
+      error: (err) => {
+        alert("Lỗi khi nộp bài, vui lòng thử lại.");
+      }
+    });
   }
 
   get isAllLessonsCompleted(): boolean {
@@ -298,5 +300,5 @@ export class StudyComponent implements OnInit {
     this.router.navigate(['learning', this.courseId, 'exam']);
 
   }
-  
+
 }

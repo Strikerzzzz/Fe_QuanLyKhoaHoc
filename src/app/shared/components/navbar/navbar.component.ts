@@ -15,13 +15,14 @@ import { AuthService } from '../../../services/auth.service';
 import { LoginRequest } from '../../api-client';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
+import { NzDividerModule } from 'ng-zorro-antd/divider';
+
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [NzLayoutModule, NzButtonModule, NzInputModule, NzModalModule, NzAvatarModule, NzDropDownModule, NzMenuModule,
-    NzFormModule, ReactiveFormsModule, CommonModule, RouterModule, NzIconModule],
+  imports: [NzLayoutModule, NzButtonModule, NzInputModule, NzModalModule, NzAvatarModule, NzDropDownModule,
+    NzFormModule, ReactiveFormsModule, CommonModule, RouterModule, NzIconModule, NzDividerModule],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.scss'
 })
