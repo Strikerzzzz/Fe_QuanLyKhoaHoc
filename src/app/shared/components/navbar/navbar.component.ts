@@ -36,6 +36,8 @@ export class NavbarComponent implements OnInit {
   passwordVisible: boolean = false;
   confirmPasswordVisible: boolean = false;
   isDropdownOpen = false;
+  user: any = null; // Lưu thông tin user
+  
   private jwtHelper = new JwtHelperService();
 
   constructor(private fb: FormBuilder,
@@ -52,7 +54,10 @@ export class NavbarComponent implements OnInit {
         this.openAuthPopup(false)
       }
     });
-
+    this.authService.user$.subscribe(user => {
+      this.user = user; // Cập nhật user khi có thay đổi
+      console.log('Navbar user updated:', this.user); // Debug
+    });
     this.loadUserRoles();
   }
 
@@ -156,6 +161,7 @@ export class NavbarComponent implements OnInit {
         this.roles = decodedToken?.["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || [];
         this.userName = decodedToken?.name || '';
         this.isLoggedIn = true;
+        this.authService.loadUserProfile(); // Đảm bảo tải thông tin user
       } catch (error) {
         console.error('Lỗi khi giải mã token:', error);
         this.logout();

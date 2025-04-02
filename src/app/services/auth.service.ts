@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { Client, RefreshTokenResponseResult, RefreshTokenRequest, LoginRequest, RegisterRequest } from '../shared/api-client';
+import { Client,UserResult, RefreshTokenResponseResult, RefreshTokenRequest, LoginRequest, RegisterRequest } from '../shared/api-client';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 
@@ -19,6 +19,8 @@ export class AuthService {
     private showLoginPopupSubject = new BehaviorSubject<boolean>(false);
     public showLoginPopup$ = this.showLoginPopupSubject.asObservable();
 
+    private userSubject = new BehaviorSubject<any>(null); // Thêm để lưu thông tin user (bao gồm avatarUrl)
+    public user$ = this.userSubject.asObservable(); // Cho phép các component subscribe
 
     constructor(private apiClient: Client) { }
     showLoginPopup(): void {
@@ -52,6 +54,7 @@ export class AuthService {
         localStorage.removeItem(this.refreshTokenKey);
         this.isLoggedInSubject.next(false);
         this.userNameSubject.next(null);
+        this.userSubject.next(null); // Xóa thông tin user khi logout
     }
 
     // Giải mã JWT và lấy thông tin người dùng
@@ -119,6 +122,7 @@ export class AuthService {
                 if (result?.succeeded && result?.data?.accessToken && result?.data?.refreshToken) {
                     this.setToken(result.data.accessToken);
                     this.setRefreshToken(result.data.refreshToken);
+                    this.loadUserProfile(); // Tải lại thông tin user sau khi refresh token
                 } else {
                     this.clearTokens();
                 }
@@ -136,6 +140,7 @@ export class AuthService {
                 if (response?.data) {
                     this.setToken(response.data.accessToken);
                     this.setRefreshToken(response.data.refreshToken);
+                    this.loadUserProfile(); // Tải thông tin user sau khi đăng nhập
                 }
             }),
             catchError(err => {
@@ -158,5 +163,28 @@ export class AuthService {
     logout(): void {
         this.clearTokens();
         window.location.href = '/home';
+    }
+
+    // Tải thông tin người dùng từ API
+    // auth.service.ts
+loadUserProfile(): void {
+  this.apiClient.profileGET().subscribe({
+    next: (data: UserResult) => {
+      console.log('User profile loaded:', data);
+      let avatarUrl = data.data?.avatarUrl || ''; // Sử dụng optional chaining
+      if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('https')) {
+        avatarUrl = `https://drui9ols58b43.cloudfront.net/${avatarUrl}`;
+      }
+      const userData = data.data ? { ...data.data, avatarUrl } : null; // Tạo object mới nếu data tồn tại
+      this.updateUser(userData); // Cập nhật user
+    },
+    error: (err) => {
+      console.error('Error loading user profile:', err);
+    }
+  });
+}
+    // Phương thức công khai để cập nhật thông tin user
+    updateUser(user: any): void {
+        this.userSubject.next(user);
     }
 }
