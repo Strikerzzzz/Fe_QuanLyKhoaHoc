@@ -99,3 +99,9 @@ button {
   color: red;
   font-weight: 500;
 }
+.avatar {
+  width: 40px !important;  /* Tăng kích thước */
+  height: 40px !important;
+  border-radius: 50%;
+  cursor: pointer;
+}

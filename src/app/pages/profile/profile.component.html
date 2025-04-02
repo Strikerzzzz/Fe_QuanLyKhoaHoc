@@ -1,1 +1,63 @@
-<p>profile works!</p>
+<div *ngIf="user; else loading" class="profile-container">
+    <div class="profile-left">
+      <ng-container *ngIf="user.avatarUrl; else noAvatar">
+        <img [src]="user.avatarUrl" alt="Avatar" class="avatar" style="cursor: pointer;" />
+      </ng-container>
+      <ng-template #noAvatar>
+        <nz-avatar nzIcon="user" nzSize="large"></nz-avatar>
+      </ng-template>
+    </div>
+    <div class="profile-right">
+      <h2 style="grid-column: span 2;">THÔNG TIN</h2>
+      <p><strong>Họ và tên:</strong></p> <p>{{ user.fullName || 'Chưa cập nhật'}}</p>
+      <p><strong>Tên tài khoản:</strong></p> <p>{{ user.userName }}</p>
+      <p><strong>Địa chỉ Email:</strong></p> <p>{{ user.email }}</p>
+      <p><strong>Số điện thoại:</strong></p> <p>{{ user.phoneNumber || 'Chưa cập nhật' }}</p>
+      <p><strong>Ngày cập nhật:</strong></p> <p>{{ user.createdAt | date:'dd/MM/yyyy' }}</p>
+      <button nz-button nzType="primary" (click)="openEditModal()" 
+              style=" margin-top: 16px;">
+        Chỉnh sửa
+      </button>
+    </div>
+    
+  </div>
+  
+  <!-- Modal chỉnh sửa thông tin và avatar -->
+  <nz-modal [(nzVisible)]="isEditModalVisible" nzTitle="Chỉnh sửa Thông Tin Người Dùng" (nzOnCancel)="closeEditModal()"
+    (nzOnOk)="saveProfileChanges()">
+    <ng-container *nzModalContent>
+      <nz-form-item>
+        <nz-form-label class="hoten">Họ và tên</nz-form-label>
+        <nz-form-control>
+          <input nz-input [(ngModel)]="editData.fullName" placeholder="Nhập họ tên" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label>Số điện thoại</nz-form-label>
+        <nz-form-control>
+          <input nz-input [(ngModel)]="editData.phoneNumber" placeholder="Nhập số điện thoại" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label>Ảnh đại diện</nz-form-label>
+        <nz-form-control>
+          <div class="upload-container" (drop)="onFileDrop($event)" (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)" (click)="triggerFileInput()">
+            <p *ngIf="!avatarPreviewUrl">Kéo thả ảnh vào đây hoặc click để chọn</p>
+            <img *ngIf="avatarPreviewUrl" [src]="avatarPreviewUrl" alt="Preview Avatar" class="avatar-preview" />
+            <input type="file" class="file-input" (change)="onAvatarFileSelected($event)" accept="image/*" #fileInput />
+          </div>
+          <div *ngIf="avatarUploadProgress > 0">
+            <nz-progress [nzPercent]="avatarUploadProgress" [nzStrokeWidth]="12" [nzStrokeColor]="'#1890ff'"
+              [nzShowInfo]="false"></nz-progress>
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+    </ng-container>
+  </nz-modal>
+  
+  <ng-template #loading>
+    <nz-spin nzTip="Đang tải..."></nz-spin>
+  </ng-template>
+  
+  <nz-alert *ngIf="errorMessage" [nzType]="'error'" [nzMessage]="errorMessage" showIcon></nz-alert>
