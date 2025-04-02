@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>FeQuanLyKhoaHoc</title>
@@ -7,7 +8,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
+
 <body>
   <app-root></app-root>
+  <div id="webchat"></div>
+
+  <script src="https://cdn.botpress.cloud/webchat/v2.3/inject.js"></script>
+  <script>
+    window.addEventListener("load", function () {
+      if (window.botpress) {
+        window.botpress.init({
+          "botId": "6c1e53ef-9b62-41f2-955d-1ef0a1d0264c",
+          "clientId": "843a0bdf-0ae1-4b84-81af-b67b373ca964",
+          "selector": "#webchat"
+        });
+      }
+    });
+  </script>
 </body>
+
 </html>
