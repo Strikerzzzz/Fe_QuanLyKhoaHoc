@@ -13,7 +13,6 @@
       <p><strong>Tên tài khoản:</strong></p> <p>{{ user.userName }}</p>
       <p><strong>Địa chỉ Email:</strong></p> <p>{{ user.email }}</p>
       <p><strong>Số điện thoại:</strong></p> <p>{{ user.phoneNumber || 'Chưa cập nhật' }}</p>
-      <p><strong>Ngày cập nhật:</strong></p> <p>{{ user.createdAt | date:'dd/MM/yyyy' }}</p>
       <button nz-button nzType="primary" (click)="openEditModal()" 
               style=" margin-top: 16px;">
         Chỉnh sửa

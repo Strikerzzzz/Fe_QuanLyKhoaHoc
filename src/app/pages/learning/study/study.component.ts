@@ -24,7 +24,6 @@ export class StudyComponent implements OnInit {
 
   lessonContent: { mediaType: string; content: string; mediaUrl?: string }[] = [];
 
-  private hasScrolledToBottom = false;
   private timeSpent = 0;
   private timer: any = null;
   private completionRate: number = 0;
@@ -34,6 +33,11 @@ export class StudyComponent implements OnInit {
   questions: any[] = []; // Danh sách câu hỏi
   currentAssignment: any = null; //biến để lưu bài tập
   selectedAnswers: { [questionId: number]: number } = {}; // Lưu đáp án đã chọn
+
+  canSubmitAssignment: boolean = false;
+  nextLesson: any = null;
+  prevLesson: any = null;
+  showNavigationButtons: boolean = false; // Biến kiểm tra hiển thị nút điều hướng
 
   constructor(private route: ActivatedRoute, private client: Client, private router: Router) { }
 
@@ -61,6 +65,14 @@ export class StudyComponent implements OnInit {
           if (currentLesson) {
             this.selectLesson(currentLesson);
           }
+        }
+        // Lấy bài học trước và sau
+        const currentIndex = this.lessons.findIndex(lesson => lesson.lessonId === this.lessonId);
+        if (currentIndex > 0) {
+          this.prevLesson = this.lessons[currentIndex - 1];
+        }
+        if (currentIndex < this.lessons.length - 1) {
+          this.nextLesson = this.lessons[currentIndex + 1];
         }
       },
       error: () => {
@@ -95,11 +107,32 @@ export class StudyComponent implements OnInit {
     this.selectedLesson = lesson;
     this.assignment = null;
     this.questions = [];
+    this.showNavigationButtons = false;
     this.loadLessonContent(lesson.lessonId);
     this.loadAssignment(lesson.lessonId);
-    this.hasScrolledToBottom = false;
     this.timeSpent = 0;
-    this.startTimer();
+    this.canSubmitAssignment = false;
+
+    if (lesson.completed) {
+      this.lessonProgress[lesson.lessonId] = 100;
+      this.canSubmitAssignment = true;
+      this.showNavigationButtons = !this.assignment;
+      clearInterval(this.timer);
+    } else {
+      this.startTimer();
+    }
+    // Cập nhật prevLesson và nextLesson sau khi chọn bài học
+  const currentIndex = this.lessons.findIndex(l => l.lessonId === lesson.lessonId);
+  if (currentIndex > 0) {
+    this.prevLesson = this.lessons[currentIndex - 1];
+  } else {
+    this.prevLesson = null; // Không có bài trước nếu đang ở bài đầu
+  }
+  if (currentIndex < this.lessons.length - 1) {
+    this.nextLesson = this.lessons[currentIndex + 1];
+  } else {
+    this.nextLesson = null; // Không có bài sau nếu đang ở bài cuối
+  }
   }
 
   loadLessonContent(lessonId: number): void {
@@ -121,21 +154,20 @@ export class StudyComponent implements OnInit {
     });
   }
 
-
-  @HostListener('window:scroll', [])
-  onScroll(): void {
-    if (!this.selectedLesson) return;
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-      this.hasScrolledToBottom = true;
-    }
-  }
-
   private startTimer(): void {
     clearInterval(this.timer);
     this.timer = setInterval(() => {
       this.timeSpent += 1;
-      if (this.hasScrolledToBottom && this.timeSpent >= 2) {
+      if (this.timeSpent >= 10) {
         this.completeLesson(this.selectedLesson.lessonId);
+        // Nếu có bài tập, hiển thị nút Nộp bài
+      if (this.assignment) {
+        this.canSubmitAssignment = true;
+      } else {
+        // Nếu không có bài tập, hiển thị các nút điều hướng
+        this.showNavigationButtons = true;
+      }
+        clearInterval(this.timer);
       }
     }, 1000);
   }
@@ -215,8 +247,6 @@ export class StudyComponent implements OnInit {
             userAnswer: '' // Lưu câu trả lời của user
           }))
         ];
-
-        console.log('Danh sách câu hỏi đã xử lý:', this.questions);
       },
       error: (err) => {
         this.questions = [];
@@ -245,19 +275,12 @@ export class StudyComponent implements OnInit {
     let correctAnswers = 0;
 
     this.questions.forEach((question, index) => {
-      console.log(`Câu hỏi ${index + 1}:`, question);
 
       if (question.type === 1) {
-        console.log(`- Đáp án đúng: ${question.correctAnswerIndex}`);
-        console.log(`- Đáp án đã chọn: ${question.selectedAnswer}`);
-
         if (question.selectedAnswer === question.correctAnswerIndex) {
           correctAnswers++;
         }
       } else if (question.type === 2) {
-        console.log(`- Đáp án đúng: ${question.correctAnswer}`);
-        console.log(`- Đáp án nhập vào: ${question.userAnswer}`);
-
         if ((question.userAnswer ?? '').trim().toLowerCase() === (question.correctAnswer ?? '').trim().toLowerCase()) {
           correctAnswers++;
         }
@@ -269,11 +292,6 @@ export class StudyComponent implements OnInit {
     const submitRequest = new SubmitAssignmentRequest();
     // const requestWithLessonId = Object.assign({}, submitRequest, { lessonId: this.lessonId });
     submitRequest.score = Math.round((correctAnswers / totalQuestions) * 100);
-
-    console.log("Gửi dữ liệu nộp bài:", submitRequest);
-    console.log(`Tổng số câu hỏi: ${totalQuestions}`);
-    console.log(`Số câu đúng: ${correctAnswers}`);
-    console.log(`Điểm số: ${Math.round((correctAnswers / totalQuestions) * 100)}`);
 
     this.client.submit(this.assignment.assignmentId, submitRequest).subscribe({
       next: (response: any) => {
