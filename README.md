@@ -1,59 +1,66 @@
-# FeQuanLyKhoaHoc
+# StackMind — E-Learning Platform (Frontend)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.6.
+Angular 19 web app for **StackMind**, an online learning platform with video lessons, exams and progress analytics.
+Built as a team graduation project at UNETI (2025, graded 9.4/10). I was the team lead and main developer.
 
-## Development server
+Backend (ASP.NET Core 8 API): [Be_QuanLyKhoaHoc](https://github.com/Strikerzzzz/Be_QuanLyKhoaHoc)
 
-To start a local development server, run:
+![Course catalog](docs/screenshots/homepage.png)
+
+## Features by role
+
+**Student**
+- Browse and search the course catalog and study lesson by lesson.
+- Watch HLS video lessons through a custom player built on hls.js.
+- Take exams and assignments; track personal progress and statistics.
+
+**Lecturer**
+- Manage courses, lessons and lesson content (text, images, video upload).
+- Follow student progress and results with charts (ECharts) and searchable, sortable result tables.
+
+**Admin**
+- Manage users: roles, lock/unlock accounts.
+- View system statistics.
+
+**Shared**
+- Registration with email confirmation, JWT login with automatic token refresh (HTTP interceptor), role-based route guards.
+- Botpress webchat widget.
+
+## Tech stack
+
+Angular 19 (standalone components) · TypeScript · ng-zorro-antd · hls.js · ngx-echarts · NSwag-generated API client
+
+The API client is generated from the backend's Swagger definition with NSwag (`nswag/service.config.nswag`), so frontend models stay in sync with the API.
+
+## Project structure
+
+| Folder | Contents |
+|---|---|
+| `src/app/pages/home` | Landing page and course catalog |
+| `src/app/pages/learning` | Course detail, study page, exams |
+| `src/app/pages/my-learning` | Enrolled courses and personal statistics |
+| `src/app/pages/lecturer` | Course management, content editor, student progress and results |
+| `src/app/pages/admin` | User management and system statistics |
+| `src/app/shared` | Generated API client (`api-client.ts`) and shared components, including the HLS video player |
+| `src/app/guards` | Authentication and role guard |
+| `src/app/services` | Auth service and JWT interceptor |
+
+## Getting started
+
+Requirements: Node.js 18.19+ (or 20/22) and the backend API running.
 
 ```bash
-ng serve
+npm install
+npm start          # http://localhost:4200
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Set the API address in `src/environments/environment.ts` (`API_BASE_URL`).
+To regenerate the API client after backend changes, run NSwag with `nswag/service.config.nswag`.
 
-## Code scaffolding
+## Screenshots
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+| Learning page | Lesson content editor | Results analytics |
+|---|---|---|
+| ![Learning page](docs/screenshots/learning.png) | ![Lesson content editor](docs/screenshots/lesson-content.jpg) | ![Results analytics](docs/screenshots/analytics.png) |
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+The UI is in Vietnamese. Personal data in the screenshots is blurred.
