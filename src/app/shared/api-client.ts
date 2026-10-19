@@ -322,12 +322,12 @@ export interface IClient {
     /**
      * @return OK
      */
-    profileGET(): Observable<UserResult>;
+    profileGET(): Observable<UserDtoResult>;
     /**
      * @param body (optional) 
      * @return OK
      */
-    profilePUT(body: UpdateUserProfileRequest | undefined): Observable<UserResult>;
+    profilePUT(body: UpdateUserProfileRequest | undefined): Observable<UserDtoResult>;
 }
 
 @Injectable({
@@ -5416,7 +5416,7 @@ export class Client implements IClient {
     /**
      * @return OK
      */
-    profileGET(): Observable<UserResult> {
+    profileGET(): Observable<UserDtoResult> {
         let url_ = this.baseUrl + "/api/Users/profile";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -5435,14 +5435,14 @@ export class Client implements IClient {
                 try {
                     return this.processProfileGET(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<UserResult>;
+                    return _observableThrow(e) as any as Observable<UserDtoResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<UserResult>;
+                return _observableThrow(response_) as any as Observable<UserDtoResult>;
         }));
     }
 
-    protected processProfileGET(response: HttpResponseBase): Observable<UserResult> {
+    protected processProfileGET(response: HttpResponseBase): Observable<UserDtoResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -5453,7 +5453,7 @@ export class Client implements IClient {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = UserResult.fromJS(resultData200);
+            result200 = UserDtoResult.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status === 400) {
@@ -5498,7 +5498,7 @@ export class Client implements IClient {
      * @param body (optional) 
      * @return OK
      */
-    profilePUT(body: UpdateUserProfileRequest | undefined): Observable<UserResult> {
+    profilePUT(body: UpdateUserProfileRequest | undefined): Observable<UserDtoResult> {
         let url_ = this.baseUrl + "/api/Users/profile";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -5521,14 +5521,14 @@ export class Client implements IClient {
                 try {
                     return this.processProfilePUT(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<UserResult>;
+                    return _observableThrow(e) as any as Observable<UserDtoResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<UserResult>;
+                return _observableThrow(response_) as any as Observable<UserDtoResult>;
         }));
     }
 
-    protected processProfilePUT(response: HttpResponseBase): Observable<UserResult> {
+    protected processProfilePUT(response: HttpResponseBase): Observable<UserDtoResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -5539,7 +5539,7 @@ export class Client implements IClient {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = UserResult.fromJS(resultData200);
+            result200 = UserDtoResult.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status === 400) {
@@ -7692,7 +7692,7 @@ export interface IObjectIEnumerableResult {
 export class ObjectResult implements IObjectResult {
     succeeded?: boolean;
     errors?: string[] | undefined;
-    data?: any | undefined;
+    data?: any;
 
     constructor(data?: IObjectResult) {
         if (data) {
@@ -7738,7 +7738,7 @@ export class ObjectResult implements IObjectResult {
 export interface IObjectResult {
     succeeded?: boolean;
     errors?: string[] | undefined;
-    data?: any | undefined;
+    data?: any;
 }
 
 export class PieChartResultDto implements IPieChartResultDto {
@@ -9270,8 +9270,128 @@ export interface IUser {
     avatarUrl?: string | undefined;
 }
 
+export class UserDto implements IUserDto {
+    id?: string | undefined;
+    userName?: string | undefined;
+    email?: string | undefined;
+    fullName?: string | undefined;
+    avatarUrl?: string | undefined;
+    phoneNumber?: string | undefined;
+    emailConfirmed?: boolean;
+    lockoutEnd?: Date | undefined;
+    createdAt?: Date;
+
+    constructor(data?: IUserDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.userName = _data["userName"];
+            this.email = _data["email"];
+            this.fullName = _data["fullName"];
+            this.avatarUrl = _data["avatarUrl"];
+            this.phoneNumber = _data["phoneNumber"];
+            this.emailConfirmed = _data["emailConfirmed"];
+            this.lockoutEnd = _data["lockoutEnd"] ? new Date(_data["lockoutEnd"].toString()) : <any>undefined;
+            this.createdAt = _data["createdAt"] ? new Date(_data["createdAt"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): UserDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["userName"] = this.userName;
+        data["email"] = this.email;
+        data["fullName"] = this.fullName;
+        data["avatarUrl"] = this.avatarUrl;
+        data["phoneNumber"] = this.phoneNumber;
+        data["emailConfirmed"] = this.emailConfirmed;
+        data["lockoutEnd"] = this.lockoutEnd ? this.lockoutEnd.toISOString() : <any>undefined;
+        data["createdAt"] = this.createdAt ? this.createdAt.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IUserDto {
+    id?: string | undefined;
+    userName?: string | undefined;
+    email?: string | undefined;
+    fullName?: string | undefined;
+    avatarUrl?: string | undefined;
+    phoneNumber?: string | undefined;
+    emailConfirmed?: boolean;
+    lockoutEnd?: Date | undefined;
+    createdAt?: Date;
+}
+
+export class UserDtoResult implements IUserDtoResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: UserDto;
+
+    constructor(data?: IUserDtoResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.succeeded = _data["succeeded"];
+            if (Array.isArray(_data["errors"])) {
+                this.errors = [] as any;
+                for (let item of _data["errors"])
+                    this.errors!.push(item);
+            }
+            this.data = _data["data"] ? UserDto.fromJS(_data["data"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): UserDtoResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserDtoResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["succeeded"] = this.succeeded;
+        if (Array.isArray(this.errors)) {
+            data["errors"] = [];
+            for (let item of this.errors)
+                data["errors"].push(item);
+        }
+        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IUserDtoResult {
+    succeeded?: boolean;
+    errors?: string[] | undefined;
+    data?: UserDto;
+}
+
 export class UserPagedResult implements IUserPagedResult {
-    users?: User[] | undefined;
+    users?: UserDto[] | undefined;
     totalCount?: number;
 
     constructor(data?: IUserPagedResult) {
@@ -9288,7 +9408,7 @@ export class UserPagedResult implements IUserPagedResult {
             if (Array.isArray(_data["users"])) {
                 this.users = [] as any;
                 for (let item of _data["users"])
-                    this.users!.push(User.fromJS(item));
+                    this.users!.push(UserDto.fromJS(item));
             }
             this.totalCount = _data["totalCount"];
         }
@@ -9314,7 +9434,7 @@ export class UserPagedResult implements IUserPagedResult {
 }
 
 export interface IUserPagedResult {
-    users?: User[] | undefined;
+    users?: UserDto[] | undefined;
     totalCount?: number;
 }
 
@@ -9368,58 +9488,6 @@ export interface IUserPagedResultResult {
     succeeded?: boolean;
     errors?: string[] | undefined;
     data?: UserPagedResult;
-}
-
-export class UserResult implements IUserResult {
-    succeeded?: boolean;
-    errors?: string[] | undefined;
-    data?: User;
-
-    constructor(data?: IUserResult) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.succeeded = _data["succeeded"];
-            if (Array.isArray(_data["errors"])) {
-                this.errors = [] as any;
-                for (let item of _data["errors"])
-                    this.errors!.push(item);
-            }
-            this.data = _data["data"] ? User.fromJS(_data["data"]) : <any>undefined;
-        }
-    }
-
-    static fromJS(data: any): UserResult {
-        data = typeof data === 'object' ? data : {};
-        let result = new UserResult();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["succeeded"] = this.succeeded;
-        if (Array.isArray(this.errors)) {
-            data["errors"] = [];
-            for (let item of this.errors)
-                data["errors"].push(item);
-        }
-        data["data"] = this.data ? this.data.toJSON() : <any>undefined;
-        return data;
-    }
-}
-
-export interface IUserResult {
-    succeeded?: boolean;
-    errors?: string[] | undefined;
-    data?: User;
 }
 
 export interface FileParameter {

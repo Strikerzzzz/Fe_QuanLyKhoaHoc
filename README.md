@@ -3,7 +3,7 @@
 Angular 19 web app for **StackMind**, an online learning platform with video lessons, exams and progress analytics.
 Built as a team graduation project at UNETI (2025, graded 9.4/10). I was the team lead and main developer.
 
-Backend (ASP.NET Core 8 API): [Be_QuanLyKhoaHoc](https://github.com/Strikerzzzz/Be_QuanLyKhoaHoc)
+Backend (ASP.NET Core 10 API): [Be_QuanLyKhoaHoc](https://github.com/Strikerzzzz/Be_QuanLyKhoaHoc)
 
 ![Course catalog](docs/screenshots/homepage.png)
 

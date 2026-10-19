@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Client, User, UserPagedResultResult, AssignRoleRequest, RemoveRoleRequest } from '../../../shared/api-client';
+import { Client, UserDto, UserPagedResultResult, AssignRoleRequest, RemoveRoleRequest } from '../../../shared/api-client';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzCardModule } from 'ng-zorro-antd/card';
@@ -34,11 +34,11 @@ import { NzInputModule } from 'ng-zorro-antd/input';
   styleUrl: './user-management.component.scss'
 })
 export class UserManagementComponent implements OnInit {
-  users: User[] = [];
+  users: UserDto[] = [];
   allRoles: string[] = ['Admin', 'Lecturer', 'User'];
   loading: boolean = false;
   showRolePopup: boolean = false;
-  selectedUser: User | null = null;
+  selectedUser: UserDto | null = null;
   currentRoles: string[] = [];
   originalRoles: string[] = [];
 
@@ -118,7 +118,7 @@ export class UserManagementComponent implements OnInit {
     this.loadUsers();
   }
 
-  editRoles(user: User): void {
+  editRoles(user: UserDto): void {
     this.selectedUser = user;
     this.currentRoles = [];
     this.originalRoles = [];

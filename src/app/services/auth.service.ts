@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { Client,UserResult, RefreshTokenResponseResult, RefreshTokenRequest, LoginRequest, RegisterRequest } from '../shared/api-client';
+import { Client,UserDtoResult, RefreshTokenResponseResult, RefreshTokenRequest, LoginRequest, RegisterRequest } from '../shared/api-client';
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 
@@ -169,7 +169,7 @@ export class AuthService {
     // auth.service.ts
 loadUserProfile(): void {
   this.apiClient.profileGET().subscribe({
-    next: (data: UserResult) => {
+    next: (data: UserDtoResult) => {
       console.log('User profile loaded:', data);
       let avatarUrl = data.data?.avatarUrl || ''; // Sử dụng optional chaining
       if (avatarUrl && !avatarUrl.startsWith('http') && !avatarUrl.startsWith('https')) {
